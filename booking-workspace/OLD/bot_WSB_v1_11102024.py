@@ -7,7 +7,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import chardet  # Для определения кодировки файла
 
 
-bot = telebot.TeleBot('6593630607:AAF1Ppr_RD5imG5gerN0Qg37ZZTSF42Um3U')
+bot = telebot.TeleBot('*************************************')
 
 # Файлы для хранения данных
 REGISTRATION_FILE = "registered_users.csv"
