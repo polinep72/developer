@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+        }
+
+        .header {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #45a049;
+        }
+		.container {
+            margin: 10px;
+            width: 100%;
+            max-width: 1850px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+		table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-left: 0; /* Выравнивание по левому краю */
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+		/* Уменьшение ширины столбцов */
+        .limited-width-column {
+            width: 90px; /* Ограничение ширины */
+            word-wrap: break-word; /* Перенос текста */
+            text-align: center;
+        }
+		.quantity-column {
+        width: 60px; /* Уменьшенная ширина столбцов */
+		}
+
+		.quantity-input-w,
+		.quantity-input-gp {
+			width: 60px; /* Уменьшенная ширина полей ввода */
+		}
+    </style>
+</head>
+<body>
+	<div class="header">
+        <div class="logo">ИПК ЭЛЕКТРОН-МАШ</div>
+		<a href="/" class="btn btn-secondary">Главное меню</a>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <span class="user-info">{{ session['username'] }}</span>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container">
+        <h1>Корзина</h1>
+        {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>item_id</th>
+					<th>Запуск</th>
+                    <th>Производитель</th>
+                    <th>Технология</th>
+                    <th>Пластина</th>
+                    <th>Квадрант</th>
+                    <th>Партия</th>
+					<th>Внутренняя партия</th>
+                    <th>Шифр кристалла</th>
+                    <th>Примечание</th>
+					<th>Место хранения</th>
+					<th>Ячейка хранения</th>
+					<th>Дата добавления</th> 
+                    <th>Взять на пластине</th>
+                    <th>Взять в GelPack</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr data-id="{{ row[0] }}">
+				    <td>{{ row[0] }}</td>
+					<td>{{ row[2] }}</td>
+					<td>{{ row[3] }}</td>
+					<td>{{ row[4] }}</td>
+					<td>{{ row[5] }}</td>
+					<td>{{ row[6] }}</td>
+					<td>{{ row[7] }}</td>
+					<td>{{ row[8] }}</td>
+					<td>{{ row[9] }}</td>
+					<td>{{ row[10] }}</td>
+					<td>{{ row[11] }}</td>
+					<td>{{ row[12] }}</td>
+					<td>{{ row[13] }}</td>
+					<td>
+						<input type="number" class="quantity-input-w" value="{{ row[14] }}" min="0">
+					</td>
+					<td>
+						<input type="number" class="quantity-input-gp" value="{{ row[15] }}" min="0">
+					</td>
+					<td>
+						<button class="save-item">Сохранить</button>
+					</td>
+				</tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/search" class="button">Назад к поиску</a>
+        <button id="export-cart" onclick="exportCart()">Экспортировать корзину в Excel</button>
+		<form action="/clear_cart" method="POST" style="display:inline;">
+			<button type="submit" class="btn btn-danger">Очистить корзину</button>
+		</form>
+        {% else %}
+        <p>Ваша корзина пуста.</p>
+        <a href="/search" class="button">Добавить позиции</a>
+        {% endif %}
+    </div>
+    <script>
+		// Сохранение изменений количества
+		document.querySelectorAll('.save-item').forEach(button => {
+			button.addEventListener('click', function () {
+				const row = this.closest('tr');
+				const itemId = row.dataset.id;
+				const consW = row.querySelector('.quantity-input-w').value;
+				const consGP = row.querySelector('.quantity-input-gp').value;
+
+				fetch('/update_cart_item', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						id: itemId,
+						cons_w: consW,
+						cons_gp: consGP
+					}),
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						alert('Количество обновлено');
+					} else {
+						alert('Ошибка обновления: ' + data.message);
+					}
+				})
+				.catch(error => {
+					console.error('Ошибка:', error);
+					alert('Ошибка сохранения данных.');
+				});
+			});
+		});
+
+		// Экспорт корзины
+		function exportCart() {
+			fetch('/export_cart')
+			.then(response => {
+				if (response.ok) {
+					return response.blob();
+				} else {
+					alert('Ошибка экспорта корзины.');
+					throw new Error('Ошибка сервера');
+				}
+			})
+			.then(blob => {
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = 'Корзина.xlsx';
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+			})
+			.catch(error => console.error('Ошибка:', error));
+		}
+	</script>
+</body>
+</html>

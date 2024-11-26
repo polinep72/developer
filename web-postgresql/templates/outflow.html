@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ИПК ЭЛЕКТРОН-МАШ{% endblock %}</title>
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
     <style>
         body {
             display: flex;
@@ -13,6 +13,7 @@
             margin: 0;
             height: 100vh;
         }
+
         .header {
             width: 100%;
             padding: 10px 20px;
@@ -23,23 +24,28 @@
             border-bottom: 1px solid #ddd;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .header .logo {
+
+        .logo {
             font-size: 24px;
             font-weight: bold;
         }
-        .header .user-icon {
-            font-size: 24px;
-            cursor: pointer;
-        }
+
         .user-menu {
             display: flex;
             align-items: center;
         }
+
         .user-info {
             margin-right: 10px;
             font-weight: bold;
             color: #333;
         }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
         .logout-button {
             padding: 5px 15px;
             background-color: #4CAF50;
@@ -48,19 +54,15 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .logout-button:hover {
             background-color: #45a049;
         }
-        main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .container {
             text-align: center;
         }
         .button {
-            display: inline-block;
+            display: block;
             margin: 10px auto;
             padding: 10px 20px;
             font-size: 18px;
@@ -70,8 +72,6 @@
             border: none;
             border-radius: 5px;
             text-decoration: none;
-            width: 200px; /* Фиксированная ширина */
-            text-align: center; /* Центрируем текст */
         }
         .button:hover {
             background-color: #45a049;
@@ -81,6 +81,7 @@
 <body>
     <div class="header">
         <div class="logo">ИПК ЭЛЕКТРОН-МАШ</div>
+		<a href="/" class="btn btn-secondary">Главное меню</a>
         <div class="user-menu">
             {% if session.get('username') %}
                 <span class="user-info">{{ session['username'] }}</span>
@@ -90,10 +91,32 @@
             {% endif %}
         </div>
     </div>
-    <main>
-        {% block content %}
-        <!-- Уникальный контент -->
-        {% endblock %}
-    </main>
+	<div class="container">
+        <h1>Расход</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required />
+            <button type="button" class="button" onclick="uploadData()">Загрузить данные в БД</button>
+        </form>
+        <a href="/" class="button">Назад</a>
+    </div>
+
+    <script>
+        function uploadData() {
+            const formData = new FormData(document.getElementById('uploadForm'));
+            fetch('/outflow', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert("Ошибка: " + data.error);
+                }
+            })
+            .catch(error => alert("Произошла ошибка: " + error));
+        }
+    </script>
 </body>
 </html>
