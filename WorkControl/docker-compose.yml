@@ -1,0 +1,39 @@
+services:
+  monitor:
+    build:
+      context: . # Указывает, что Dockerfile находится в текущей директории
+      dockerfile: Dockerfile # Имя Dockerfile (по умолчанию Dockerfile, можно не указывать)
+    network_mode: "host"
+    image: service-monitor:latest # Имя образа, которое будет собрано
+    container_name: my-monitor # Имя для запущенного контейнера
+    restart: unless-stopped # Политика перезапуска контейнера
+    volumes:
+      # Монтирование Docker-сокета для доступа к Docker API
+      # Для Linux и Docker Desktop с WSL2:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Для Docker Desktop на Windows с Hyper-V (если WSL2 не используется):
+      # - type: npipe # или просто строка: "//./pipe/docker_engine://./pipe/docker_engine"
+      #   source: '//./pipe/docker_engine'
+      #   target: '//./pipe/docker_engine'
+    env_file:
+      - .env # Загружает переменные окружения из файла .env
+    # Сетевые настройки:
+    # Если ваши сервисы доступны через host.docker.internal (Docker Desktop)
+    # или по IP хоста, то специальная настройка сети здесь может не понадобиться.
+    # Контейнер будет в сети bridge по умолчанию.
+
+    # Если бы вы хотели подключить его к существующей сети (например, app-network,
+    # но мы решили не трогать другие контейнеры):
+    # networks:
+    #   - app-network
+    dns: # <-- ДОБАВЛЕНО
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
+
+# Если бы вы определяли сеть здесь же (но мы не используем этот вариант сейчас):
+# networks:
+#   app-network:
+#     external: true # Если сеть создана отдельно командой docker network create
+#     # или
+#     # driver: bridge # Если создаем сеть через compose

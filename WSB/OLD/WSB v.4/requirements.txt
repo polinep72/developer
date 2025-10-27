@@ -1,0 +1,12 @@
+psycopg2-binary~=2.9.10
+python-dotenv~=1.0.1
+pyTelegramBotAPI~=4.22.1
+APScheduler~=3.10.4
+pandas
+Pillow # Добавлено, т.к. используется 'from PIL import Image' в оригинальном коде, хотя и не применяется
+schedule # Добавлено, т.к. используется 'import schedule', хотя и не применяется активно
+telebot~=0.0.5
+requests~=2.32.3
+pytz~=2024.2
+dotenv~=0.9.9
+psycopg2~=2.9.10

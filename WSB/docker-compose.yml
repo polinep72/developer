@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  wsb_bot:
+    build:
+      context: ./wsb_bot
+      dockerfile: Dockerfile
+    network_mode: "host"
+    container_name: wsb_bot_container
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ./wsb_bot/logs:/app/logs
+    dns: 
+      - 8.8.8.8
+      - 1.1.1.1 
+          
+  heatmap:
+    build:
+      context: ./heatmap_app
+      dockerfile: Dockerfile
+    container_name: wsb_heatmap_container
+    env_file:
+      - .env
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    dns: 
+      - 8.8.8.8
+      - 1.1.1.1
