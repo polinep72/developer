@@ -1,0 +1,984 @@
+2025-06-02 09:48:36,184 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 09:48:36,185 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 09:48:36,186 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 09:48:36,186 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 09:48:36,187 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 09:48:36,188 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 09:48:36,188 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 09:48:36,189 - INFO - [root:<module>:269] - Путь к лог-файлу: C:\Soft_IPK\Zotero\zotero_excel_importer.log
+2025-06-02 09:48:36,189 - INFO - [root:<module>:270] - Папка для временных загрузок: C:\Soft_IPK\Zotero\uploads_temp
+2025-06-02 09:48:36,189 - INFO - [root:<module>:271] - Запуск Flask приложения на 192.168.1.139:8086
+2025-06-02 09:48:36,207 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 09:48:36,207 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 09:48:36,216 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 09:48:36,945 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 09:48:36,946 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 09:48:36,947 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 09:48:36,948 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 09:48:36,949 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 09:48:36,949 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 09:48:36,950 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 09:48:36,950 - INFO - [root:<module>:269] - Путь к лог-файлу: C:\Soft_IPK\Zotero\zotero_excel_importer.log
+2025-06-02 09:48:36,950 - INFO - [root:<module>:270] - Папка для временных загрузок: C:\Soft_IPK\Zotero\uploads_temp
+2025-06-02 09:48:36,950 - INFO - [root:<module>:271] - Запуск Flask приложения на 192.168.1.139:8086
+2025-06-02 09:48:36,963 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 09:48:36,965 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 09:48:53,575 - INFO - [app:index:68] - Запрос главной страницы /
+2025-06-02 09:48:53,585 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 09:48:53] "GET / HTTP/1.1" 200 -
+2025-06-02 09:48:53,988 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 09:48:53] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-06-02 09:57:12,431 - INFO - [app:index:68] - Запрос главной страницы /
+2025-06-02 09:57:12,434 - INFO - [werkzeug:_log:97] - 192.168.1.139 - - [02/Jun/2025 09:57:12] "GET / HTTP/1.1" 200 -
+2025-06-02 09:57:12,482 - INFO - [werkzeug:_log:97] - 192.168.1.139 - - [02/Jun/2025 09:57:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-06-02 09:57:46,456 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 09:57:46,457 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 09:57:46,458 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 09:57:46,459 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 09:57:46,460 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 09:57:46,460 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 09:57:46,461 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 09:57:46,461 - INFO - [root:<module>:269] - Путь к лог-файлу: C:\Soft_IPK\Zotero\zotero_excel_importer.log
+2025-06-02 09:57:46,461 - INFO - [root:<module>:270] - Папка для временных загрузок: C:\Soft_IPK\Zotero\uploads_temp
+2025-06-02 09:57:46,461 - INFO - [root:<module>:271] - Запуск Flask приложения на 192.168.1.139:8086
+2025-06-02 09:57:46,482 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 09:57:46,482 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 09:57:46,493 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 09:57:47,315 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 09:57:47,316 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 09:57:47,317 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 09:57:47,318 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 09:57:47,319 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 09:57:47,319 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 09:57:47,320 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 09:57:47,320 - INFO - [root:<module>:269] - Путь к лог-файлу: C:\Soft_IPK\Zotero\zotero_excel_importer.log
+2025-06-02 09:57:47,320 - INFO - [root:<module>:270] - Папка для временных загрузок: C:\Soft_IPK\Zotero\uploads_temp
+2025-06-02 09:57:47,320 - INFO - [root:<module>:271] - Запуск Flask приложения на 192.168.1.139:8086
+2025-06-02 09:57:47,331 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 09:57:47,333 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 09:57:54,975 - INFO - [app:index:68] - Запрос главной страницы /
+2025-06-02 09:57:54,979 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 09:57:54] "GET / HTTP/1.1" 200 -
+2025-06-02 09:58:27,921 - INFO - [app:preview_excel:74] - Запрос /preview_excel (POST)
+2025-06-02 09:58:27,922 - WARNING - [app:preview_excel:93] - Папка PDF не была выбрана или не содержит файлов в запросе /preview_excel.
+2025-06-02 09:58:27,924 - INFO - [app:preview_excel:146] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp\pdf.xlsx'
+2025-06-02 09:58:28,108 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 09:58:28] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:00:57,232 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:00:57,233 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:00:57,234 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:00:58,028 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:01:01,356 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:01:01,357 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:01:01,358 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:01:01,359 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:01:01,360 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:01:01,360 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:01:01,361 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:01:01,361 - INFO - [root:<module>:240] - Путь к лог-файлу: C:\Soft_IPK\Zotero\zotero_excel_importer.log
+2025-06-02 10:01:01,361 - INFO - [root:<module>:241] - Папка для временных загрузок: C:\Soft_IPK\Zotero\uploads_temp
+2025-06-02 10:01:01,361 - INFO - [root:<module>:242] - Запуск Flask приложения на 192.168.1.139:8086
+2025-06-02 10:01:01,382 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 10:01:01,382 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 10:01:01,392 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:01:02,179 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:01:02,180 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:01:02,181 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:01:02,182 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:01:02,182 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:01:02,183 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:01:02,183 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:01:02,183 - INFO - [root:<module>:240] - Путь к лог-файлу: C:\Soft_IPK\Zotero\zotero_excel_importer.log
+2025-06-02 10:01:02,183 - INFO - [root:<module>:241] - Папка для временных загрузок: C:\Soft_IPK\Zotero\uploads_temp
+2025-06-02 10:01:02,183 - INFO - [root:<module>:242] - Запуск Flask приложения на 192.168.1.139:8086
+2025-06-02 10:01:02,195 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:01:02,197 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:01:05,729 - INFO - [app:index:68] - Запрос главной страницы /
+2025-06-02 10:01:05,739 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:01:05] "GET / HTTP/1.1" 200 -
+2025-06-02 10:01:30,326 - INFO - [app:preview_excel:74] - Запрос /preview_excel (POST)
+2025-06-02 10:01:30,327 - INFO - [app:preview_excel:89] - Получен путь к папке PDF от пользователя: 'C:\Users\PC-22\Downloads'
+2025-06-02 10:01:30,327 - WARNING - [app:preview_excel:98] - Указанный путь к папке PDF не существует или не является директорией: C:\Users\PC-22\Downloads
+2025-06-02 10:01:30,327 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:01:30] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:08:43,732 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:08:43,733 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:08:43,734 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:08:44,590 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:08:45,423 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:08:45,424 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:08:45,425 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:08:45,426 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:08:45,426 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:08:45,427 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:08:45,428 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:08:45,428 - WARNING - [app:<module>:229] - ПРЕДУПРЕЖДЕНИЕ: SERVER_BASE_PDF_COLLECTIONS_PATH в app.py, возможно, не настроен или использует значение по умолчанию. Убедитесь, что он указывает на реальный общий ресурс!
+2025-06-02 10:08:45,428 - INFO - [app:<module>:232] - Запуск Flask приложения на 192.168.1.139:8086. Базовый путь для PDF: /mnt/shared_network_drive/zotero_user_collections/
+2025-06-02 10:08:45,439 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:08:45,441 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:09:36,697 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:09:36,698 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:09:36,699 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:09:36,699 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:09:36,700 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:09:36,701 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:09:36,701 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:09:36,702 - WARNING - [app:<module>:229] - ПРЕДУПРЕЖДЕНИЕ: SERVER_BASE_PDF_COLLECTIONS_PATH в app.py, возможно, не настроен или использует значение по умолчанию. Убедитесь, что он указывает на реальный общий ресурс!
+2025-06-02 10:09:36,702 - INFO - [app:<module>:232] - Запуск Flask приложения на 192.168.1.139:8086. Базовый путь для PDF: /mnt/shared_network_drive/zotero_user_collections/
+2025-06-02 10:09:36,721 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 10:09:36,721 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 10:09:36,730 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:09:37,510 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:09:37,511 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:09:37,512 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:09:37,513 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:09:37,514 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:09:37,514 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:09:37,515 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:09:37,515 - WARNING - [app:<module>:229] - ПРЕДУПРЕЖДЕНИЕ: SERVER_BASE_PDF_COLLECTIONS_PATH в app.py, возможно, не настроен или использует значение по умолчанию. Убедитесь, что он указывает на реальный общий ресурс!
+2025-06-02 10:09:37,515 - INFO - [app:<module>:232] - Запуск Flask приложения на 192.168.1.139:8086. Базовый путь для PDF: /mnt/shared_network_drive/zotero_user_collections/
+2025-06-02 10:09:37,529 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:09:37,531 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:10:52,351 - INFO - [app:index:56] - Запрос главной страницы /
+2025-06-02 10:10:52,367 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:10:52] "GET / HTTP/1.1" 200 -
+2025-06-02 10:11:03,260 - INFO - [app:preview_excel:65] - Запрос /preview_excel (POST)
+2025-06-02 10:11:03,261 - INFO - [app:preview_excel:79] - Получено имя подпапки PDF от пользователя: 'V:\01_Документы\'
+2025-06-02 10:11:03,261 - WARNING - [app:preview_excel:91] - Недопустимые символы в имени подпапки PDF: 'V:\01_Документы\'
+2025-06-02 10:11:03,261 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:11:03] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:13:49,136 - INFO - [app:preview_excel:65] - Запрос /preview_excel (POST)
+2025-06-02 10:13:49,137 - INFO - [app:preview_excel:79] - Получено имя подпапки PDF от пользователя: 'V:\01_Документы\'
+2025-06-02 10:13:49,137 - WARNING - [app:preview_excel:91] - Недопустимые символы в имени подпапки PDF: 'V:\01_Документы\'
+2025-06-02 10:13:49,137 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:13:49] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:13:55,673 - INFO - [app:index:56] - Запрос главной страницы /
+2025-06-02 10:13:55,673 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:13:55] "GET / HTTP/1.1" 200 -
+2025-06-02 10:14:35,026 - INFO - [app:preview_excel:65] - Запрос /preview_excel (POST)
+2025-06-02 10:14:35,027 - INFO - [app:preview_excel:79] - Получено имя подпапки PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:14:35,027 - WARNING - [app:preview_excel:91] - Недопустимые символы в имени подпапки PDF: 'Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:14:35,027 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:14:35] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:20:07,697 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:20:07,698 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\app.py', reloading
+2025-06-02 10:20:08,305 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:20:09,055 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:20:09,057 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:20:09,058 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:20:09,058 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:20:09,059 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:20:09,060 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:20:09,062 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:20:09,062 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:20:09,077 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:20:09,079 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:20:12,320 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:20:12,321 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:20:12,322 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:20:12,322 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:20:12,323 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:20:12,324 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:20:12,324 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:20:12,324 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:20:12,342 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 10:20:12,342 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 10:20:12,351 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:20:13,062 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:20:13,063 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:20:13,064 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:20:13,065 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:20:13,065 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:20:13,066 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:20:13,066 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:20:13,067 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:20:13,077 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:20:13,079 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:20:23,696 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 10:20:23,700 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:20:23] "GET / HTTP/1.1" 200 -
+2025-06-02 10:20:50,576 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 10:20:50,577 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:20:50,579 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 10:20:50,581 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 10:20:50,923 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:20:50] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:20:54,070 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 10:20:54,071 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:20:54,071 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: Z:\01_Документы\КПР-СВЧ) ================
+2025-06-02 10:20:54,071 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 10:20:54,071 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 10:20:54,078 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 1 строк из Excel.
+2025-06-02 10:20:54,078 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 10:20:54,394 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 10:20:54,394 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 1 СТРОК EXCEL ---
+2025-06-02 10:20:54,394 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 10:20:54,400 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: Z:\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 10:21:06,382 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:21:06,384 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 10:21:06,819 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:21:06,820 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 10:21:07,475 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:21:07,476 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 10:21:07,908 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:21:07,913 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: Q3UXGNJF).
+2025-06-02 10:21:08,194 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:21:08,195 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 10:21:08,396 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:21:10,936 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:21:11,277 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/375A6X3K/file "HTTP/1.1 200 OK"
+2025-06-02 10:21:11,278 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: 375A6X3K).
+2025-06-02 10:21:11,278 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.
+2025-06-02 10:21:11,278 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 10:21:11,278 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.', 'processed': 1, 'skipped': 0, 'errors': 0}
+2025-06-02 10:21:11,278 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 10:21:11,279 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:21:11] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 10:25:09,061 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:25:09,062 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:25:09,063 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:25:09,063 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:25:09,064 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:25:09,065 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:25:09,065 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:25:09,065 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:25:09,084 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 10:25:09,084 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 10:25:09,093 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:25:09,783 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:25:09,784 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:25:09,785 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:25:09,786 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:25:09,786 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:25:09,787 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:25:09,787 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:25:09,787 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:25:09,799 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:25:09,801 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:25:11,748 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 10:25:11,752 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:25:11] "GET / HTTP/1.1" 200 -
+2025-06-02 10:25:24,125 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:25:24] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+2025-06-02 10:25:52,531 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:25:52] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+2025-06-02 10:28:49,488 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:28:49,489 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:28:49,489 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:28:49,490 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:28:49,491 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:28:49,491 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:28:49,492 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:28:49,492 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:28:49,513 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 10:28:49,513 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 10:28:49,522 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 10:28:50,260 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 10:28:50,261 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 10:28:50,262 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 10:28:50,263 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 10:28:50,264 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 10:28:50,264 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 10:28:50,265 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 10:28:50,265 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 10:28:50,283 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 10:28:50,285 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 10:28:52,732 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 10:28:52,738 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:28:52] "GET / HTTP/1.1" 200 -
+2025-06-02 10:29:02,476 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 10:29:02,480 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:29:02,483 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 10:29:02,487 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 10:29:02,879 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:29:02] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:29:06,614 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 10:29:06,615 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:29:06,615 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: Z:\01_Документы\КПР-СВЧ) ================
+2025-06-02 10:29:06,615 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 10:29:06,615 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 10:29:06,623 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 1 строк из Excel.
+2025-06-02 10:29:06,624 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 10:29:06,929 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 10:29:06,929 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 1 СТРОК EXCEL ---
+2025-06-02 10:29:06,929 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 10:29:06,935 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: Z:\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 10:29:18,944 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:29:18,946 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 10:29:19,330 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:29:19,332 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 10:29:20,196 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:29:20,197 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 10:29:20,570 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:29:20,571 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: JC9ZMTU9).
+2025-06-02 10:29:20,896 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:29:20,897 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 10:29:21,045 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:29:21,493 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:29:21,745 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/FDUDT69M/file "HTTP/1.1 200 OK"
+2025-06-02 10:29:21,745 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: FDUDT69M).
+2025-06-02 10:29:21,745 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.
+2025-06-02 10:29:21,745 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 10:29:21,745 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.', 'processed': 1, 'skipped': 0, 'errors': 0}
+2025-06-02 10:29:21,746 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 10:29:21,746 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:29:21] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 10:52:46,949 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 10:52:46,950 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:52:46] "GET / HTTP/1.1" 200 -
+2025-06-02 10:57:20,282 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 10:57:20,283 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:57:20,285 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 10:57:20,287 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 10:57:20,311 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:57:20] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 10:57:23,310 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 10:57:23,311 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='Z:\01_Документы\КПР-СВЧ'
+2025-06-02 10:57:23,311 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: Z:\01_Документы\КПР-СВЧ) ================
+2025-06-02 10:57:23,315 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 10:57:23,315 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 10:57:23,324 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 1 строк из Excel.
+2025-06-02 10:57:23,325 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 10:57:23,637 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 10:57:23,637 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 1 СТРОК EXCEL ---
+2025-06-02 10:57:23,638 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 10:57:23,643 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: Z:\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 10:57:35,607 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:57:35,608 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 10:57:35,978 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:57:35,980 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 10:57:36,663 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:57:36,664 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 10:57:37,047 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:57:37,048 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: WSB3VE98).
+2025-06-02 10:57:37,337 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:57:37,337 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 10:57:37,494 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 10:57:37,893 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 10:57:38,236 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/MXEDRRDE/file "HTTP/1.1 200 OK"
+2025-06-02 10:57:38,236 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: MXEDRRDE).
+2025-06-02 10:57:38,236 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.
+2025-06-02 10:57:38,236 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 10:57:38,237 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.', 'processed': 1, 'skipped': 0, 'errors': 0}
+2025-06-02 10:57:38,237 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 10:57:38,238 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:57:38] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 10:58:24,992 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 10:58:24,993 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 10:58:24] "GET / HTTP/1.1" 200 -
+2025-06-02 11:00:45,817 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 11:00:45,818 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: '\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:00:45,819 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF '\\192.168.1.10\work\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 11:00:45,821 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 11:00:45,841 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:00:45] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 11:00:54,526 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 11:00:54,529 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:00:54,529 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: \\192.168.1.10\work\01_Документы\КПР-СВЧ) ================
+2025-06-02 11:00:54,529 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 11:00:54,529 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 11:00:54,585 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 1 строк из Excel.
+2025-06-02 11:00:54,586 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 11:00:54,885 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 11:00:54,885 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 1 СТРОК EXCEL ---
+2025-06-02 11:00:54,886 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 11:00:54,891 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 11:01:06,615 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:01:06,617 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 11:01:07,284 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:01:07,285 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 11:01:07,687 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:01:07,688 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 11:01:08,141 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:01:08,142 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: 38WDM26H).
+2025-06-02 11:01:08,413 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:01:08,414 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 11:01:08,568 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:01:08,993 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:01:09,272 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/K2HTC3F6/file "HTTP/1.1 200 OK"
+2025-06-02 11:01:09,273 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: K2HTC3F6).
+2025-06-02 11:01:09,273 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.
+2025-06-02 11:01:09,273 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 11:01:09,273 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 1, Пропущено: 0, Ошибки: 0.', 'processed': 1, 'skipped': 0, 'errors': 0}
+2025-06-02 11:01:09,274 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 11:01:09,274 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:01:09] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 11:06:46,512 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 11:06:46,512 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:06:46] "GET / HTTP/1.1" 200 -
+2025-06-02 11:09:51,488 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 11:09:51,489 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: '\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:09:51,492 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF '\\192.168.1.10\work\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 11:09:51,493 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 11:09:51,515 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:09:51] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 11:10:20,140 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 11:10:20,141 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: '\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:10:20,144 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF '\\192.168.1.10\work\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 11:10:20,145 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 11:10:20,169 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:10:20] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 11:10:40,561 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 11:10:40,562 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:10:40] "GET / HTTP/1.1" 200 -
+2025-06-02 11:12:10,177 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 11:12:10,178 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: '\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:12:10,181 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF '\\192.168.1.10\work\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 11:12:10,183 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 11:12:10,205 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:12:10] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 11:12:17,947 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 11:12:17,948 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:12:17,948 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: \\192.168.1.10\work\01_Документы\КПР-СВЧ) ================
+2025-06-02 11:12:17,948 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 11:12:17,948 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 11:12:17,955 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 2 строк из Excel.
+2025-06-02 11:12:17,956 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 11:12:18,135 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 11:12:18,136 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 2 СТРОК EXCEL ---
+2025-06-02 11:12:18,136 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 11:12:18,142 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 11:12:30,229 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:12:30,231 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 11:12:30,932 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:12:30,933 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 11:12:31,674 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:12:31,675 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 11:12:32,060 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:12:32,061 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: 7NP8ZTJC).
+2025-06-02 11:12:32,306 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:12:32,307 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 11:12:32,464 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:12:32,952 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:12:33,218 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/J32E646W/file "HTTP/1.1 200 OK"
+2025-06-02 11:12:33,218 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: J32E646W).
+2025-06-02 11:12:33,219 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 3 ---
+2025-06-02 11:12:34,475 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_2.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\Материалы общие\test_2.pdf
+2025-06-02 11:12:34,882 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:12:34,883 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 3: Родительский элемент для 'test_2.pdf' создан (Key: UABZJ2FQ).
+2025-06-02 11:12:35,139 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:12:35,139 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 3: Заметка добавлена.
+2025-06-02 11:12:35,519 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:12:35,805 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/PUFJHI5I/file "HTTP/1.1 200 OK"
+2025-06-02 11:12:35,805 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 3: Файл 'test_2.pdf' прикреплен (Key: PUFJHI5I).
+2025-06-02 11:12:35,805 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 2, Пропущено: 0, Ошибки: 0.
+2025-06-02 11:12:35,805 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 11:12:35,805 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 2, Пропущено: 0, Ошибки: 0.', 'processed': 2, 'skipped': 0, 'errors': 0}
+2025-06-02 11:12:35,806 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 11:12:35,807 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:12:35] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 11:29:09,619 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\zotero_add_folders.zip', reloading
+2025-06-02 11:29:09,885 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 11:29:10,652 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 11:29:10,654 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 11:29:10,654 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 11:29:10,655 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 11:29:10,656 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 11:29:10,656 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 11:29:10,657 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 11:29:10,657 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 11:29:10,670 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 11:29:10,672 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 11:34:24,684 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\zotero_importer_core.py', reloading
+2025-06-02 11:34:24,684 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\zotero_importer_core.py', reloading
+2025-06-02 11:34:24,685 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\zotero_importer_core.py', reloading
+2025-06-02 11:34:24,686 - INFO - [werkzeug:_log:97] -  * Detected change in 'C:\\Soft_IPK\\Zotero\\zotero_importer_core.py', reloading
+2025-06-02 11:34:25,572 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 11:35:14,354 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 11:35:14,356 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 11:35:14,356 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 11:35:14,357 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 11:35:14,359 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 11:35:14,359 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 11:35:14,360 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 11:35:14,360 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 11:35:14,390 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 11:35:14,390 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 11:35:14,404 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 11:35:15,740 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 11:35:15,741 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 11:35:15,743 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 11:35:15,744 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 11:35:15,746 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 11:35:15,746 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 11:35:15,747 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 11:35:15,747 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 11:35:15,778 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 11:35:15,781 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 11:35:21,298 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 11:35:21,304 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:35:21] "GET / HTTP/1.1" 200 -
+2025-06-02 11:36:58,388 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 11:36:58,389 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: '\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:36:58,394 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF '\\192.168.1.10\work\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 11:36:58,396 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 11:36:58,587 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:36:58] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 11:37:10,886 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 11:37:10,889 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 11:37:10,890 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: \\192.168.1.10\work\01_Документы\КПР-СВЧ) ================
+2025-06-02 11:37:10,890 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 11:37:10,890 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 11:37:10,897 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 2 строк из Excel.
+2025-06-02 11:37:10,897 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 11:37:11,198 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 11:37:11,198 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 2 СТРОК EXCEL ---
+2025-06-02 11:37:11,199 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 11:37:11,204 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 11:37:23,234 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:37:23,236 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 11:37:23,910 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:37:23,911 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 11:37:24,525 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:37:24,527 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 11:37:24,922 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:37:24,923 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: IKQT6SCK).
+2025-06-02 11:37:25,197 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:37:25,198 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 11:37:25,422 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:37:25,886 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:37:26,216 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/7PXB2J98/file "HTTP/1.1 200 OK"
+2025-06-02 11:37:26,217 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: 7PXB2J98).
+2025-06-02 11:37:26,217 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 3 ---
+2025-06-02 11:37:26,509 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_2.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\Материалы общие\test_2.pdf
+2025-06-02 11:37:27,195 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=UQ5J8553&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 11:37:27,196 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'По_Смежным_Областям' (ID: NW9XASD4) в 'UQ5J8553'
+2025-06-02 11:37:27,695 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:37:27,696 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 3: Родительский элемент для 'test_2.pdf' создан (Key: FENA3F3F).
+2025-06-02 11:37:28,019 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:37:28,019 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 3: Заметка добавлена.
+2025-06-02 11:37:28,508 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 11:37:28,761 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/GUSEDH6S/file "HTTP/1.1 200 OK"
+2025-06-02 11:37:28,762 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 3: Файл 'test_2.pdf' прикреплен (Key: GUSEDH6S).
+2025-06-02 11:37:28,762 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 2, Пропущено: 0, Ошибки: 0.
+2025-06-02 11:37:28,762 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 11:37:28,762 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 2, Пропущено: 0, Ошибки: 0.', 'processed': 2, 'skipped': 0, 'errors': 0}
+2025-06-02 11:37:28,762 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 11:37:28,763 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 11:37:28] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 15:09:07,896 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 15:09:07,898 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 15:09:07,899 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 15:09:07,900 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 15:09:07,901 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 15:09:07,902 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 15:09:07,903 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 15:09:07,904 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 15:09:07,944 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 15:09:07,948 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 15:09:08,005 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 15:09:09,062 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 15:09:09,064 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 15:09:09,066 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 15:09:09,067 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 15:09:09,068 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 15:09:09,069 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 15:09:09,070 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 15:09:09,071 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 15:09:09,091 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 15:09:09,095 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 15:09:19,025 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 15:09:19,036 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 15:09:19] "GET / HTTP/1.1" 200 -
+2025-06-02 15:10:06,860 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 15:10:06,864 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: '\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 15:10:06,874 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF '\\192.168.1.10\work\01_Документы\КПР-СВЧ' найдена на сервере.
+2025-06-02 15:10:06,880 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 15:10:07,203 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 15:10:07] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 15:10:12,469 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 15:10:12,470 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf.xlsx', Корневая папка поиска PDF='\\192.168.1.10\work\01_Документы\КПР-СВЧ'
+2025-06-02 15:10:12,473 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf.xlsx, pdf_dir: \\192.168.1.10\work\01_Документы\КПР-СВЧ) ================
+2025-06-02 15:10:12,473 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 15:10:12,474 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf.xlsx
+2025-06-02 15:10:12,498 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 2 строк из Excel.
+2025-06-02 15:10:12,499 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 15:10:12,787 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 15:10:12,788 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 2 СТРОК EXCEL ---
+2025-06-02 15:10:12,791 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 15:10:12,802 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_1.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\test_1.pdf
+2025-06-02 15:10:24,904 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 15:10:24,908 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'КПР_СВЧ_НТО' (ID: D8EG2H4F) в 'ROOT'
+2025-06-02 15:10:25,396 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=D8EG2H4F&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 15:10:25,401 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Материалы_ТТ_НИОКТР_Перспективные_Исследования' (ID: WWKNFWCS) в 'D8EG2H4F'
+2025-06-02 15:10:25,962 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=WWKNFWCS&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 15:10:25,965 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Перспективных_Направлений_НИР' (ID: UQ5J8553) в 'WWKNFWCS'
+2025-06-02 15:10:26,846 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 15:10:26,848 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 2: Родительский элемент для 'test_1.pdf' создан (Key: 3DCC5B2S).
+2025-06-02 15:10:27,168 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 15:10:27,171 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 2: Заметка добавлена.
+2025-06-02 15:10:27,344 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 15:10:28,039 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 15:10:28,445 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/Q6EG3IR3/file "HTTP/1.1 200 OK"
+2025-06-02 15:10:28,446 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 2: Файл 'test_1.pdf' прикреплен (Key: Q6EG3IR3).
+2025-06-02 15:10:28,450 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 3 ---
+2025-06-02 15:10:30,059 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'test_2.pdf' найден по пути: \\192.168.1.10\work\01_Документы\КПР-СВЧ\Материалы общие\test_2.pdf
+2025-06-02 15:10:30,628 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=UQ5J8553&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 15:10:30,633 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'По_Смежным_Областям' (ID: NW9XASD4) в 'UQ5J8553'
+2025-06-02 15:10:31,102 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 15:10:31,104 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 3: Родительский элемент для 'test_2.pdf' создан (Key: XKIRIKMF).
+2025-06-02 15:10:31,396 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 15:10:31,397 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 3: Заметка добавлена.
+2025-06-02 15:10:31,846 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 15:10:32,153 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/RTXWCGBR/file "HTTP/1.1 200 OK"
+2025-06-02 15:10:32,155 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 3: Файл 'test_2.pdf' прикреплен (Key: RTXWCGBR).
+2025-06-02 15:10:32,157 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 2, Пропущено: 0, Ошибки: 0.
+2025-06-02 15:10:32,159 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 15:10:32,161 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'success', 'message': 'Импорт завершен. Успешно: 2, Пропущено: 0, Ошибки: 0.', 'processed': 2, 'skipped': 0, 'errors': 0}
+2025-06-02 15:10:32,163 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf.xlsx
+2025-06-02 15:10:32,166 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 15:10:32] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 15:39:31,088 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 15:39:31,089 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 15:39:31,090 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 15:39:31,090 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 15:39:31,091 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 15:39:31,092 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 15:39:31,092 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 15:39:31,092 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 15:39:31,137 - INFO - [werkzeug:_log:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8086
+ * Running on http://192.168.1.139:8086
+2025-06-02 15:39:31,137 - INFO - [werkzeug:_log:97] - [33mPress CTRL+C to quit[0m
+2025-06-02 15:39:31,172 - INFO - [werkzeug:_log:97] -  * Restarting with watchdog (windowsapi)
+2025-06-02 15:39:31,813 - INFO - [zotero_importer_core:check_python_version:74] - Версия Python: 3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)] - проверка пройдена.
+2025-06-02 15:39:31,814 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pandas: 2.2.3
+2025-06-02 15:39:31,815 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета openpyxl: 3.1.5
+2025-06-02 15:39:31,815 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета pyzotero: 1.6.11
+2025-06-02 15:39:31,816 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета python-dotenv: 1.0.1
+2025-06-02 15:39:31,817 - INFO - [zotero_importer_core:log_package_versions:56] - Версия пакета Flask: 3.0.3
+2025-06-02 15:39:31,817 - INFO - [zotero_importer_core:log_package_versions:65] - Пакет xlrd не найден (это ожидаемо для работы с .xlsx через openpyxl).
+2025-06-02 15:39:31,818 - INFO - [app:<module>:193] - Запуск Flask приложения на 192.168.1.139:8086. Папка для Excel: uploads_temp_excel
+2025-06-02 15:39:31,828 - WARNING - [werkzeug:_log:97] -  * Debugger is active!
+2025-06-02 15:39:31,830 - INFO - [werkzeug:_log:97] -  * Debugger PIN: 131-156-720
+2025-06-02 15:39:33,274 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 15:39:33,307 - INFO - [werkzeug:_log:97] - 192.168.2.146 - - [02/Jun/2025 15:39:33] "GET / HTTP/1.1" 200 -
+2025-06-02 16:54:06,892 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 16:54:06,892 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 16:54:06] "GET / HTTP/1.1" 200 -
+2025-06-02 16:54:07,901 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 16:54:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-06-02 18:01:16,918 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 18:01:16,919 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:01:16] "GET / HTTP/1.1" 200 -
+2025-06-02 18:38:26,640 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:38:26,665 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестирование'
+2025-06-02 18:38:26,671 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:38:26,671 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:38:26] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:39:08,239 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:39:08,241 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестирование'
+2025-06-02 18:39:08,244 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:39:08,244 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:39:08] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:41:30,345 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:41:30,347 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестирование'
+2025-06-02 18:41:30,350 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:41:30,350 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:41:30] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:41:36,177 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:41:36,179 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестирование'
+2025-06-02 18:41:36,183 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:41:36,184 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:41:36] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:42:54,857 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:42:54,859 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестирование'
+2025-06-02 18:42:54,863 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:42:54,864 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:42:54] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:43:05,811 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:43:05,812 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестированиеZ:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:43:05,815 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестированиеZ:\01_Документы\КПР-СВЧ\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:43:05,816 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:43:05] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:43:07,136 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:43:07,137 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'D:\тестированиеZ:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:43:07,140 - WARNING - [app:preview_excel:91] - Указанная корневая папка для поиска PDF 'D:\тестированиеZ:\01_Документы\КПР-СВЧ\тестирование' не найдена на сервере или не является директорией.
+2025-06-02 18:43:07,140 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:43:07] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:43:17,647 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:43:17,649 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:43:17,653 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ\тестирование' найдена на сервере.
+2025-06-02 18:43:17,657 - INFO - [app:preview_excel:105] - Excel файл 'pdf.xlsx' сохранен в 'uploads_temp_excel\pdf.xlsx'
+2025-06-02 18:43:18,026 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:43:18] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:43:29,856 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:43:29,860 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:43:29,862 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ\тестирование' найдена на сервере.
+2025-06-02 18:43:29,864 - INFO - [app:preview_excel:105] - Excel файл 'pdf-_2025_05_30_v1.xlsx' сохранен в 'uploads_temp_excel\pdf-_2025_05_30_v1.xlsx'
+2025-06-02 18:43:29,899 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:43:29] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:43:49,096 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 18:43:49,099 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf-_2025_05_30_v1.xlsx', Корневая папка поиска PDF='Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:43:49,099 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx, pdf_dir: Z:\01_Документы\КПР-СВЧ\тестирование) ================
+2025-06-02 18:43:49,099 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 18:43:49,099 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx
+2025-06-02 18:43:49,133 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 70 строк из Excel.
+2025-06-02 18:43:49,133 - CRITICAL - [zotero_importer_core:run_zotero_import:199] - В Excel файле отсутствуют столбцы: раздел Zotero.
+2025-06-02 18:43:49,134 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'error', 'message': 'В Excel файле отсутствуют столбцы: раздел Zotero.', 'processed': 0, 'skipped': 0, 'errors': 1}
+2025-06-02 18:43:49,134 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx
+2025-06-02 18:43:49,134 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:43:49] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 18:44:27,749 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:44:27,753 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:44:27,754 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ\тестирование' найдена на сервере.
+2025-06-02 18:44:27,756 - INFO - [app:preview_excel:105] - Excel файл 'pdf-_2025_05_30_v1.xlsx' сохранен в 'uploads_temp_excel\pdf-_2025_05_30_v1.xlsx'
+2025-06-02 18:44:27,794 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:44:27] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:44:32,242 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:44:32,246 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:44:32,246 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ\тестирование' найдена на сервере.
+2025-06-02 18:44:32,249 - INFO - [app:preview_excel:105] - Excel файл 'pdf-_2025_05_30_v1.xlsx' сохранен в 'uploads_temp_excel\pdf-_2025_05_30_v1.xlsx'
+2025-06-02 18:44:32,287 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:44:32] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:44:36,508 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 18:44:36,509 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf-_2025_05_30_v1.xlsx', Корневая папка поиска PDF='Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:44:36,510 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx, pdf_dir: Z:\01_Документы\КПР-СВЧ\тестирование) ================
+2025-06-02 18:44:36,510 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 18:44:36,510 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx
+2025-06-02 18:44:36,550 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 70 строк из Excel.
+2025-06-02 18:44:36,550 - CRITICAL - [zotero_importer_core:run_zotero_import:199] - В Excel файле отсутствуют столбцы: раздел Zotero.
+2025-06-02 18:44:36,550 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'error', 'message': 'В Excel файле отсутствуют столбцы: раздел Zotero.', 'processed': 0, 'skipped': 0, 'errors': 1}
+2025-06-02 18:44:36,551 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx
+2025-06-02 18:44:36,552 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:44:36] "POST /import_to_zotero HTTP/1.1" 200 -
+2025-06-02 18:44:55,554 - INFO - [app:index:46] - Запрос главной страницы /
+2025-06-02 18:44:55,555 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:44:55] "GET / HTTP/1.1" 200 -
+2025-06-02 18:45:23,131 - INFO - [app:preview_excel:52] - Запрос /preview_excel (POST)
+2025-06-02 18:45:23,134 - INFO - [app:preview_excel:66] - Получена корневая папка для поиска PDF от пользователя: 'Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:45:23,135 - INFO - [app:preview_excel:96] - Корневая папка для поиска PDF 'Z:\01_Документы\КПР-СВЧ\тестирование' найдена на сервере.
+2025-06-02 18:45:23,136 - INFO - [app:preview_excel:105] - Excel файл 'pdf-_2025_05_30_v1.xlsx' сохранен в 'uploads_temp_excel\pdf-_2025_05_30_v1.xlsx'
+2025-06-02 18:45:23,170 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:45:23] "POST /preview_excel HTTP/1.1" 200 -
+2025-06-02 18:45:26,118 - INFO - [app:import_to_zotero_route:127] - Запрос /import_to_zotero (POST)
+2025-06-02 18:45:26,120 - INFO - [app:import_to_zotero_route:144] - Запуск импорта Zotero: Excel='uploads_temp_excel\pdf-_2025_05_30_v1.xlsx', Корневая папка поиска PDF='Z:\01_Документы\КПР-СВЧ\тестирование'
+2025-06-02 18:45:26,120 - INFO - [zotero_importer_core:run_zotero_import:171] - ================ ЗАПУСК ИМПОРТА В ZOTERO (excel: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx, pdf_dir: Z:\01_Документы\КПР-СВЧ\тестирование) ================
+2025-06-02 18:45:26,120 - INFO - [zotero_importer_core:run_zotero_import:184] - Конфигурация Zotero: Group ID='6004044', Library Type='group'
+2025-06-02 18:45:26,120 - INFO - [zotero_importer_core:run_zotero_import:187] - Чтение Excel файла: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx
+2025-06-02 18:45:26,142 - INFO - [zotero_importer_core:run_zotero_import:189] - Успешно прочитано 70 строк из Excel.
+2025-06-02 18:45:26,142 - INFO - [zotero_importer_core:run_zotero_import:201] - Все необходимые столбцы найдены в Excel.
+2025-06-02 18:45:26,402 - INFO - [zotero_importer_core:run_zotero_import:205] - Успешное подключение к Zotero API (группа '6004044').
+2025-06-02 18:45:26,402 - INFO - [zotero_importer_core:run_zotero_import:216] - --- НАЧАЛО ОБРАБОТКИ 70 СТРОК EXCEL ---
+2025-06-02 18:45:26,402 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 2 ---
+2025-06-02 18:45:26,407 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Effects of Ballast Resistors on Power and ESD Performance in AlGaAs_GaAs Heterojunction Bipolar Transistors.pdf' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:45:26,407 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 2: Файл 'Effects of Ballast Resistors on Power and ESD Performance in AlGaAs_GaAs Heterojunction Bipolar Transistors.pdf' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:45:26,407 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 3 ---
+2025-06-02 18:45:26,407 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'ic3s1347.pdf' найден по пути: Z:\01_Документы\КПР-СВЧ\тестирование\ic3s1347.pdf
+2025-06-02 18:45:38,436 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&top=true&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 18:45:38,437 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'МИР_Обзор_СВЧ-электроники' (ID: 8SJV47SV) в 'ROOT'
+2025-06-02 18:45:39,058 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=8SJV47SV&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 18:45:39,060 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Технологии_Основные_Мир' (ID: K8V2A2K7) в '8SJV47SV'
+2025-06-02 18:45:39,521 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=K8V2A2K7&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 18:45:39,522 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'GaAs_Мир' (ID: 45PRFG37) в 'K8V2A2K7'
+2025-06-02 18:45:40,129 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=45PRFG37&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 18:45:40,130 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'САПР_Проектирование_GaAs' (ID: 8GPDQFRA) в '45PRFG37'
+2025-06-02 18:45:40,553 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:45:40,554 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 3: Родительский элемент для 'ic3s1347.pdf' создан (Key: CEHVIESM).
+2025-06-02 18:45:40,791 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:45:40,792 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 3: Заметка добавлена.
+2025-06-02 18:45:40,948 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/items/new?locale=en-US&itemType=attachment&linkMode=imported_file&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 18:45:43,353 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:45:43,662 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/RNDNTRDM/file "HTTP/1.1 200 OK"
+2025-06-02 18:45:55,872 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://zoterofilestorage.s3.us-east-1.amazonaws.com/ "HTTP/1.1 201 Created"
+2025-06-02 18:45:56,564 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/RNDNTRDM/file "HTTP/1.1 204 No Content"
+2025-06-02 18:45:56,565 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 3: Файл 'ic3s1347.pdf' прикреплен (Key: {'itemType': 'attachment', 'linkMode': 'imported_file', 'title': 'ic3s1347.pdf', 'accessDate': '', 'note': '', 'tags': [], 'collections': [], 'relations': {}, 'contentType': '', 'charset': '', 'filename': 'Z:\\01_Документы\\КПР-СВЧ\\тестирование\\ic3s1347.pdf', 'md5': None, 'mtime': None, 'parentItem': 'CEHVIESM', 'key': 'RNDNTRDM'}).
+2025-06-02 18:45:56,565 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 4 ---
+2025-06-02 18:45:56,569 - INFO - [zotero_importer_core:find_file_path:83] - Файл 'AP60x_&_28V_InGaP_HBT_Proccess_Technology.pdf' найден по пути: Z:\01_Документы\КПР-СВЧ\тестирование\AP60x_&_28V_InGaP_HBT_Proccess_Technology.pdf
+2025-06-02 18:45:57,061 - INFO - [httpx:_send_single_request:1025] - HTTP Request: GET https://api.zotero.org/groups/6004044/collections?locale=en-US&parentCollection=45PRFG37&format=json&limit=100 "HTTP/1.1 200 OK"
+2025-06-02 18:45:57,064 - INFO - [zotero_importer_core:get_or_create_hierarchical_collection:138] - Найдена существующая коллекция 'Обзоры_Рынок_Производители_Патенты' (ID: AC6ZVUF8) в '45PRFG37'
+2025-06-02 18:45:57,602 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:45:57,603 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 4: Родительский элемент для 'AP60x_&_28V_InGaP_HBT_Proccess_Technology.pdf' создан (Key: ST66VUU4).
+2025-06-02 18:45:57,893 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:45:57,894 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 4: Заметка добавлена.
+2025-06-02 18:45:58,341 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:45:58,577 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/9IGB8IS9/file "HTTP/1.1 200 OK"
+2025-06-02 18:46:00,964 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://zoterofilestorage.s3.us-east-1.amazonaws.com/ "HTTP/1.1 201 Created"
+2025-06-02 18:46:01,303 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/9IGB8IS9/file "HTTP/1.1 204 No Content"
+2025-06-02 18:46:01,304 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 4: Файл 'AP60x_&_28V_InGaP_HBT_Proccess_Technology.pdf' прикреплен (Key: {'itemType': 'attachment', 'linkMode': 'imported_file', 'title': 'AP60x_&_28V_InGaP_HBT_Proccess_Technology.pdf', 'accessDate': '', 'note': '', 'tags': [], 'collections': [], 'relations': {}, 'contentType': '', 'charset': '', 'filename': 'Z:\\01_Документы\\КПР-СВЧ\\тестирование\\AP60x_&_28V_InGaP_HBT_Proccess_Technology.pdf', 'md5': None, 'mtime': None, 'parentItem': 'ST66VUU4', 'key': '9IGB8IS9'}).
+2025-06-02 18:46:01,304 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 5 ---
+2025-06-02 18:46:01,304 - INFO - [zotero_importer_core:find_file_path:83] - Файл '5989-7346.pdf' найден по пути: Z:\01_Документы\КПР-СВЧ\тестирование\5989-7346.pdf
+2025-06-02 18:46:01,826 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:46:01,827 - INFO - [zotero_importer_core:run_zotero_import:276] - Строка 5: Родительский элемент для '5989-7346.pdf' создан (Key: UQ9KQPVX).
+2025-06-02 18:46:02,139 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:46:02,139 - INFO - [zotero_importer_core:run_zotero_import:284] - Строка 5: Заметка добавлена.
+2025-06-02 18:46:02,572 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items "HTTP/1.1 200 OK"
+2025-06-02 18:46:02,907 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/IT2G9JQ6/file "HTTP/1.1 200 OK"
+2025-06-02 18:46:05,055 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://zoterofilestorage.s3.us-east-1.amazonaws.com/ "HTTP/1.1 201 Created"
+2025-06-02 18:46:05,340 - INFO - [httpx:_send_single_request:1025] - HTTP Request: POST https://api.zotero.org/groups/6004044/items/IT2G9JQ6/file "HTTP/1.1 204 No Content"
+2025-06-02 18:46:05,341 - INFO - [zotero_importer_core:run_zotero_import:305] - Строка 5: Файл '5989-7346.pdf' прикреплен (Key: {'itemType': 'attachment', 'linkMode': 'imported_file', 'title': '5989-7346.pdf', 'accessDate': '', 'note': '', 'tags': [], 'collections': [], 'relations': {}, 'contentType': '', 'charset': '', 'filename': 'Z:\\01_Документы\\КПР-СВЧ\\тестирование\\5989-7346.pdf', 'md5': None, 'mtime': None, 'parentItem': 'UQ9KQPVX', 'key': 'IT2G9JQ6'}).
+2025-06-02 18:46:05,341 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 6 ---
+2025-06-02 18:46:05,342 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'knoll2006' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,342 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 6: Файл 'knoll2006' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,342 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 7 ---
+2025-06-02 18:46:05,342 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'kushner2015' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,342 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 7: Файл 'kushner2015' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,343 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 8 ---
+2025-06-02 18:46:05,343 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'islam2019' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,343 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 8: Файл 'islam2019' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,344 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 9 ---
+2025-06-02 18:46:05,344 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ADMV1013' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,344 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 9: Файл 'ADMV1013' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,344 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 10 ---
+2025-06-02 18:46:05,345 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ADMV1014' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,345 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 10: Файл 'ADMV1014' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,345 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 11 ---
+2025-06-02 18:46:05,345 - WARNING - [zotero_importer_core:find_file_path:85] - Файл '1526_1526_RF Front Ends for GNSS Receivers_v2.3(1)1' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,346 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 11: Файл '1526_1526_RF Front Ends for GNSS Receivers_v2.3(1)1' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,346 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 12 ---
+2025-06-02 18:46:05,346 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Способ увеличения управляющего напряжения на затворе GaN транзистора' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,346 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 12: Файл 'Способ увеличения управляющего напряжения на затворе GaN транзистора' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,346 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 13 ---
+2025-06-02 18:46:05,347 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Организация производства высоконадежных изделий твердотельной СВЧ ЭКБ' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,347 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 13: Файл 'Организация производства высоконадежных изделий твердотельной СВЧ ЭКБ' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,347 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 14 ---
+2025-06-02 18:46:05,347 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Non-Linear_RF_Modeling_of_GaN_HEMTs_with_Industry_Standard_ASM_GaN_Model_Invited' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,347 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 14: Файл 'Non-Linear_RF_Modeling_of_GaN_HEMTs_with_Industry_Standard_ASM_GaN_Model_Invited' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,348 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 15 ---
+2025-06-02 18:46:05,348 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Inverted_Scanning_Microwave_Microscopy_of_GaN_AlN_High-Electron_Mobility_Transistors' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,348 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 15: Файл 'Inverted_Scanning_Microwave_Microscopy_of_GaN_AlN_High-Electron_Mobility_Transistors' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,348 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 16 ---
+2025-06-02 18:46:05,349 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Raman Spectroscopy of Silicon Carbide Semiconductor Wafers' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,349 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 16: Файл 'Raman Spectroscopy of Silicon Carbide Semiconductor Wafers' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,349 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 17 ---
+2025-06-02 18:46:05,349 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Schottky_barrier_heights_and_electronic_transport_' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,349 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 17: Файл 'Schottky_barrier_heights_and_electronic_transport_' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,349 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 18 ---
+2025-06-02 18:46:05,350 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Atomic-Scale_Dynamics_at_the_Interface_of_Doped_Li' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,350 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 18: Файл 'Atomic-Scale_Dynamics_at_the_Interface_of_Doped_Li' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,350 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 19 ---
+2025-06-02 18:46:05,351 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Power_Cycling_on_Lateral_GaN_and_b-Ga2O3_Transisto' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,351 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 19: Файл 'Power_Cycling_on_Lateral_GaN_and_b-Ga2O3_Transisto' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,351 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 20 ---
+2025-06-02 18:46:05,351 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Indium_Phosphide_Semiconductor_Technology_for_Next' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,351 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 20: Файл 'Indium_Phosphide_Semiconductor_Technology_for_Next' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,352 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 21 ---
+2025-06-02 18:46:05,352 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Amorphous_Ga2O3_Semiconductor_A_New_Solution_for_R' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,352 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 21: Файл 'Amorphous_Ga2O3_Semiconductor_A_New_Solution_for_R' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,352 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 22 ---
+2025-06-02 18:46:05,353 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Highlighting the role of 3C SiC in the performance optimization' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,353 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 22: Файл 'Highlighting the role of 3C SiC in the performance optimization' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,353 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 23 ---
+2025-06-02 18:46:05,353 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Progress_in_Gallium_Oxide_Field-Effect_Transistors' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,353 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 23: Файл 'Progress_in_Gallium_Oxide_Field-Effect_Transistors' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,354 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 24 ---
+2025-06-02 18:46:05,354 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ГОСТ Р 71380-2024' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,354 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 24: Файл 'ГОСТ Р 71380-2024' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,354 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 25 ---
+2025-06-02 18:46:05,354 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ГОСТ Р 71285-2024' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,355 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 25: Файл 'ГОСТ Р 71285-2024' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,355 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 26 ---
+2025-06-02 18:46:05,355 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ГОСТ Р 71269-2024.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,355 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 26: Файл 'ГОСТ Р 71269-2024.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,356 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 27 ---
+2025-06-02 18:46:05,356 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ГОСТ Р 71268-2024' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,356 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 27: Файл 'ГОСТ Р 71268-2024' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,356 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 28 ---
+2025-06-02 18:46:05,356 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ГОСТ Р 71267-2024' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,357 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 28: Файл 'ГОСТ Р 71267-2024' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,357 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 29 ---
+2025-06-02 18:46:05,357 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'ГОСТ Р 71266-2024' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,357 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 29: Файл 'ГОСТ Р 71266-2024' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,357 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 30 ---
+2025-06-02 18:46:05,358 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'GaAs-Based_Heterostructures_on_Silicon' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,358 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 30: Файл 'GaAs-Based_Heterostructures_on_Silicon' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,358 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 31 ---
+2025-06-02 18:46:05,358 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Impact_of_Si_and_GaAs_as_Semiconductor_Materials_D' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,358 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 31: Файл 'Impact_of_Si_and_GaAs_as_Semiconductor_Materials_D' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,358 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 32 ---
+2025-06-02 18:46:05,358 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'A_complete_small-signal_model_of_GaAs_dual-gate_HE' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,358 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 32: Файл 'A_complete_small-signal_model_of_GaAs_dual-gate_HE' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,359 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 33 ---
+2025-06-02 18:46:05,359 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Yakovlev_poster_2017_PhysSPb_final_cs5_blue2_Formulas' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,359 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 33: Файл 'Yakovlev_poster_2017_PhysSPb_final_cs5_blue2_Formulas' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,359 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 34 ---
+2025-06-02 18:46:05,359 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Study_on_phase_characteristics_of_heterostructure_' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,359 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 34: Файл 'Study_on_phase_characteristics_of_heterostructure_' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,360 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 35 ---
+2025-06-02 18:46:05,360 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'nan' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,360 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 35: Файл 'nan' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,360 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 36 ---
+2025-06-02 18:46:05,360 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'OPTIC20231.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,360 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 36: Файл 'OPTIC20231.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,360 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 37 ---
+2025-06-02 18:46:05,361 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'On-chip_GaAs_carrier.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,361 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 37: Файл 'On-chip_GaAs_carrier.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,361 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 38 ---
+2025-06-02 18:46:05,361 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'GaAs Foundry .md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,361 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 38: Файл 'GaAs Foundry .md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,361 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 39 ---
+2025-06-02 18:46:05,362 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Growth of epitaxial chalcopyrite.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,362 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 39: Файл 'Growth of epitaxial chalcopyrite.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,362 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 40 ---
+2025-06-02 18:46:05,362 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'W-Band_GaAs_pHEMT_.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,362 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 40: Файл 'W-Band_GaAs_pHEMT_.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,362 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 41 ---
+2025-06-02 18:46:05,363 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US7157749.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,363 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 41: Файл 'US7157749.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,363 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 42 ---
+2025-06-02 18:46:05,363 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US20200006520A1.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,363 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 42: Файл 'US20200006520A1.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,363 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 43 ---
+2025-06-02 18:46:05,363 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US20170069739A1.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,364 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 43: Файл 'US20170069739A1.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,364 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 44 ---
+2025-06-02 18:46:05,364 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US20060284212A1.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,364 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 44: Файл 'US20060284212A1.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,364 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 45 ---
+2025-06-02 18:46:05,364 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US20030096486A1.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,364 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 45: Файл 'US20030096486A1.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,364 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 46 ---
+2025-06-02 18:46:05,365 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US20030025179A1.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,365 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 46: Файл 'US20030025179A1.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,365 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 47 ---
+2025-06-02 18:46:05,365 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US7345547.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,365 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 47: Файл 'US7345547.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,365 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 48 ---
+2025-06-02 18:46:05,366 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US7218175.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,366 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 48: Файл 'US7218175.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,366 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 49 ---
+2025-06-02 18:46:05,366 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US6972630.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,366 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 49: Файл 'US6972630.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,366 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 50 ---
+2025-06-02 18:46:05,367 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'US6933787_High_IP3.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,367 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 50: Файл 'US6933787_High_IP3.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,367 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 51 ---
+2025-06-02 18:46:05,367 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'vais2019.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,367 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 51: Файл 'vais2019.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,367 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 52 ---
+2025-06-02 18:46:05,368 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Transfer and Qualification .md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,368 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 52: Файл 'Transfer and Qualification .md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,368 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 53 ---
+2025-06-02 18:46:05,368 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'The Effects of Feedback .md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,368 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 53: Файл 'The Effects of Feedback .md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,368 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 54 ---
+2025-06-02 18:46:05,368 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'RFMD BR_WLAN_PA GaAs HBT.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,369 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 54: Файл 'RFMD BR_WLAN_PA GaAs HBT.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,369 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 55 ---
+2025-06-02 18:46:05,369 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'rf5322_data_sheet GaAs HBT.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,369 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 55: Файл 'rf5322_data_sheet GaAs HBT.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,369 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 56 ---
+2025-06-02 18:46:05,369 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'P244_LIWTKS.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,369 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 56: Файл 'P244_LIWTKS.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,370 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 57 ---
+2025-06-02 18:46:05,370 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Optimizing GaAs .md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,370 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 57: Файл 'Optimizing GaAs .md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,370 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 58 ---
+2025-06-02 18:46:05,370 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'kim1990.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,370 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 58: Файл 'kim1990.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,370 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 59 ---
+2025-06-02 18:46:05,371 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Innogration PA GaAs HBT 5G.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,371 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 59: Файл 'Innogration PA GaAs HBT 5G.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,371 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 60 ---
+2025-06-02 18:46:05,371 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Device Characteristics .md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,371 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 60: Файл 'Device Characteristics .md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,371 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 61 ---
+2025-06-02 18:46:05,372 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Deep_Market_.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,372 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 61: Файл 'Deep_Market_.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,372 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 62 ---
+2025-06-02 18:46:05,372 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'CN1627485A.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,372 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 62: Файл 'CN1627485A.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,372 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 63 ---
+2025-06-02 18:46:05,373 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Thermal_Stability_of_Cu_Pd2Si.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,373 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 63: Файл 'Thermal_Stability_of_Cu_Pd2Si.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,373 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 64 ---
+2025-06-02 18:46:05,373 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Temperature-Independen_.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,373 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 64: Файл 'Temperature-Independen_.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,373 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 65 ---
+2025-06-02 18:46:05,373 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Simplified_EPFL_GaN_HEMT_Model.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,374 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 65: Файл 'Simplified_EPFL_GaN_HEMT_Model.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,374 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 66 ---
+2025-06-02 18:46:05,374 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Field_Plate_and_Package.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,374 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 66: Файл 'Field_Plate_and_Package.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,374 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 67 ---
+2025-06-02 18:46:05,374 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Identification_of_Bufferr.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,374 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 67: Файл 'Identification_of_Bufferr.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,375 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 68 ---
+2025-06-02 18:46:05,375 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'A_Physics-Based.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,375 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 68: Файл 'A_Physics-Based.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,375 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 69 ---
+2025-06-02 18:46:05,375 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'A_Novel_LG40_nm.md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,375 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 69: Файл 'A_Novel_LG40_nm.md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,375 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 70 ---
+2025-06-02 18:46:05,376 - WARNING - [zotero_importer_core:find_file_path:85] - Файл '4_DC and microwave .md' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,376 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 70: Файл '4_DC and microwave .md' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,376 - INFO - [zotero_importer_core:run_zotero_import:219] - --- Обработка строки 71 ---
+2025-06-02 18:46:05,376 - WARNING - [zotero_importer_core:find_file_path:85] - Файл 'Progress and Current Topics of JEDEC JC-70.1.pdf' НЕ найден в 'Z:\01_Документы\КПР-СВЧ\тестирование' и ее поддиректориях.
+2025-06-02 18:46:05,376 - ERROR - [zotero_importer_core:run_zotero_import:241] - Строка 71: Файл 'Progress and Current Topics of JEDEC JC-70.1.pdf' не найден в 'Z:\01_Документы\КПР-СВЧ\тестирование'. Запись ПРОПУЩЕНА.
+2025-06-02 18:46:05,376 - INFO - [zotero_importer_core:run_zotero_import:321] - Импорт завершен. Успешно: 3, Пропущено: 0, Ошибки: 67.
+2025-06-02 18:46:05,376 - INFO - [zotero_importer_core:run_zotero_import:322] - Подробный лог в файле: zotero_excel_importer.log
+2025-06-02 18:46:05,376 - INFO - [app:import_to_zotero_route:150] - Результат импорта Zotero: {'status': 'partial_success', 'message': 'Импорт завершен. Успешно: 3, Пропущено: 0, Ошибки: 67.', 'processed': 3, 'skipped': 0, 'errors': 67}
+2025-06-02 18:46:05,377 - INFO - [app:import_to_zotero_route:156] - Временный Excel файл удален: uploads_temp_excel\pdf-_2025_05_30_v1.xlsx
+2025-06-02 18:46:05,377 - INFO - [werkzeug:_log:97] - 192.168.1.196 - - [02/Jun/2025 18:46:05] "POST /import_to_zotero HTTP/1.1" 200 -

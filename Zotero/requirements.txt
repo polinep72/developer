@@ -1,0 +1,7 @@
+Flask
+pandas
+openpyxl
+pyzotero
+python-dotenv
+Werkzeug 
+# gunicorn # Рекомендуется для продакшена вместо встроенного сервера Flask

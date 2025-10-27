@@ -1,0 +1,48 @@
+version: '3.8' # Укажите актуальную версию Compose файла
+
+services:
+  app:
+    build:
+      context: . # Контекст сборки - текущая директория (где лежит Dockerfile)
+      dockerfile: Dockerfile # Имя вашего Dockerfile
+    container_name: chipdip-parser-app # Имя контейнера
+    ports:
+      - "8085:8085" # Проброс порта: <хост>:<контейнер>
+    volumes:
+      # Монтирование файла Excel для чтения/записи
+      # Убедитесь, что файл rezult.xlsx существует в текущей директории на хосте
+      - ./rezult.xlsx:/app/rezult.xlsx
+      # Монтирование файла логов
+      - ./app.log:/app/app.log
+      # Опционально: монтирование всего кода для разработки (чтобы не пересобирать образ при каждом изменении Python кода)
+      # Для продакшена это обычно не делают, код копируется в образ при сборке.
+      # - .:/app # Раскомментируйте для разработки, если хотите видеть изменения кода сразу
+    environment:
+      # Переменные окружения для вашего приложения
+      # Эти значения будут доступны внутри контейнера
+      - FLASK_APP=app.py
+      - PYTHONUNBUFFERED=1 # Уже есть в Dockerfile, но дублирование не повредит
+      # Конфигурация парсера
+      - XLSX_FILE=rezult.xlsx # Имя файла ВНУТРИ контейнера (соответствует тому, что в volumes)
+      - HEADLESS_MODE=1
+      - TIME_FORMAT=%d.%m.%Y %H:%M:%S
+      - CONSOLE_LOG_ACTIVE=1
+      - CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      # Конфигурация Flask
+      - FLASK_SECRET_KEY=your_very_strong_and_unique_secret_key_for_flask_change_me 
+      # Важно: Замените на ваш реальный секретный ключ!
+    # Для Chrome требуется увеличенный размер разделяемой памяти
+    shm_size: '2gb' # Эквивалент --shm-size="2g" в docker run
+    # Можно добавить healthcheck, restart policy и другие опции Docker Compose
+    restart: unless-stopped # Политика перезапуска контейнера
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8085/health"] # Если у вас есть эндпоинт для проверки здоровья
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 30s
+
+# Опционально: определение именованных томов (volumes)
+# volumes:
+#   excel_data: # Если бы вы хотели использовать именованный том вместо bind mount
+#   log_data:

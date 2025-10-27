@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+        }
+
+        .header {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            margin: 10px;
+            width: 100%;
+            max-width: 1850px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        form {
+            display: flex;
+            align-items: center; /* Выравнивание по вертикали */
+            margin-bottom: 20px;
+            width: 100%; /* Установка ширины формы */
+        }
+
+        form label {
+            margin-right: 10px; /* Отступ между меткой и полем ввода */
+        }
+
+        form input, form button {
+            margin: 0 10px; /* Минимальные отступы между элементами */
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-left: 0; /* Выравнивание по левому краю */
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .cart-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .cart-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">ИПК ЭЛЕКТРОН-МАШ</div>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <span class="user-info">{{ session['username'] }}</span>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Поиск кристаллов</h1>
+        <form method="POST" action="/search">
+            <label for="chip_name">Введите шифр кристалла:</label>
+            <input type="text" id="chip_name" name="chip_name" required>
+            <button type="submit">Найти</button>
+        </form>
+		
+        {% if results %}
+		<h2>Результаты поиска</h2>
+		<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Запуск</th>
+            <th>Производитель</th>
+            <th>Технология</th>
+            <th>Партия</th>
+            <th>Пластина</th>
+            <th>Квадрант</th>
+            <th>Внутренняя партия</th>
+            <th>Шифр кристалла</th>
+            <th>Количество на пластине</th>
+            <th>Количество в GelPack</th>
+            <th>Взять на пластине</th>
+            <th>Взять в GelPack</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
+            <td>{{ row[6] }}</td>
+            <td>{{ row[7] }}</td>
+            <td>{{ row[8] }}</td>
+            <td>{{ row[9] }}</td>
+            <td>{{ row[10] }}</td>
+            <td>{{ row[11] }}</td>
+            <td>
+                <input type="number" class="quantity-input-w" data-id="{{ row[0] }}" 
+                       max="{{ row[10] }}" placeholder="Макс: {{ row[10] }}">
+            </td>
+            <td>
+                <input type="number" class="quantity-input-gp" data-id="{{ row[0] }}" 
+                       max="{{ row[11] }}" placeholder="Макс: {{ row[11] }}">
+            </td>
+            <td>
+                <button class="add-to-cart" data-id="{{ row[0] }}">Добавить в корзину</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+		{% endif %}
+
+        <a href="/cart" class="cart-button">Перейти в корзину</a>
+    </div>
+</body>
+</html>

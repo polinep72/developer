@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Стили для таблицы и интерфейса */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        /* Стили для контейнера поиска и экспорта */
+        .search-export-container {
+            display: flex;
+            align-items: center; /* Центрируем по вертикали */
+            margin-bottom: 20px; /* Отступ снизу для разделения с результатами */
+        }
+        #chip_name {
+            margin-left: 0.1cm; /* Отступ 2 см слева от кнопки экспорта */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px; /* Заокругляем углы */
+        }
+        #exportButton {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px; /* Заокругляем углы */
+        }
+        #exportButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Поиск кристаллов</h1>
+
+    <!-- Контейнер для строки поиска и экспорта -->
+    <div class="search-export-container">
+        <!-- Оборачиваем поле ввода в форму -->
+        <form id="search_form">
+            <label for="chip_name" style="margin-right: 10px;">Название кристалла:</label>
+            <input type="text" id="chip_name" name="chip_name" placeholder="Введите шифр кристалла..." />
+            <button type="button" id="search_button" style="margin-left: 10px;">ВВОД</button>
+        
+		<!-- Кнопка для экспорта выбранных строк в Excel -->
+        <button id="exportButton">Экспорт выбранного в Excel</button>
+		</form>
+    </div>
+
+    <div id="results"></div>
+</main>
+
+<script>
+    $(document).ready(function() {
+        // Ваш JavaScript код для логики поиска и экспорта
+    });
+</script>
+</body>
+</html>

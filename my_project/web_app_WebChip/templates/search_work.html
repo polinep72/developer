@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Стили для таблицы и интерфейса */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #exportButton {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #exportButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Поиск кристаллов</h1>
+
+    <!-- Оборачиваем поле ввода и кнопку в форму -->
+    <form id="search_form">
+        <label>Название кристалла:</label>
+        <input type="text" id="chip_name" name="chip_name" placeholder="Введите название кристалла..." />
+        <button type="button" id="search_button">ВВОД</button>
+		
+		
+		<!-- Кнопка для экспорта выбранных строк в Excel -->
+    <button id="exportButton">Экспорт выбранного в Excel</button>
+    
+	</form>
+
+    <div id="results"></div>
+    
+</main>
+
+<script>
+    $(document).ready(function() {
+        // Обработчик для кнопки "ВВОД"
+        $("#search_button").click(function() {
+            performSearch();
+        });
+
+        // Обработка нажатия Enter в форме
+        $("#search_form").on("submit", function(event) {
+            event.preventDefault(); // Предотвращаем отправку формы
+            performSearch();
+        });
+
+        function performSearch() {
+            var chip_name = $("#chip_name").val();
+
+            $.ajax({
+                url: "/search",
+                method: "POST",
+                data: { chip_name: chip_name },
+                success: function(response) {
+                    $("#results").html(response);
+                }
+            });
+        }
+
+        // Обработчик нажатия на кнопку "Экспорт"
+        $("#exportButton").on("click", function() {
+            var selectedItems = [];
+
+            $("input[type=checkbox]:checked").each(function() {
+                var id = $(this).data("id");
+                var quantity = $(`.quantity-input[data-id="${id}"]`).val();
+
+                // Проверяем, указано ли количество и не превышает ли оно остаток
+                if (!quantity || parseInt(quantity) <= 0) {
+                    alert("Укажите количество для всех выбранных строк.");
+                    return false;
+                }
+
+                selectedItems.push({ id: id, quantity: parseInt(quantity) });
+            });
+
+            if (selectedItems.length === 0) {
+                alert("Пожалуйста, выберите строки для экспорта.");
+                return;
+            }
+
+            $.ajax({
+                url: "/export",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ selected_items: selectedItems }),
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = "/download_excel";
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

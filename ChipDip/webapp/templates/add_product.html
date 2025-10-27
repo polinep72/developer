@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить товар{% endblock %}
+
+{% block content %}
+    <h1>Добавить новый товар</h1>
+    <form method="post">
+        <div>
+            <label for="name">Артикул (Name из CSV):</label><br>
+            <input type="text" id="name" name="name" value="{{ name or '' }}" required size="50">
+        </div>
+        <br>
+        <div>
+            <label for="url">Ссылка на товар (URL):</label><br>
+            <input type="url" id="url" name="url" value="{{ url or '' }}" required size="80">
+        </div>
+        <br>
+        <div>
+            <button type="submit">Добавить товар</button>
+        </div>
+    </form>
+{% endblock %}

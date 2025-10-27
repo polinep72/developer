@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  pdf2md:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      # Монтируем папку для загрузки файлов (опционально)
+      - ./uploads:/app/uploads
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_ENABLE_CORS=false
+      - STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
+    restart: unless-stopped
+    # Увеличиваем лимиты для обработки больших файлов
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G

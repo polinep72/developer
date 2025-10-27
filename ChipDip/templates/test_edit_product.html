@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование товара - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-edit text-warning me-2"></i>Редактирование товара</h1>
+            <a href="/variant-c" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Назад к списку
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Информация о товаре
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="editProductForm">
+                    <input type="hidden" id="productId" name="product_id" value="{{ product.id }}">
+                    
+                    <div class="mb-4">
+                        <label for="productName" class="form-label">
+                            <strong>Название товара *</strong>
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="productName" 
+                               name="name" 
+                               value="{{ product.name }}"
+                               required>
+                        <div class="form-text">Основное название товара, которое будет отображаться в списке</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="productUrl" class="form-label">
+                            <strong>URL товара</strong>
+                        </label>
+                        <input type="url" 
+                               class="form-control" 
+                               id="productUrl" 
+                               name="url" 
+                               value="{{ product.url }}"
+                               readonly>
+                        <div class="form-text">Ссылка на товар (не редактируется)</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label for="productPrice" class="form-label">
+                                    <strong>Цена (₽)</strong>
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="productPrice" 
+                                       name="price" 
+                                       value="{{ product.price }}"
+                                       step="0.01" 
+                                       readonly>
+                                <div class="form-text">Текущая цена товара</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label for="productStock" class="form-label">
+                                    <strong>Остаток (шт.)</strong>
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="productStock" 
+                                       name="stock_level" 
+                                       value="{{ product.stock_level or 0 }}"
+                                       readonly>
+                                <div class="form-text">Текущий остаток на складе</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="productNotes" class="form-label">
+                            <strong>Описание товара</strong>
+                        </label>
+                        <textarea class="form-control" 
+                                  id="productNotes" 
+                                  name="notes" 
+                                  rows="4" 
+                                  placeholder="Дополнительная информация о товаре..."></textarea>
+                        <div class="form-text">Дополнительные заметки о товаре</div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Статистика
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Дата добавления:</strong><br>
+                    <span class="text-muted">{{ product.created_at.strftime('%d.%m.%Y %H:%M') if product.created_at else 'Неизвестно' }}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Последнее обновление:</strong><br>
+                    <span class="text-muted">Сегодня</span>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Статус:</strong><br>
+                    <span class="badge bg-success">Активный</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-link me-2"></i>Быстрые действия
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ product.url }}" target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-2"></i>Открыть на сайте
+                    </a>
+                    <button type="button" class="btn btn-outline-info" onclick="copyToClipboard('{{ product.url }}')">
+                        <i class="fas fa-copy me-2"></i>Копировать ссылку
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between">
+            <a href="/variant-c" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Отмена
+            </a>
+            <button type="button" class="btn btn-warning btn-lg" id="saveProduct">
+                <i class="fas fa-save me-2"></i>Сохранить изменения
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const saveButton = document.getElementById('saveProduct');
+    const productNameInput = document.getElementById('productName');
+    const productIdInput = document.getElementById('productId');
+    
+    // Фокус на поле названия при загрузке
+    productNameInput.focus();
+    productNameInput.select();
+    
+    // Обработчик сохранения
+    saveButton.addEventListener('click', function() {
+        const productId = productIdInput.value;
+        const newName = productNameInput.value.trim();
+        
+        if (!newName) {
+            alert('Название не может быть пустым');
+            productNameInput.focus();
+            return;
+        }
+        
+        // Показываем индикатор загрузки
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Сохранение...';
+        
+        fetch('/api/update-product-name', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                new_name: newName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Показываем уведомление об успехе
+                showNotification('Товар успешно обновлен!', 'success');
+                
+                // Перенаправляем обратно к списку через 1.5 секунды
+                setTimeout(() => {
+                    window.location.href = '/variant-c';
+                }, 1500);
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при сохранении');
+        })
+        .finally(() => {
+            // Восстанавливаем кнопку
+            saveButton.disabled = false;
+            saveButton.innerHTML = '<i class="fas fa-save me-2"></i>Сохранить изменения';
+        });
+    });
+    
+    // Обработчик нажатия Enter в поле названия
+    productNameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveButton.click();
+        }
+    });
+    
+    // Обработчик изменения названия
+    productNameInput.addEventListener('input', function() {
+        const hasChanges = this.value.trim() !== this.defaultValue;
+        saveButton.disabled = !hasChanges;
+        
+        if (hasChanges) {
+            saveButton.classList.remove('btn-warning');
+            saveButton.classList.add('btn-primary');
+        } else {
+            saveButton.classList.remove('btn-primary');
+            saveButton.classList.add('btn-warning');
+        }
+    });
+    
+    function showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }
+    
+    // Функция копирования в буфер обмена
+    window.copyToClipboard = function(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            showNotification('Ссылка скопирована в буфер обмена!', 'info');
+        }, function(err) {
+            console.error('Ошибка копирования: ', err);
+            alert('Не удалось скопировать ссылку');
+        });
+    };
+});
+</script>
+{% endblock %}

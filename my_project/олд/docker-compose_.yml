@@ -1,0 +1,30 @@
+services:
+  web_app_dash:
+    build: ./web_app_dash
+    env_file:
+      - ./web_app_dash/.env
+    ports:
+      - "8050:8050"
+    environment:
+      - DB_HOST=192.168.1.22
+      - DB_PORT=5432
+      - DB_USER=${POSTGRE_USER}
+      - DB_PASSWORD=${POSTGRE_PASSWORD}
+      - DB_NAME=${POSTGRE_DBNAME}
+
+  db_workspace:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${POSTGRE_USER}
+      POSTGRES_PASSWORD: ${POSTGRE_PASSWORD}
+      POSTGRES_DB: ${POSTGRE_DBNAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRE_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

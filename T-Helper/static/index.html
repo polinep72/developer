@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <meta charset="UTF-8">
+    <title>Техническая поддержка</title>
+</head>
+<body>
+    <h1>Техническая поддержка</h1>
+    <form hx-post="/query" hx-target="#response">
+        <input type="text" name="query" placeholder="Введите ваш вопрос">
+        <input type="submit" value="Отправить">
+    </form>
+    <div id="response"></div>
+</body>
+</html>

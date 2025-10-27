@@ -1,0 +1,84 @@
+2025-06-11 11:51:34,645 WARN received SIGTERM indicating exit request
+2025-06-11 11:51:34,646 INFO waiting for parser, webapp to die
+2025-06-11 11:51:35,169 INFO stopped: webapp (exit status 0)
+2025-06-11 11:51:35,173 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 11:51:55,381 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 11:51:55,386 INFO supervisord started with pid 1
+2025-06-11 11:51:56,391 INFO spawned: 'parser' with pid 7
+2025-06-11 11:51:56,397 INFO spawned: 'webapp' with pid 8
+2025-06-11 11:51:57,658 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 11:52:01,844 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:00:18,920 WARN received SIGTERM indicating exit request
+2025-06-11 12:00:18,925 INFO waiting for parser, webapp to die
+2025-06-11 12:00:19,553 INFO stopped: webapp (exit status 0)
+2025-06-11 12:00:19,569 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:00:42,479 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:00:42,483 INFO supervisord started with pid 1
+2025-06-11 12:00:43,496 INFO spawned: 'parser' with pid 8
+2025-06-11 12:00:43,514 INFO spawned: 'webapp' with pid 9
+2025-06-11 12:00:44,875 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:00:49,008 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:00:53,014 WARN received SIGTERM indicating exit request
+2025-06-11 12:00:53,015 INFO waiting for parser, webapp to die
+2025-06-11 12:00:53,941 INFO stopped: webapp (exit status 0)
+2025-06-11 12:00:53,946 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:04:01,451 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:04:01,463 INFO supervisord started with pid 1
+2025-06-11 12:04:02,477 INFO spawned: 'parser' with pid 7
+2025-06-11 12:04:02,501 INFO spawned: 'webapp' with pid 8
+2025-06-11 12:04:04,158 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:04:08,444 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:05:38,050 WARN received SIGTERM indicating exit request
+2025-06-11 12:05:38,051 INFO waiting for parser, webapp to die
+2025-06-11 12:05:38,291 INFO stopped: webapp (exit status 0)
+2025-06-11 12:05:38,302 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:07:41,054 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:07:41,058 INFO supervisord started with pid 1
+2025-06-11 12:07:42,070 INFO spawned: 'parser' with pid 7
+2025-06-11 12:07:42,098 INFO spawned: 'webapp' with pid 8
+2025-06-11 12:07:43,658 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:07:47,214 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:16:57,181 WARN received SIGTERM indicating exit request
+2025-06-11 12:16:57,183 INFO waiting for parser, webapp to die
+2025-06-11 12:16:57,511 INFO stopped: webapp (exit status 0)
+2025-06-11 12:16:57,526 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:18:01,156 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:18:01,159 INFO supervisord started with pid 1
+2025-06-11 12:18:02,172 INFO spawned: 'parser' with pid 7
+2025-06-11 12:18:02,201 INFO spawned: 'webapp' with pid 8
+2025-06-11 12:18:03,540 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:18:07,936 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:21:34,525 WARN received SIGTERM indicating exit request
+2025-06-11 12:21:34,527 INFO waiting for parser, webapp to die
+2025-06-11 12:21:34,852 INFO stopped: webapp (exit status 0)
+2025-06-11 12:21:34,865 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:21:45,040 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:21:45,043 INFO supervisord started with pid 1
+2025-06-11 12:21:46,060 INFO spawned: 'parser' with pid 7
+2025-06-11 12:21:46,069 INFO spawned: 'webapp' with pid 8
+2025-06-11 12:21:47,395 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:21:51,344 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:22:08,350 WARN received SIGTERM indicating exit request
+2025-06-11 12:22:08,351 INFO waiting for parser, webapp to die
+2025-06-11 12:22:09,408 INFO stopped: webapp (exit status 0)
+2025-06-11 12:22:09,428 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:22:32,100 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:22:32,120 INFO supervisord started with pid 1
+2025-06-11 12:22:33,134 INFO spawned: 'parser' with pid 7
+2025-06-11 12:22:33,150 INFO spawned: 'webapp' with pid 8
+2025-06-11 12:22:34,533 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:22:38,415 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:26:35,839 WARN received SIGTERM indicating exit request
+2025-06-11 12:26:35,840 INFO waiting for parser, webapp to die
+2025-06-11 12:26:36,590 INFO stopped: webapp (exit status 0)
+2025-06-11 12:26:36,605 INFO stopped: parser (terminated by SIGTERM)
+2025-06-11 12:27:02,739 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-06-11 12:27:02,743 INFO supervisord started with pid 1
+2025-06-11 12:27:03,757 INFO spawned: 'parser' with pid 7
+2025-06-11 12:27:03,783 INFO spawned: 'webapp' with pid 8
+2025-06-11 12:27:05,141 INFO success: webapp entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-06-11 12:27:09,055 INFO success: parser entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2025-06-11 12:53:52,221 WARN received SIGTERM indicating exit request
+2025-06-11 12:53:52,223 INFO waiting for parser, webapp to die
+2025-06-11 12:53:52,958 INFO stopped: webapp (exit status 0)
+2025-06-11 12:53:52,964 INFO stopped: parser (terminated by SIGTERM)

@@ -1,0 +1,961 @@
+2025-06-11 11:51:25,544 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=107, URL='https://www.chipdip.ru/product/hmc512lp5etr'
+2025-06-11 11:51:25,544 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 107, URL: https://www.chipdip.ru/product/hmc512lp5etr, Текущая цена в БД: 8370.00
+2025-06-11 11:51:25,624 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product/hmc512lp5etr': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product/hmc512lp5etr&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product/hmc512lp5etr&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 11:51:25,627 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=107, stock=-1, price=None, status=None
+2025-06-11 11:51:25,631 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 107
+2025-06-11 11:51:56,511 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 11:51:56,512 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 11:51:56,540 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 11:51:56,540 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 11:51:56,603 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 11:51:56,603 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 11:51:56,603 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 11:51:56,656 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 11:51:56,656 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 11:51:56,656 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 11:51:58,608 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 11:51:58,656 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 11:51:58,662 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=6, URL='https://www.chipdip.ru/product0/8005792605'
+2025-06-11 11:51:58,662 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 6, URL: https://www.chipdip.ru/product0/8005792605, Текущая цена в БД: 267100.00
+2025-06-11 11:51:58,823 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8005792605': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8005792605&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8005792605&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 11:51:58,830 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=6, stock=-1, price=None, status=None
+2025-06-11 11:51:58,838 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 6
+2025-06-11 11:53:24,843 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=202, URL='https://www.chipdip.ru/product0/8006665540'
+2025-06-11 11:53:24,843 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 202, URL: https://www.chipdip.ru/product0/8006665540, Текущая цена в БД: 5280.00
+2025-06-11 11:53:24,934 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006665540': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006665540&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006665540&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 11:53:24,938 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=202, stock=-1, price=None, status=None
+2025-06-11 11:53:24,943 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 202
+2025-06-11 11:55:37,365 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=136, URL='https://www.chipdip.ru/product0/8002239735'
+2025-06-11 11:55:37,365 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 136, URL: https://www.chipdip.ru/product0/8002239735, Текущая цена в БД: 6440.00
+2025-06-11 11:55:37,454 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8002239735': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8002239735&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8002239735&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 11:55:37,458 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=136, stock=-1, price=None, status=None
+2025-06-11 11:55:37,464 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 136
+2025-06-11 11:58:10,642 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=126, URL='https://www.chipdip.ru/product0/8004974785'
+2025-06-11 11:58:10,642 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 126, URL: https://www.chipdip.ru/product0/8004974785, Текущая цена в БД: 4080.00
+2025-06-11 11:58:10,774 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004974785': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974785&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974785&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 11:58:10,780 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=126, stock=-1, price=None, status=None
+2025-06-11 11:58:10,789 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 126
+2025-06-11 12:00:16,778 - chipdip_parser.scheduler - INFO - scheduler.wait_if_needed:87 - Новый час (12:00 Europe/Moscow). Сброс счетчика запросов.
+2025-06-11 12:00:16,784 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=111, URL='https://www.chipdip.ru/product0/8004974879'
+2025-06-11 12:00:16,784 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 111, URL: https://www.chipdip.ru/product0/8004974879, Текущая цена в БД: 8880.00
+2025-06-11 12:00:16,904 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004974879': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974879&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974879&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:00:16,909 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=111, stock=-1, price=None, status=None
+2025-06-11 12:00:16,913 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 111
+2025-06-11 12:00:43,698 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:00:43,700 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:00:43,733 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:00:43,733 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:00:43,797 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:00:43,797 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:00:43,797 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:00:43,874 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:00:43,874 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:00:43,874 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 12:00:46,951 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:00:46,998 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:00:47,004 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=48, URL='https://www.chipdip.ru/product0/8004885729'
+2025-06-11 12:00:47,004 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 48, URL: https://www.chipdip.ru/product0/8004885729, Текущая цена в БД: 7690.00
+2025-06-11 12:04:02,900 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:04:02,902 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:04:02,965 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:04:02,965 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:04:03,049 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:04:03,049 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:04:03,049 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:04:03,155 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:04:03,155 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:04:03,155 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 12:04:07,266 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:04:07,435 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:04:07,441 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=48, URL='https://www.chipdip.ru/product0/8004885729'
+2025-06-11 12:04:07,441 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 48, URL: https://www.chipdip.ru/product0/8004885729, Текущая цена в БД: 7690.00
+2025-06-11 12:04:48,796 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8004885729...
+2025-06-11 12:04:53,797 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8004885729...
+2025-06-11 12:04:53,822 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: 'CVCO55CC-3901-4101, VCO Oscillators 3901-4101MHz -40C to 85C'
+2025-06-11 12:04:53,901 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): '2nd Harmonic: -20 dBc
+Brand: Crystek Corporation
+C'
+2025-06-11 12:04:53,927 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8004885729' получен сток: 2 (из сырого текста: '2 шт.')
+2025-06-11 12:04:53,968 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 7690.0 (из сырого текста: '7 690')
+2025-06-11 12:04:53,975 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 48.
+2025-06-11 12:04:53,980 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=48, stock=2, price=7690.0, status=success
+2025-06-11 12:04:53,995 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 48
+2025-06-11 12:07:42,433 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:07:42,436 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:07:42,476 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:07:42,476 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:07:42,562 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:07:42,562 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:07:42,562 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:07:42,655 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:07:42,655 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:07:42,655 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 12:07:47,211 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:07:47,270 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:07:47,283 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=184, URL='https://www.chipdip.ru/product0/8025422912'
+2025-06-11 12:07:47,283 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 184, URL: https://www.chipdip.ru/product0/8025422912, Текущая цена в БД: 20130.00
+2025-06-11 12:08:04,488 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8025422912...
+2025-06-11 12:08:09,489 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8025422912...
+2025-06-11 12:08:09,538 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: 'CRBV55BE-3350-3500, VCO Oscillators'
+2025-06-11 12:08:09,579 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): '2nd Harmonic: -25 dBc
+Brand: Crystek Corporation
+C'
+2025-06-11 12:08:09,596 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8025422912' получен сток: 3 (из сырого текста: '3 шт.')
+2025-06-11 12:08:09,627 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 20130.0 (из сырого текста: '20 130')
+2025-06-11 12:08:09,634 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 184.
+2025-06-11 12:08:09,639 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=184, stock=3, price=20130.0, status=success
+2025-06-11 12:08:09,643 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 184
+2025-06-11 12:09:51,172 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=168, URL='https://www.chipdip.ru/product0/8007092908'
+2025-06-11 12:09:51,173 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 168, URL: https://www.chipdip.ru/product0/8007092908, Текущая цена в БД: 5040.00
+2025-06-11 12:10:17,637 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8007092908...
+2025-06-11 12:10:22,637 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8007092908...
+2025-06-11 12:10:22,671 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: 'CVCO55CL-0350-0405, VCO Oscillators 350-405MHz'
+2025-06-11 12:10:22,709 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): '2nd Harmonic: -3 dBc
+Brand: Crystek Corporation
+Cu'
+2025-06-11 12:10:22,726 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8007092908' получен сток: 5 (из сырого текста: '5 шт.')
+2025-06-11 12:10:22,744 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 5040.0 (из сырого текста: '5 040')
+2025-06-11 12:10:22,750 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 168.
+2025-06-11 12:10:22,759 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=168, stock=5, price=5040.0, status=success
+2025-06-11 12:10:22,764 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 168
+2025-06-11 12:13:31,032 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=103, URL='https://www.chipdip.ru/product0/8020675160'
+2025-06-11 12:13:31,032 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 103, URL: https://www.chipdip.ru/product0/8020675160, Текущая цена в БД: 13080.00
+2025-06-11 12:13:36,403 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8020675160...
+2025-06-11 12:13:41,403 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8020675160...
+2025-06-11 12:13:41,425 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: 'HMC531LP5, VCO Oscillators VCO w/ Fo/2 & Div/4, 13.6 - 14.9 GHz'
+2025-06-11 12:13:41,473 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): '2nd Harmonic: 18 dBc
+Brand: Analog Devices
+Current'
+2025-06-11 12:13:41,499 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8020675160' получен сток: 7 (из сырого текста: '7 шт.')
+2025-06-11 12:13:41,518 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 13080.0 (из сырого текста: '13 080')
+2025-06-11 12:13:41,524 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 103.
+2025-06-11 12:13:41,531 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=103, stock=7, price=13080.0, status=success
+2025-06-11 12:13:41,537 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 103
+2025-06-11 12:15:19,263 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=7, URL='https://www.chipdip.ru/product0/8008674327'
+2025-06-11 12:15:19,263 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 7, URL: https://www.chipdip.ru/product0/8008674327, Текущая цена в БД: 267100.00
+2025-06-11 12:15:37,963 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8008674327...
+2025-06-11 12:15:42,964 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8008674327...
+2025-06-11 12:15:42,983 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: '108648-HMC732LC4B, - HMC732LC4B Voltage Controlled Oscillator (VCO) 6GHz ~ 12GHz Evaluation Board'
+2025-06-11 12:15:43,020 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): 'Brand: Analog Devices
+Factory Pack Quantity: Facto'
+2025-06-11 12:15:43,038 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8008674327' получен сток: 4 (из сырого текста: '4 шт.')
+2025-06-11 12:15:43,055 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 267100.0 (из сырого текста: '267 100')
+2025-06-11 12:15:43,062 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 7.
+2025-06-11 12:15:43,069 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=7, stock=4, price=267100.0, status=success
+2025-06-11 12:15:43,075 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 7
+2025-06-11 12:18:02,367 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:18:02,368 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:18:02,396 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:18:02,396 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:18:02,457 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:18:02,458 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:18:02,458 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:18:02,542 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:18:02,542 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:18:02,542 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 12:18:04,855 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:18:04,921 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:18:04,930 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=91, URL='https://www.chipdip.ru/product0/8004885634'
+2025-06-11 12:18:04,930 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 91, URL: https://www.chipdip.ru/product0/8004885634, Текущая цена в БД: 5170.00
+2025-06-11 12:18:12,494 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8004885634...
+2025-06-11 12:18:17,494 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8004885634...
+2025-06-11 12:18:17,529 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: 'CVCO55BE-1650-2150, VCO Oscillators 1650-2150MHz'
+2025-06-11 12:18:17,568 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): '2nd Harmonic: -15 dBc
+Brand: Crystek Corporation
+C'
+2025-06-11 12:18:17,586 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8004885634' получен сток: 10 (из сырого текста: '10 шт.')
+2025-06-11 12:18:17,603 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 5170.0 (из сырого текста: '5 170')
+2025-06-11 12:18:17,615 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 91.
+2025-06-11 12:18:17,623 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=91, stock=10, price=5170.0, status=success
+2025-06-11 12:18:17,630 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 91
+2025-06-11 12:19:50,094 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=153, URL='https://www.chipdip.ru/product0/8004680339'
+2025-06-11 12:19:50,095 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 153, URL: https://www.chipdip.ru/product0/8004680339, Текущая цена в БД: 4830.00
+2025-06-11 12:19:53,226 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8004680339...
+2025-06-11 12:19:58,227 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8004680339...
+2025-06-11 12:19:58,264 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: 'CVCO55CL-0490-0540, VCO Oscillators Crystek High Performance VCOs'
+2025-06-11 12:19:58,335 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): '2nd Harmonic: -12 dBc
+Brand: Crystek Corporation
+C'
+2025-06-11 12:19:58,357 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8004680339' получен сток: 4 (из сырого текста: '4 шт.')
+2025-06-11 12:19:58,374 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 4830.0 (из сырого текста: '4 830')
+2025-06-11 12:19:58,383 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 153.
+2025-06-11 12:19:58,388 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=153, stock=4, price=4830.0, status=success
+2025-06-11 12:19:58,393 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 153
+2025-06-11 12:21:46,201 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:21:46,202 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:21:46,229 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:21:46,229 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:21:46,292 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:21:46,292 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:21:46,292 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:21:46,393 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:21:46,393 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:21:49,122 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:21:49,326 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:21:49,336 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=5, URL='https://www.chipdip.ru/product0/8005888772'
+2025-06-11 12:21:49,336 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 5, URL: https://www.chipdip.ru/product0/8005888772, Текущая цена в БД: 103400.00
+2025-06-11 12:21:53,137 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:89 - Пауза 5 секунд после загрузки страницы https://www.chipdip.ru/product0/8005888772...
+2025-06-11 12:21:58,137 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:91 - Пауза 5 секунд завершена. Сбор данных для https://www.chipdip.ru/product0/8005888772...
+2025-06-11 12:21:58,174 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:99 - Название товара: '110227-HMC513LP5, - HMC513LP5 Voltage Controlled Oscillator (VCO) 10.43GHz ~ 11.46GHz Evaluation Board'
+2025-06-11 12:21:58,268 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:115 - Описание/заметки (первые ~50): 'Base Product Number HMC513 ->
+ECCN EAR99
+For Use W'
+2025-06-11 12:21:58,302 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:144 - Для URL 'https://www.chipdip.ru/product0/8005888772' получен сток: 1 (из сырого текста: '1 шт.')
+2025-06-11 12:21:58,316 - chipdip_parser.scraper - INFO - scraper.get_product_details_from_site:175 - Цена найдена: 103400.0 (из сырого текста: '103 400')
+2025-06-11 12:21:58,326 - chipdip_parser.database - INFO - database.update_product_details_in_db:141 - Детали (notes) обновлены для product_id: 5.
+2025-06-11 12:21:58,333 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=5, stock=1, price=103400.0, status=success
+2025-06-11 12:21:58,338 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 5
+2025-06-11 12:22:33,349 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:22:33,350 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:22:33,377 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:22:33,377 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:22:33,436 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:22:33,436 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:22:33,436 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:22:33,528 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:22:33,528 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:22:33,528 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 12:22:36,154 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:22:36,215 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:22:36,222 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=86, URL='https://www.chipdip.ru/product0/8007116193'
+2025-06-11 12:22:36,222 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 86, URL: https://www.chipdip.ru/product0/8007116193, Текущая цена в БД: 6070.00
+2025-06-11 12:22:36,390 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8007116193': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8007116193&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8007116193&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:22:36,401 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=86, stock=-1, price=None, status=None
+2025-06-11 12:22:36,411 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 86
+2025-06-11 12:25:32,620 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=4, URL='https://www.chipdip.ru/product0/8006182998'
+2025-06-11 12:25:32,620 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 4, URL: https://www.chipdip.ru/product0/8006182998, Текущая цена в БД: 85610.00
+2025-06-11 12:25:32,734 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006182998': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006182998&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006182998&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:25:32,744 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=4, stock=-1, price=None, status=None
+2025-06-11 12:25:32,750 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 4
+2025-06-11 12:27:03,956 - root - ERROR - utils.setup_logging:48 - Не удалось настроить файловый логгер для 'parser_app.log': [Errno 21] Is a directory: '/app/parser_app.log'
+Traceback (most recent call last):
+  File "/app/chipdip_parser/utils.py", line 38, in setup_logging
+    file_handler = logging.handlers.RotatingFileHandler(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 155, in __init__
+    BaseRotatingHandler.__init__(self, filename, mode, encoding=encoding,
+  File "/usr/local/lib/python3.11/logging/handlers.py", line 58, in __init__
+    logging.FileHandler.__init__(self, filename, mode=mode,
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1181, in __init__
+    StreamHandler.__init__(self, self._open())
+                                 ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/logging/__init__.py", line 1213, in _open
+    return open_func(self.baseFilename, self.mode,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+IsADirectoryError: [Errno 21] Is a directory: '/app/parser_app.log'
+2025-06-11 12:27:03,957 - root - INFO - utils.setup_logging:49 - Логирование будет осуществляться только в консоль.
+2025-06-11 12:27:03,988 - __main__ - INFO - app.<module>:237 - Запуск приложения парсера ChipDip (main_parser_loop).
+2025-06-11 12:27:03,988 - __main__ - INFO - app.main_parser_loop:56 - Запуск основного цикла парсера.
+2025-06-11 12:27:04,052 - chipdip_parser.scheduler - INFO - scheduler.__init__:36 - Загружен календарь праздников для страны: RU
+2025-06-11 12:27:04,052 - __main__ - INFO - app.main_parser_loop:64 - Инициализация Selenium WebDriver (Firefox)...
+2025-06-11 12:27:04,052 - __main__ - INFO - app.main_parser_loop:69 - WebDriver (Firefox) будет запущен в headless режиме.
+2025-06-11 12:27:04,138 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Problem reading geckodriver versions: error sending request for url (https://raw.githubusercontent.com/SeleniumHQ/selenium/trunk/common/geckodriver/geckodriver-support.json). Using latest geckodriver version
+2025-06-11 12:27:04,139 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Exception managing firefox: error sending request for url (https://github.com/mozilla/geckodriver/releases/latest)
+2025-06-11 12:27:04,139 - selenium.webdriver.common.selenium_manager - WARNING - selenium_manager._process_logs:137 - Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+2025-06-11 12:27:06,789 - __main__ - INFO - app.main_parser_loop:104 - Selenium WebDriver (Firefox) успешно инициализирован.
+2025-06-11 12:27:06,850 - chipdip_parser.database - INFO - database.get_db_connection:23 - Успешное подключение к PostgreSQL: 192.168.1.139:5432, БД: ChipDip
+2025-06-11 12:27:06,857 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=71, URL='https://www.chipdip.ru/product0/8007249667'
+2025-06-11 12:27:06,857 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 71, URL: https://www.chipdip.ru/product0/8007249667, Текущая цена в БД: 6560.00
+2025-06-11 12:27:07,026 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8007249667': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8007249667&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8007249667&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:27:07,042 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=71, stock=-1, price=None, status=None
+2025-06-11 12:27:07,052 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 71
+2025-06-11 12:29:03,054 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=97, URL='https://www.chipdip.ru/product0/8006712588'
+2025-06-11 12:29:03,054 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 97, URL: https://www.chipdip.ru/product0/8006712588, Текущая цена в БД: 6050.00
+2025-06-11 12:29:03,185 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006712588': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006712588&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006712588&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:29:03,192 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=97, stock=-1, price=None, status=None
+2025-06-11 12:29:03,203 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 97
+2025-06-11 12:31:40,615 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=116, URL='https://www.chipdip.ru/product0/8004974872'
+2025-06-11 12:31:40,616 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 116, URL: https://www.chipdip.ru/product0/8004974872, Текущая цена в БД: 8750.00
+2025-06-11 12:31:40,792 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004974872': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974872&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974872&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:31:40,799 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=116, stock=-1, price=None, status=None
+2025-06-11 12:31:40,807 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 116
+2025-06-11 12:33:29,659 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=1, URL='https://www.chipdip.ru/product0/8006944537'
+2025-06-11 12:33:29,660 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 1, URL: https://www.chipdip.ru/product0/8006944537, Текущая цена в БД: 294700.00
+2025-06-11 12:33:29,788 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006944537': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006944537&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006944537&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:33:29,795 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=1, stock=-1, price=None, status=None
+2025-06-11 12:33:29,802 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 1
+2025-06-11 12:35:18,215 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=151, URL='https://www.chipdip.ru/product0/8004885672'
+2025-06-11 12:35:18,215 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 151, URL: https://www.chipdip.ru/product0/8004885672, Текущая цена в БД: 5020.00
+2025-06-11 12:35:18,332 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004885672': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004885672&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004885672&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:35:18,337 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=151, stock=-1, price=None, status=None
+2025-06-11 12:35:18,345 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 151
+2025-06-11 12:38:17,552 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=199, URL='https://www.chipdip.ru/product0/8004974945'
+2025-06-11 12:38:17,553 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 199, URL: https://www.chipdip.ru/product0/8004974945, Текущая цена в БД: 8880.00
+2025-06-11 12:38:17,660 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004974945': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974945&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004974945&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:38:17,669 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=199, stock=-1, price=None, status=None
+2025-06-11 12:38:17,680 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 199
+2025-06-11 12:41:24,634 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=161, URL='https://www.chipdip.ru/product0/8006520685'
+2025-06-11 12:41:24,635 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 161, URL: https://www.chipdip.ru/product0/8006520685, Текущая цена в БД: 13670.00
+2025-06-11 12:41:24,739 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006520685': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006520685&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006520685&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:41:24,744 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=161, stock=-1, price=None, status=None
+2025-06-11 12:41:24,751 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 161
+2025-06-11 12:43:40,682 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=33, URL='https://www.chipdip.ru/product0/8006795324'
+2025-06-11 12:43:40,682 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 33, URL: https://www.chipdip.ru/product0/8006795324, Текущая цена в БД: 6380.00
+2025-06-11 12:43:40,794 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006795324': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006795324&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006795324&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:43:40,810 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=33, stock=-1, price=None, status=None
+2025-06-11 12:43:40,822 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 33
+2025-06-11 12:45:19,975 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=79, URL='https://www.chipdip.ru/product0/8004885651'
+2025-06-11 12:45:19,975 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 79, URL: https://www.chipdip.ru/product0/8004885651, Текущая цена в БД: 6880.00
+2025-06-11 12:45:20,079 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004885651': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004885651&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004885651&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:45:20,087 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=79, stock=-1, price=None, status=None
+2025-06-11 12:45:20,097 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 79
+2025-06-11 12:46:47,248 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=36, URL='https://www.chipdip.ru/product0/8004680337'
+2025-06-11 12:46:47,248 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 36, URL: https://www.chipdip.ru/product0/8004680337, Текущая цена в БД: 5280.00
+2025-06-11 12:46:47,337 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004680337': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004680337&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004680337&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:46:47,342 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=36, stock=-1, price=None, status=None
+2025-06-11 12:46:47,346 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 36
+2025-06-11 12:49:58,212 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=27, URL='https://www.chipdip.ru/product0/8006071670'
+2025-06-11 12:49:58,212 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 27, URL: https://www.chipdip.ru/product0/8006071670, Текущая цена в БД: 7370.00
+2025-06-11 12:49:58,313 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8006071670': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006071670&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8006071670&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:49:58,320 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=27, stock=-1, price=None, status=None
+2025-06-11 12:49:58,328 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 27
+2025-06-11 12:52:14,947 - chipdip_parser.database - INFO - database.get_product_to_parse:44 - Выбран товар для парсинга: ID=194, URL='https://www.chipdip.ru/product0/8004975040'
+2025-06-11 12:52:14,947 - __main__ - INFO - app.main_parser_loop:136 - Начало обработки товара ID: 194, URL: https://www.chipdip.ru/product0/8004975040, Текущая цена в БД: 13100.00
+2025-06-11 12:52:15,055 - chipdip_parser.scraper - ERROR - scraper.get_product_details_from_site:201 - Ошибка WebDriver при обработке URL 'https://www.chipdip.ru/product0/8004975040': Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004975040&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+Traceback (most recent call last):
+  File "/app/chipdip_parser/scraper.py", line 40, in get_product_details_from_site
+    driver.get(url)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "/usr/local/lib/python3.11/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//www.chipdip.ru/product0/8004975040&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20www.chipdip.ru.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:832:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:330:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+2025-06-11 12:52:15,063 - chipdip_parser.database - INFO - database.save_stock_history:86 - Сохранена история: product_id=194, stock=-1, price=None, status=None
+2025-06-11 12:52:15,069 - __main__ - INFO - app.main_parser_loop:203 - Завершение обработки товара ID: 194

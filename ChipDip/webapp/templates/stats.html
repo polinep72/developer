@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика и графики - ChipDip Парсер{% endblock %}
+
+{% block content %}
+<div class="stats">
+    <h2>Статистика и графики</h2>
+
+    <div class="cards" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+        <div class="card" style="min-width:200px; padding:12px; border:1px solid #eee; border-radius:6px;">
+            <div>Всего товаров</div>
+            <div id="ov_total" style="font-size:20px; font-weight:bold;">-</div>
+        </div>
+        <div class="card" style="min-width:200px; padding:12px; border:1px solid #eee; border-radius:6px;">
+            <div>Активных товаров</div>
+            <div id="ov_active" style="font-size:20px; font-weight:bold;">-</div>
+        </div>
+        <div class="card" style="min-width:200px; padding:12px; border:1px solid #eee; border-radius:6px;">
+            <div>Уникальных URL</div>
+            <div id="ov_unique" style="font-size:20px; font-weight:bold;">-</div>
+        </div>
+        <div class="card" style="min-width:200px; padding:12px; border:1px solid #eee; border-radius:6px;">
+            <div>Активных пользователей</div>
+            <div id="ov_users" style="font-size:20px; font-weight:bold;">-</div>
+        </div>
+        <div class="card" style="min-width:200px; padding:12px; border:1px solid #eee; border-radius:6px;">
+            <div>Проверок за 24ч</div>
+            <div id="ov_checks" style="font-size:20px; font-weight:bold;">-</div>
+        </div>
+    </div>
+
+    <div class="actions" style="gap:8px; align-items:center; margin-bottom:20px;">
+        <label>Интервал продаж:</label>
+        <input type="date" id="salesFrom"/>
+        <input type="date" id="salesTo"/>
+        <button class="btn btn-primary" onclick="loadSales()">Показать продажи</button>
+    </div>
+
+
+    <div style="max-width:1880px; margin-bottom:32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3>1. График продаж по убыванию</h3>
+            <button class="btn btn-success btn-sm" onclick="exportSalesToExcel()">📊 Экспорт в Excel</button>
+        </div>
+        <div id="salesBar" style="height:420px;"></div>
+    </div>
+
+    <div style="max-width:1880px; margin-bottom:32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3>2. График продаж по месяцам (последние 12 месяцев)</h3>
+            <button class="btn btn-success btn-sm" onclick="exportMonthlyToExcel()">📊 Экспорт в Excel</button>
+        </div>
+        <div id="yearlySalesBar" style="height:420px;"></div>
+    </div>
+
+    <div style="max-width:1880px; margin-bottom:32px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3>3. График выручки по месяцам (последние 12 месяцев)</h3>
+            <button class="btn btn-success btn-sm" onclick="exportRevenueToExcel()">📊 Экспорт в Excel</button>
+        </div>
+        <div id="revenueBar" style="height:420px;"></div>
+    </div>
+
+    <div class="actions" style="margin-bottom:16px;">
+        <form id="productSelectForm" onsubmit="return false;">
+            <label for="productSelect">Товар:</label>
+            <select id="productSelect">
+                {% for p in products %}
+                    <option value="{{ p.id }}">{{ p.name }} ({{ p.internal_sku }})</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary" onclick="loadSeries()">Показать</button>
+        </form>
+    </div>
+
+    <div style="max-width:1880px;">
+        <div style="margin-bottom:32px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3>3. Количество товара на складе</h3>
+                <button class="btn btn-success btn-sm" onclick="exportStockToExcel()">📊 Экспорт в Excel</button>
+            </div>
+            <div id="stockChart" style="height:360px;"></div>
+        </div>
+        
+        <div style="margin-bottom:32px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3>4. Стоимость</h3>
+                <button class="btn btn-success btn-sm" onclick="exportPriceToExcel()">📊 Экспорт в Excel</button>
+            </div>
+            <div id="priceChart" style="height:360px;"></div>
+        </div>
+        
+        <div style="margin-bottom:32px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3>5. Продажи по месяцам (выбранный товар)</h3>
+                <button class="btn btn-success btn-sm" onclick="exportProductMonthlyToExcel()">📊 Экспорт в Excel</button>
+            </div>
+            <div id="monthlyChart" style="height:360px;"></div>
+        </div>
+
+        <div style="margin-bottom:32px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3>6. Выручка по месяцам (выбранный товар)</h3>
+                <button class="btn btn-success btn-sm" onclick="exportProductRevenueToExcel()">📊 Экспорт в Excel</button>
+            </div>
+            <div id="productRevenueChart" style="height:360px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script>
+let stockChart, priceChart, monthlyChart;
+
+async function loadOverview() {
+  try {
+    const resp = await fetch('{{ url_for('main.api_stats_overview') }}');
+    const data = await resp.json();
+    document.getElementById('ov_total').textContent = data.total_products ?? '-';
+    document.getElementById('ov_active').textContent = data.active_products ?? '-';
+    document.getElementById('ov_unique').textContent = data.unique_urls ?? '-';
+    document.getElementById('ov_users').textContent = data.users_count ?? '-';
+    document.getElementById('ov_checks').textContent = data.checks_24h ?? '-';
+  } catch (e) { console.error(e); }
+}
+
+function ensureCharts(labels, stockData, priceData) {
+  const stockEl = document.getElementById('stockChart');
+  const priceEl = document.getElementById('priceChart');
+  const stockTrace = { x: labels, y: stockData, mode: 'lines+markers', name: 'Остаток', line: {color: '#2f7ed8'} };
+  const priceTrace = { x: labels, y: priceData, mode: 'lines+markers', name: 'Цена', line: {color: '#28a745'} };
+  const commonLayout = { margin: {l: 40, r: 10, t: 40, b: 40}, hovermode: 'x unified' };
+  Plotly.newPlot(
+    stockEl,
+    [stockTrace],
+    { 
+      ...commonLayout,
+      title: 'Количество товара на складе',
+      yaxis: { title: 'шт.', range: [0, Math.max(...stockData) * 1.1] }
+    },
+    {displaylogo:false, responsive:true}
+  );
+  Plotly.newPlot(
+    priceEl,
+    [priceTrace],
+    { 
+      ...commonLayout,
+      title: 'Стоимость',
+      yaxis: { title: '₽', range: [0, Math.max(...priceData) * 1.1] }
+    },
+    {displaylogo:false, responsive:true}
+  );
+}
+
+async function loadSeries() {
+  const sel = document.getElementById('productSelect');
+  const id = sel && sel.value ? sel.value : null;
+  if (!id) { return; }
+  try {
+    // Загружаем временные ряды (остаток и цена)
+    const resp = await fetch(`{{ url_for('main.api_stats_product_series', product_id=0) }}`.replace('/0/', `/${id}/`));
+    const json = await resp.json();
+    const labels = json.points.map(p => p.ts);
+    const stockData = json.points.map(p => p.stock);
+    const priceData = json.points.map(p => p.price);
+    ensureCharts(labels, stockData, priceData);
+    
+    // Загружаем месячную статистику продаж
+    await loadMonthlySales(id);
+    
+    // Загружаем месячную статистику выручки
+    await loadProductRevenue(id);
+  } catch (e) { console.error(e); }
+}
+
+async function loadMonthlySales(productId) {
+  try {
+    const resp = await fetch(`{{ url_for('main.api_stats_product_monthly', product_id=0) }}`.replace('/0/', `/${productId}/`));
+    const json = await resp.json();
+    const months = json.points.map(p => p.month);
+    const salesData = json.points.map(p => p.sold_qty);
+    const maxY = salesData.length ? Math.max(...salesData) : 0;
+    
+    const monthlyEl = document.getElementById('monthlyChart');
+    const trace = { 
+      x: months, 
+      y: salesData, 
+      type: 'bar', 
+      marker: {color: '#ff6b35'},
+      name: 'Продажи по месяцам'
+    };
+    const layout = { 
+      margin: {l: 40, r: 10, t: 40, b: 60}, 
+      xaxis: { 
+        title: 'Месяц', 
+        type: 'category',
+        tickmode: 'array',
+        tickvals: months,
+        ticktext: months,
+        tickangle: -45,
+        automargin: true
+      }, 
+      yaxis: { title: 'шт.', rangemode: 'tozero', range: [0, (maxY > 0 ? maxY * 1.1 : 1)] },
+      title: 'Продажи по месяцам (последние 12 месяцев)'
+    };
+    Plotly.newPlot(monthlyEl, [trace], layout, {displaylogo:false, responsive:true});
+  } catch (e) { console.error(e); }
+}
+
+async function loadProductRevenue(productId) {
+  try {
+    const resp = await fetch(`{{ url_for('main.api_stats_revenue_product_monthly') }}?product_id=${productId}`);
+    const json = await resp.json();
+    
+    if (!json.months || !json.revenues) {
+      console.error('Нет данных для графика выручки товара');
+      return;
+    }
+    
+    const months = json.months;
+    const revenues = json.revenues;
+    const maxY = revenues.length ? Math.max(...revenues) : 0;
+    
+    const revenueEl = document.getElementById('productRevenueChart');
+    const trace = { 
+      x: months, 
+      y: revenues, 
+      type: 'bar', 
+      marker: {color: '#28a745'},
+      name: 'Выручка'
+    };
+    const layout = { 
+      margin: {l: 40, r: 40, t: 40, b: 60}, 
+      xaxis: { title: 'Месяц', tickangle: -45 }, 
+      yaxis: { title: 'руб.', range: [0, (maxY > 0 ? maxY * 1.1 : 1)] },
+      title: `Выручка по месяцам: ${json.product_name}`
+    };
+    Plotly.newPlot(revenueEl, [trace], layout, {displaylogo:false, responsive:true});
+  } catch (e) { console.error(e); }
+}
+
+async function loadYearlySales() {
+  try {
+    const resp = await fetch(`{{ url_for('main.api_stats_yearly_monthly') }}`);
+    const json = await resp.json();
+    
+    const months = json.months;
+    const products = json.products;
+    
+    // Генерируем цвета для товаров
+    const colors = [
+      '#2f7ed8', '#ff6b35', '#28a745', '#dc3545', '#ffc107',
+      '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d',
+      '#17a2b8', '#343a40', '#007bff', '#28a745', '#ffc107',
+      '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c'
+    ];
+    
+    const allTraces = [];
+    
+    // Создаем stacked bar traces для каждого товара
+    products.forEach((product, index) => {
+      const color = colors[index % colors.length];
+      
+      allTraces.push({
+        x: months,
+        y: product.sales,
+        type: 'bar',
+        name: product.name,
+        marker: {color: color},
+        showlegend: true,
+        visible: true
+      });
+    });
+    
+    // Вычисляем максимальное значение для оси Y (сумма всех товаров по месяцам)
+    const monthlyTotals = months.map((_, monthIndex) => 
+      products.reduce((sum, product) => sum + product.sales[monthIndex], 0)
+    );
+    const maxTotal = Math.max(...monthlyTotals);
+    
+    const yearlyEl = document.getElementById('yearlySalesBar');
+    const layout = { 
+      margin: {l: 40, r: 300, t: 40, b: 60}, 
+      xaxis: { 
+        title: 'Месяц',
+        type: 'category',
+        tickmode: 'array',
+        tickvals: months,
+        ticktext: months,
+        tickangle: -45,
+        automargin: true
+      }, 
+      yaxis: { title: 'шт.', range: [0, (maxTotal > 0 ? maxTotal * 1.1 : 1)] },
+      title: 'Продажи по месяцам за год (последние 12 месяцев)',
+      showlegend: true,
+      legend: {
+        x: 1.02,
+        y: 1,
+        xanchor: 'left',
+        yanchor: 'top',
+        font: {size: 9}
+      },
+      barmode: 'stack'
+    };
+    
+    Plotly.newPlot(yearlyEl, allTraces, layout, {
+      displaylogo: false, 
+      responsive: true,
+      modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+    });
+    
+  } catch (e) { console.error(e); }
+}
+
+async function loadRevenueChart() {
+  try {
+    const resp = await fetch('{{ url_for('main.api_stats_revenue_monthly') }}');
+    const json = await resp.json();
+    
+    if (!json.months || !json.products) {
+      console.error('Нет данных для графика выручки');
+      return;
+    }
+    
+    const months = json.months;
+    const products = json.products;
+    const data = json.data;
+    
+    // Генерируем цвета для товаров
+    const colors = [
+      '#2f7ed8', '#ff6b35', '#28a745', '#dc3545', '#ffc107',
+      '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d',
+      '#17a2b8', '#343a40', '#007bff', '#28a745', '#ffc107',
+      '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c'
+    ];
+    
+    const allTraces = [];
+    
+    // Создаем stacked bar traces для каждого товара
+    products.forEach((product, index) => {
+      const color = colors[index % colors.length];
+      const revenues = months.map(month => data[month]?.[product] || 0);
+      
+      allTraces.push({
+        x: months,
+        y: revenues,
+        type: 'bar',
+        name: product,
+        marker: {color: color},
+        showlegend: true,
+        visible: true
+      });
+    });
+    
+    // Вычисляем максимальное значение для оси Y (сумма всех товаров по месяцам)
+    const monthlyTotals = months.map(month => 
+      products.reduce((sum, product) => sum + (data[month]?.[product] || 0), 0)
+    );
+    const maxTotal = Math.max(...monthlyTotals);
+    
+    const revenueEl = document.getElementById('revenueBar');
+    const layout = { 
+      margin: {l: 40, r: 300, t: 40, b: 60}, 
+      xaxis: { 
+        title: 'Месяц',
+        type: 'category',
+        tickmode: 'array',
+        tickvals: months,
+        ticktext: months,
+        tickangle: -45,
+        automargin: true
+      }, 
+      yaxis: { title: 'руб.', range: [0, (maxTotal > 0 ? maxTotal * 1.1 : 1)] },
+      title: 'Выручка по месяцам за год (последние 12 месяцев)',
+      showlegend: true,
+      legend: {
+        x: 1.02,
+        y: 1,
+        bgcolor: 'rgba(255,255,255,0.8)',
+        bordercolor: 'rgba(0,0,0,0.2)',
+        borderwidth: 1
+      },
+      barmode: 'stack'
+    };
+    
+    Plotly.newPlot(revenueEl, allTraces, layout, {
+      displaylogo: false, 
+      responsive: true,
+      modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+    });
+    
+  } catch (e) { console.error(e); }
+}
+
+async function loadSales() {
+  const fromEl = document.getElementById('salesFrom');
+  const toEl = document.getElementById('salesTo');
+  const params = new URLSearchParams();
+  if (fromEl.value) params.set('from', fromEl.value);
+  if (toEl.value) params.set('to', toEl.value);
+  try {
+    const resp = await fetch(`{{ url_for('main.api_stats_sales') }}?` + params.toString());
+    const json = await resp.json();
+    
+    // Создаём номера для оси X и hover-тексты с полными названиями
+    const xLabels = json.items.map((_, i) => (i + 1).toString());
+    const values = json.items.map(i => i.sold_qty);
+    const hoverTexts = json.items.map(i => `${i.name}<br>Продано: ${i.sold_qty} шт.`);
+    
+    // Создаем отдельный trace для каждого товара
+    const traces = json.items.map((item, i) => ({
+      x: [xLabels[i]],
+      y: [values[i]],
+      type: 'bar',
+      marker: {color: '#2f7ed8'},
+      text: [hoverTexts[i]],
+      hovertemplate: '%{text}<extra></extra>',
+      name: `${i + 1}. ${item.name}`,
+      showlegend: true,
+      visible: true
+    }));
+    
+    const layout = { 
+      margin: {l: 40, r: 300, t: 10, b: 60}, 
+      xaxis: { 
+        title: 'Товары (по убыванию продаж)',
+        type: 'category',
+        tickmode: 'array',
+        tickvals: xLabels,
+        ticktext: xLabels
+      }, 
+      yaxis: { title: 'шт.', range: [0, Math.max(...values) * 1.1] },
+      showlegend: true,
+      legend: {
+        x: 0.84,  // Позиция легенды: 1580/1880 = 0.84
+        y: 1,
+        xanchor: 'left',
+        yanchor: 'top',
+        font: {size: 9}
+      }
+    };
+    Plotly.newPlot('salesBar', traces, layout, {displaylogo:false, responsive:true});
+  } catch (e) { console.error(e); }
+}
+
+// Проставим дефолтный интервал: последние 7 дней
+(function initDates(){
+  const to = new Date();
+  const from = new Date(Date.now() - 30*24*3600*1000);
+  const pad = n => (n<10? '0'+n : ''+n);
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  document.getElementById('salesFrom').value = fmt(from);
+  document.getElementById('salesTo').value = fmt(to);
+})();
+
+// Функции экспорта для каждого графика
+function exportSalesToExcel() {
+  window.open('/api/export/chart/sales/excel', '_blank');
+}
+
+function exportMonthlyToExcel() {
+  window.open('/api/export/chart/monthly/excel', '_blank');
+}
+
+function exportStockToExcel() {
+  const productId = document.getElementById('productSelect').value;
+  if (!productId) {
+    alert('Сначала выберите товар!');
+    return;
+  }
+  window.open(`/api/export/chart/stock/excel?product_id=${productId}`, '_blank');
+}
+
+function exportPriceToExcel() {
+  const productId = document.getElementById('productSelect').value;
+  if (!productId) {
+    alert('Сначала выберите товар!');
+    return;
+  }
+  window.open(`/api/export/chart/price/excel?product_id=${productId}`, '_blank');
+}
+
+function exportProductMonthlyToExcel() {
+  const productId = document.getElementById('productSelect').value;
+  if (!productId) {
+    alert('Сначала выберите товар!');
+    return;
+  }
+  window.open(`/api/export/chart/product-monthly/excel?product_id=${productId}`, '_blank');
+}
+
+function exportRevenueToExcel() {
+  window.open('/api/export/chart/revenue/excel', '_blank');
+}
+
+function exportProductRevenueToExcel() {
+  const productId = document.getElementById('productSelect').value;
+  if (!productId) {
+    alert('Сначала выберите товар!');
+    return;
+  }
+  window.open(`/api/export/chart/product-revenue/excel?product_id=${productId}`, '_blank');
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadOverview();
+  await loadYearlySales();
+  await loadRevenueChart();
+  const sel = document.getElementById('productSelect');
+  if (sel && sel.options.length > 0) {
+    await loadSeries();
+  }
+  await loadSales();
+});
+</script>
+{% endblock %}

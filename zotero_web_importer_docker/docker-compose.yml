@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  zotero-importer:
+    build:
+      context: .
+    container_name: zotero_importer_service
+    ports:
+      - "8086:8086"
+    env_file:
+      - .env
+    environment:
+      - ZOTERO_API_KEY=${ZOTERO_API_KEY_FROM_ENV}
+      - ZOTERO_GROUP_ID=${ZOTERO_GROUP_ID_FROM_ENV}
+      - ZOTERO_LIBRARY_TYPE=${ZOTERO_LIBRARY_TYPE_FROM_ENV:-group}
+      - SERVER_BASE_PDF_PATH_IN_CONTAINER=/mnt/shared_z_drive # Это правильно, соответствует target
+      - LOG_PATH_IN_CONTAINER=/app/logs
+      - FLASK_APP=app.py
+      - FLASK_ENV=${FLASK_ENV:-development}
+    volumes:
+      - type: bind
+        source: /mnt/my_cifs_share_in_wsl  # Путь, где CIFS смонтирован ВНУТРИ WSL2
+        target: /mnt/shared_z_drive
+        read_only: true
+      # Для логов, Docker Desktop поймет этот путь, если проект в C:\...
+      # и пробросит его из Windows в WSL2, а затем в контейнер.
+      - ./app_logs:/app/logs 
+    restart: unless-stopped

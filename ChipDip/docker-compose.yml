@@ -1,0 +1,42 @@
+# ChipDip/docker-compose.yml
+services:
+  # Веб-приложение
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GECKODRIVER_VERSION: "0.36.0"
+    container_name: chipdip_webapp
+    ports:
+      - "8085:8085"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    command: gunicorn --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:8085 "webapp:create_app()"
+    volumes:
+      - ./logs:/app/logs
+
+  # Парсер
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GECKODRIVER_VERSION: "0.36.0"
+    container_name: chipdip_parser
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./logs:/app/logs
+    shm_size: '2gb'
+    restart: unless-stopped
+    command: python -m chipdip_parser.app

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}История товара: {{ product.name }}{% endblock %}
+
+{% block content %}
+    <h1>История остатков и цен для "{{ product.name }}"</h1>
+    <p><strong>URL:</strong> <a href="{{ product.url }}" target="_blank">{{ product.url }}</a></p>
+    <p><a href="{{ url_for('main.index') }}">« К списку товаров</a></p>
+
+    {% if history %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Время проверки</th>
+                    <th>Остаток</th>
+                    <th>Цена</th>
+                    <th>Статус</th>
+                    <th>Сырой текст (остаток)</th>
+                    <th>Сообщение об ошибке</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history %}
+                <tr>
+                    <td>{{ item.check_timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') }}</td>
+                    <td>{{ item.stock_level }}</td>
+                    <td>{{ item.price if item.price is not none else 'N/A' }}</td>
+                    <td>{{ item.status }}</td>
+                    <td><small>{{ item.raw_text | truncate(80) if item.raw_text else '' }}</small></td>
+                    <td><small>{{ item.error_message | truncate(80) if item.error_message else '' }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>История для этого товара пока отсутствует.</p>
+    {% endif %}
+{% endblock %}

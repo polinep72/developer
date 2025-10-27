@@ -1,0 +1,16 @@
+services:
+  assistant:
+    build: .
+    volumes:
+      - Z:/50_obsidian/vault:/vault
+    ports:
+      - "8091:8091"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

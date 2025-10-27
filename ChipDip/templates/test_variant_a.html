@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Вариант A - Inline редактирование{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-edit text-primary me-2"></i>Вариант A: Inline редактирование</h1>
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Назад к выбору
+            </a>
+        </div>
+        
+        <div class="alert alert-info">
+            <strong>Как использовать:</strong> Кликните на название товара, чтобы отредактировать его прямо в списке.
+            Нажмите Enter для сохранения или Escape для отмены.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3>Мои товары</h3>
+        <div id="products-list">
+            {% for product in products %}
+            <div class="product-item" data-product-id="{{ product.id }}">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="product-name-container">
+                            <span class="product-name" 
+                                  data-product-id="{{ product.id }}" 
+                                  data-original-name="{{ product.name }}"
+                                  style="cursor: pointer; border-bottom: 1px dashed #007bff;">
+                                {{ product.name }}
+                            </span>
+                            <small class="text-muted ms-2">
+                                <i class="fas fa-edit"></i> кликните для редактирования
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="product-meta">
+                            <strong>Цена:</strong> {{ "%.2f"|format(product.price) }} ₽
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="product-meta">
+                            <strong>Остаток:</strong> {{ product.stock_level or 0 }} шт.
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <small class="text-muted">
+                            <i class="fas fa-link me-1"></i>
+                            <a href="{{ product.url }}" target="_blank" class="text-decoration-none">
+                                {{ product.url[:50] }}{% if product.url|length > 50 %}...{% endif %}
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-success">
+            <h5><i class="fas fa-check-circle me-2"></i>Преимущества этого варианта:</h5>
+            <ul class="mb-0">
+                <li>Быстрое редактирование без дополнительных окон</li>
+                <li>Интуитивно понятный интерфейс</li>
+                <li>Минимум кликов для изменения</li>
+                <li>Сохранение контекста списка товаров</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productNames = document.querySelectorAll('.product-name');
+    
+    productNames.forEach(nameElement => {
+        nameElement.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const originalName = this.dataset.originalName;
+            
+            // Создаем input поле
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = originalName;
+            input.className = 'form-control edit-inline';
+            input.style.width = '100%';
+            
+            // Заменяем span на input
+            this.parentNode.replaceChild(input, this);
+            input.focus();
+            input.select();
+            
+            // Обработчики событий
+            input.addEventListener('blur', function() {
+                saveName(productId, this.value, originalName);
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    saveName(productId, this.value, originalName);
+                } else if (e.key === 'Escape') {
+                    cancelEdit(this, originalName);
+                }
+            });
+        });
+    });
+    
+    function saveName(productId, newName, originalName) {
+        if (newName.trim() === '') {
+            alert('Название не может быть пустым');
+            restoreName(productId, originalName);
+            return;
+        }
+        
+        if (newName === originalName) {
+            restoreName(productId, originalName);
+            return;
+        }
+        
+        // Показываем индикатор загрузки
+        const input = document.querySelector(`[data-product-id="${productId}"]`);
+        input.disabled = true;
+        input.value = 'Сохранение...';
+        
+        fetch('/api/update-product-name', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                new_name: newName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновляем название и делаем его снова редактируемым
+                const span = document.createElement('span');
+                span.className = 'product-name';
+                span.dataset.productId = productId;
+                span.dataset.originalName = newName;
+                span.style.cursor = 'pointer';
+                span.style.borderBottom = '1px dashed #007bff';
+                span.textContent = newName;
+                
+                const container = input.parentNode;
+                container.replaceChild(span, input);
+                
+                // Добавляем обработчик клика для нового элемента
+                span.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    const originalName = this.dataset.originalName;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = originalName;
+                    input.className = 'form-control edit-inline';
+                    input.style.width = '100%';
+                    
+                    this.parentNode.replaceChild(input, this);
+                    input.focus();
+                    input.select();
+                    
+                    input.addEventListener('blur', function() {
+                        saveName(productId, this.value, originalName);
+                    });
+                    
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            saveName(productId, this.value, originalName);
+                        } else if (e.key === 'Escape') {
+                            cancelEdit(this, originalName);
+                        }
+                    });
+                });
+                
+                // Показываем уведомление об успехе
+                showNotification('Название успешно обновлено!', 'success');
+            } else {
+                alert('Ошибка: ' + data.message);
+                restoreName(productId, originalName);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при сохранении');
+            restoreName(productId, originalName);
+        });
+    }
+    
+    function cancelEdit(input, originalName) {
+        const productId = input.closest('.product-item').dataset.productId;
+        restoreName(productId, originalName);
+    }
+    
+    function restoreName(productId, originalName) {
+        const input = document.querySelector(`[data-product-id="${productId}"]`);
+        const span = document.createElement('span');
+        span.className = 'product-name';
+        span.dataset.productId = productId;
+        span.dataset.originalName = originalName;
+        span.style.cursor = 'pointer';
+        span.style.borderBottom = '1px dashed #007bff';
+        span.textContent = originalName;
+        
+        const container = input.parentNode;
+        container.replaceChild(span, input);
+        
+        // Добавляем обработчик клика
+        span.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const originalName = this.dataset.originalName;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = originalName;
+            input.className = 'form-control edit-inline';
+            input.style.width = '100%';
+            
+            this.parentNode.replaceChild(input, this);
+            input.focus();
+            input.select();
+            
+            input.addEventListener('blur', function() {
+                saveName(productId, this.value, originalName);
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    saveName(productId, this.value, originalName);
+                } else if (e.key === 'Escape') {
+                    cancelEdit(this, originalName);
+                }
+            });
+        });
+    }
+    
+    function showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

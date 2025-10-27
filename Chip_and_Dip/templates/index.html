@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            background-color: #f4f6f9;
+        }
+        .header {
+            width: 100%;
+            padding: 15px 30px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .header .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        h1.page-title-main {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            margin: 15px auto;
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            width: 220px;
+            text-align: center;
+            transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button:disabled {
+            background-color: #aabbcc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .progress-section {
+            width: 100%;
+            margin-top: 25px;
+            display: none;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 24px;
+        }
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 8px 0 0 8px;
+            text-align: center;
+            line-height: 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            transition: width 0.3s ease-out;
+        }
+        .progress-bar-fill.completed {
+             border-radius: 8px;
+        }
+        .status-message {
+            margin-top: 12px;
+            font-size: 16px;
+            color: #555;
+            min-height: 20px;
+        }
+        .error-display {
+            color: #D8000C;
+            background-color: #FFD2D2;
+            border: 1px solid #D8000C;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">ИПК ЭЛЕКТРОН-МАШ</div>
+    </div>
+    <div class="container">
+        <h1 class="page-title-main">{{ page_title }}</h1>
+
+        <button id="run-parser-btn" class="button">Получить данные</button>
+
+        <div class="progress-section" id="progress-section">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar">0%</div>
+            </div>
+            <div class="status-message" id="status-message">Ожидание...</div>
+        </div>
+
+        <div class="error-display" id="error-display"></div>
+
+        <a href="#" id="download-excel-btn" class="button" style="display: none; margin-top: 20px;">Скачать файл Excel</a>
+    </div>
+
+    <script>
+        const runParserBtn = document.getElementById('run-parser-btn');
+        const downloadBtn = document.getElementById('download-excel-btn');
+        const progressSection = document.getElementById('progress-section');
+        const progressBar = document.getElementById('progress-bar');
+        const statusMessage = document.getElementById('status-message');
+        const errorDisplay = document.getElementById('error-display');
+
+        let sseClient = null;
+        let parsingSuccessfullyCompleted = false; // Флаг для отслеживания успешного завершения
+
+        function updateUI(data) {
+            // console.log("SSE Data Received:", data);
+            statusMessage.textContent = data.message || ' ';
+
+            if (data.total > 0 && data.progress >= 0) {
+                const percentage = Math.min(100, Math.round((data.progress / data.total) * 100));
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = percentage + '%';
+                if (percentage === 100) {
+                    progressBar.classList.add('completed');
+                } else {
+                    progressBar.classList.remove('completed');
+                }
+            } else if (data.running) {
+                progressBar.style.width = '5%';
+                progressBar.textContent = '';
+                 progressBar.classList.remove('completed');
+            }
+
+
+            if (data.error) {
+                errorDisplay.textContent = "Ошибка: " + data.error;
+                errorDisplay.style.display = 'block';
+                // Не сбрасываем parsingSuccessfullyCompleted здесь, т.к. ошибка может прийти после успеха
+            } else {
+                errorDisplay.style.display = 'none'; // Скрываем, если нет новой ошибки
+            }
+
+            if (data.running) {
+                parsingSuccessfullyCompleted = false; // Сбрасываем флаг при запуске/во время работы
+                runParserBtn.disabled = true;
+                runParserBtn.textContent = 'В процессе...';
+                progressSection.style.display = 'block';
+                downloadBtn.style.display = 'none';
+                errorDisplay.style.display = 'none'; // Скрываем старые ошибки при новом запуске
+            } else { // Не выполняется (running: false)
+                runParserBtn.disabled = false;
+                runParserBtn.textContent = 'Получить данные';
+
+                if (data.file_path && !data.error) { // Успешное завершение
+                    parsingSuccessfullyCompleted = true;
+                    downloadBtn.href = `/download-file/${data.file_path}`;
+                    downloadBtn.style.display = 'inline-block';
+                    // Убедимся, что прогресс-бар на 100%
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    progressBar.classList.add('completed');
+                    // Сообщение об успехе уже должно быть в data.message
+                } else if (data.error) { // Завершено с ошибкой
+                    parsingSuccessfullyCompleted = false;
+                    // errorDisplay уже должен быть показан
+                    downloadBtn.style.display = 'none';
+                }
+                // Если завершено без файла и без ошибки (например, пустой excel)
+                // parsingSuccessfullyCompleted останется false, если file_path не пришел
+                // progressSection остается видимым
+            }
+        }
+
+        runParserBtn.addEventListener('click', () => {
+            if (sseClient) {
+                sseClient.close(); // Закрываем старое соединение, если есть
+                sseClient = null;
+            }
+            parsingSuccessfullyCompleted = false; // Сброс флага перед новым запуском
+
+            // Сброс UI перед новым запуском
+            errorDisplay.style.display = 'none';
+            errorDisplay.textContent = '';
+            downloadBtn.style.display = 'none';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            progressBar.classList.remove('completed');
+            statusMessage.textContent = 'Запрос на запуск...';
+            progressSection.style.display = 'block';
+
+            fetch('/start-parsing', { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || `HTTP error ${response.status}`) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Не меняем statusMessage здесь, оно обновится из SSE
+                        // runParserBtn.disabled и runParserBtn.textContent обновятся из SSE (data.running)
+
+                        sseClient = new EventSource('/progress-stream');
+
+                        sseClient.onmessage = (event) => {
+                            try {
+                                const progressData = JSON.parse(event.data);
+                                updateUI(progressData);
+                            } catch (e) {
+                                console.error("Error parsing SSE data: ", e, "Raw data: ", event.data);
+                            }
+                        };
+
+                        sseClient.onerror = (errorEvent) => {
+                            console.error("SSE Error Event:", errorEvent);
+
+                            // Если парсинг УЖЕ был отмечен как успешно завершенный,
+                            // то эта "ошибка" скорее всего просто штатное закрытие соединения сервером.
+                            if (parsingSuccessfullyCompleted) {
+                                console.log("SSE connection closed by server after successful completion. Not displaying as an error.");
+                                // Можно обновить сообщение, если нужно, или оставить как есть
+                                // statusMessage.textContent = 'Соединение для обновлений закрыто.';
+                            } else {
+                                // Показываем ошибку только если процесс НЕ был успешно завершен
+                                statusMessage.textContent = 'Ошибка соединения с сервером для обновлений.';
+                                errorDisplay.textContent = 'Потеряно соединение с сервером для получения обновлений. Проверьте консоль сервера. Если парсинг шел долго, возможно, он завершился, но обновление статуса не дошло. Попробуйте обновить страницу или проверить результат вручную.';
+                                errorDisplay.style.display = 'block';
+                            }
+
+                            runParserBtn.disabled = false;
+                            runParserBtn.textContent = 'Получить данные';
+                            if (sseClient) {
+                                sseClient.close(); // Явно закрываем соединение
+                                sseClient = null;
+                            }
+                        };
+                    } else { // Ошибка от /start-parsing
+                        statusMessage.textContent = 'Не удалось запустить: ' + (data.message || 'Неизвестная ошибка');
+                        errorDisplay.textContent = 'Не удалось запустить: ' + (data.message || 'Неизвестная ошибка');
+                        errorDisplay.style.display = 'block';
+                        runParserBtn.disabled = false; // Разблокируем кнопку
+                        runParserBtn.textContent = 'Получить данные';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error on /start-parsing:', error);
+                    statusMessage.textContent = 'Ошибка при отправке запроса на запуск.';
+                    errorDisplay.textContent = 'Ошибка при отправке запроса на запуск: ' + error.message;
+                    errorDisplay.style.display = 'block';
+                    runParserBtn.disabled = false;
+                    runParserBtn.textContent = 'Получить данные';
+                });
+        });
+    </script>
+</body>
+</html>

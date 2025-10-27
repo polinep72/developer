@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        .header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header .user-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        .header .user-icon .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background-color: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 10;
+        }
+        .header .user-icon:hover .dropdown {
+            display: block;
+        }
+        .header .user-icon .dropdown button {
+            display: block;
+            width: 100%;
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+        }
+        .header .user-icon .dropdown button:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">Crystal Manager</div>
+        <div class="user-icon">
+            <i class="fas fa-user-circle fa-2x"></i>
+            <div class="dropdown">
+                {% if user_logged_in %}
+                    <p style="margin: 0; padding: 10px 20px; font-weight: bold;">{{ user.username }}</p>
+                    <hr style="margin: 0;">
+                    <button onclick="location.href='/logout'">Выйти</button>
+                {% else %}
+                    <button onclick="location.href='/register'">Зарегистрироваться</button>
+                    <button onclick="location.href='/login'">Войти</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 20px;">
+        <h1>Добро пожаловать в Crystal Manager!</h1>
+        <p>Здесь вы можете управлять своими кристаллами, отслеживать их наличие и оформлять заказы.</p>
+    </div>
+</body>
+</html>

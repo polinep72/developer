@@ -1,0 +1,48 @@
+{
+  "mcpServers": {
+    "docker-mcp@local": {
+      "command": "uvx",
+      "args": [
+        "docker-mcp"
+      ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
+    },
+    "postgresql-universal": {
+      "command": "node",
+      "args": [
+        "C:\\Soft_IPK\\СИ\\universal-postgres-mcp-server.js"
+      ],
+      "cwd": "C:\\Soft_IPK\\СИ",
+      "env": {
+        "POSTGRES_HOST": "192.168.1.139",
+        "POSTGRES_PORT": "5432",
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "27915002"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Soft_IPK\\СИ"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    }
+  }
+}
+
+
+

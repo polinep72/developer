@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка данных в ZOTERO</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #1d2129; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding-top: 20px; padding-bottom: 20px;}
+        .container { width: 90%; max-width: 960px; margin: auto; background-color: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+        h1 { color: #1877f2; text-align: center; margin-bottom: 25px; font-size: 1.8em; font-weight: 600;}
+        h2 { color: #1c1e21; margin-top: 30px; border-bottom: 1px solid #dddfe2; padding-bottom: 10px; font-size: 1.4em; font-weight: 500;}
+
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #4b4f56; font-size: 0.95em; }
+
+        input[type="file"], input[type="text"] {
+            width: 100%; /* Полная ширина */
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="file"] { padding-top: 8px; padding-bottom: 8px; } /* Небольшая коррекция для input type file */
+
+        .button {
+            padding: 10px 22px;
+            background-color: #1877f2; /* Синий Facebook */
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out;
+            display: inline-block; /* Для корректного отображения */
+            text-align: center;
+        }
+        .button:hover { background-color: #166fe5; }
+        .button:disabled { background-color: #e4e6eb; color: #bcc0c4; cursor: not-allowed; }
+
+        .hidden { display: none !important; } /* Важно для переопределения */
+
+        #excel-table-container { max-height: 400px; overflow-y: auto; margin-top: 15px; border: 1px solid #dddfe2; border-radius: 6px;}
+        #excel-table { border-collapse: collapse; width: 100%; }
+        #excel-table th, #excel-table td { border: 1px solid #dddfe2; padding: 10px; text-align: left; font-size: 0.9em; }
+        #excel-table th { background-color: #f5f6f7; color: #4b4f56; font-weight: 600; position: sticky; top: 0; z-index: 1;}
+
+        #search-path-status, #status-message {
+            margin-top: 15px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            border-width: 1px;
+            border-style: solid;
+        }
+        .success { background-color: #e9f6ec; color: #2f6a3c; border-color: #c3e6cb; }
+        .error { background-color: #fdecea; color: #a31313; border-color: #f5c6cb; }
+        .info { background-color: #e7f3ff; color: #004085; border-color: #b8daff; }
+
+        .loader {
+            border: 5px solid #f0f2f5;
+            border-top: 5px solid #1877f2;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .path-note { font-size: 0.85em; color: #606770; margin-top: -10px; margin-bottom: 15px; padding-left: 2px;}
+        .path-note code { background-color: #f0f2f5; padding: 2px 5px; border-radius: 3px; font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace; color: #1c1e21;}
+
+        #log-output-container { margin-top: 25px; }
+        #log-output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #dddfe2;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #f5f6f7;
+            font-size: 0.8em;
+            line-height: 1.5;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Загрузка данных в ZOTERO</h1>
+
+        <form id="upload-form" method="POST" action="/preview_excel" enctype="multipart/form-data">
+            <div>
+                <label for="excel-file">1. Выберите Excel-файл с метаданными (.xlsx):</label>
+                <input type="file" id="excel-file" name="excel_file" accept=".xlsx" required>
+            </div>
+
+            <div>
+                <label for="pdf-subfolder-name">2. Укажите имя Вашей папки с PDF файлами на общем ресурсе:</label>
+                <input type="text" id="pdf-subfolder-name" name="pdf_subfolder_name" required placeholder="например, ПроектXYZ_Документы_2024">
+                <div class="path-note">
+                    Введите <strong>только имя Вашей конечной папки</strong> или относительный путь от корня общего ресурса (например, <code>Z:\</code> или <code>\\192.168.1.10\work\</code>).<br>
+                    Пример: если файлы в <code>Z:\МоиПроекты\ПроектАльфа\PDF_файлы</code>, введите <code>МоиПроекты/ПроектАльфа/PDF_файлы</code>.<br>
+                    Используйте <code>/</code> или <code>\</code> в качестве разделителя пути.
+                </div>
+            </div>
+
+            <button type="submit" id="preview-btn" class="button">Проверить пути и показать таблицу</button>
+        </form>
+
+        <div id="preview-section" class="hidden">
+            <h2>Предварительный просмотр Excel (первые 20 строк):</h2>
+            <div id="excel-table-container">
+                <!-- Таблица будет вставлена сюда -->
+            </div>
+            <div id="search-path-status" class="info"></div>
+            <br>
+            <button id="submit-to-zotero-btn" class="button">Передать данные в ZOTERO</button>
+            <div id="loader" class="loader hidden"></div>
+        </div>
+
+        <div id="status-message" class="hidden"></div>
+
+        <div id="log-output-container">
+            <h2>Лог выполнения:</h2>
+            <pre id="log-output"></pre>
+        </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const previewSection = document.getElementById('preview-section');
+        const excelTableContainer = document.getElementById('excel-table-container');
+        const searchPathStatus = document.getElementById('search-path-status');
+        const submitToZoteroBtn = document.getElementById('submit-to-zotero-btn');
+        const statusMessage = document.getElementById('status-message');
+        const logOutput = document.getElementById('log-output');
+        const loader = document.getElementById('loader');
+
+        let currentExcelFilePathOnServer = null; // Путь к Excel ВНУТРИ контейнера
+        let currentFullSearchPathInContainer = null; // Полный путь к папке поиска PDF ВНУТРИ контейнера
+
+        window.addEventListener('DOMContentLoaded', () => {
+           logOutput.textContent = `${new Date().toLocaleString()}: Страница загружена. Готово к работе.\n`;
+        });
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            previewSection.classList.add('hidden'); // Скрываем предыдущий предпросмотр
+            statusMessage.className = 'hidden';
+            statusMessage.textContent = '';
+            searchPathStatus.className = 'info hidden';
+            searchPathStatus.textContent = '';
+            // Не очищаем весь лог, а добавляем разделитель
+            logOutput.textContent += '------------------------------------------\n';
+            logOutput.textContent += `${new Date().toLocaleString()}: Запрос на предпросмотр и проверку путей...\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+
+            loader.classList.remove('hidden');
+            submitToZoteroBtn.disabled = true; // Блокируем кнопку импорта до успешной проверки
+
+            const formData = new FormData(uploadForm);
+
+            try {
+                const response = await fetch('/preview_excel', { // action формы уже указывает сюда
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                loader.classList.add('hidden');
+
+                if (result.status === 'success') {
+                    excelTableContainer.innerHTML = result.table_html;
+                    currentExcelFilePathOnServer = result.excel_file_path;
+                    currentFullSearchPathInContainer = result.search_root_path; // Это полный путь в контейнере
+
+                    searchPathStatus.textContent = result.search_path_message || `Проверка пути к PDF завершена. Используемый путь в системе: ${currentFullSearchPathInContainer}`;
+                    searchPathStatus.className = 'success';
+                    searchPathStatus.classList.remove('hidden');
+                    previewSection.classList.remove('hidden'); // Показываем секцию с таблицей и кнопкой импорта
+                    submitToZoteroBtn.disabled = false; // Разблокируем кнопку импорта
+                    logOutput.textContent += `${new Date().toLocaleString()}: Таблица Excel загружена. ${searchPathStatus.textContent}\n`;
+                } else {
+                    searchPathStatus.textContent = result.message || 'Ошибка проверки пути к PDF.';
+                    searchPathStatus.className = 'error';
+                    searchPathStatus.classList.remove('hidden'); // Показываем сообщение об ошибке пути
+                    logOutput.textContent += `${new Date().toLocaleString()}: Ошибка предпросмотра: ${result.message}\n`;
+                }
+            } catch (error) {
+                loader.classList.add('hidden');
+                searchPathStatus.textContent = 'Критическая ошибка при связи с сервером во время предпросмотра.';
+                searchPathStatus.className = 'error';
+                searchPathStatus.classList.remove('hidden');
+                logOutput.textContent += `${new Date().toLocaleString()}: Критическая ошибка предпросмотра (fetch): ${error}\n`;
+            }
+            logOutput.scrollTop = logOutput.scrollHeight;
+        });
+
+        submitToZoteroBtn.addEventListener('click', async () => {
+            if (!currentExcelFilePathOnServer || !currentFullSearchPathInContainer) {
+                statusMessage.textContent = 'Ошибка: Необходимые пути (Excel или папка PDF) не установлены или неверны. Пожалуйста, выполните шаг с проверкой путей.';
+                statusMessage.className = 'error';
+                statusMessage.classList.remove('hidden');
+                return;
+            }
+            loader.classList.remove('hidden');
+            submitToZoteroBtn.disabled = true;
+            statusMessage.className = 'hidden'; // Скрываем предыдущее сообщение
+            statusMessage.textContent = '';
+
+            logOutput.textContent += `${new Date().toLocaleString()}: Запуск импорта в ZOTERO...\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+
+            try {
+                const response = await fetch('/import_to_zotero', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        excel_file_path: currentExcelFilePathOnServer,
+                        search_root_directory: currentFullSearchPathInContainer // Передаем полный путь внутри контейнера
+                    })
+                });
+                const result = await response.json();
+                loader.classList.add('hidden');
+                // Кнопку submitToZoteroBtn можно оставить заблокированной после одной попытки,
+                // чтобы избежать случайных повторных нажатий, или разблокировать:
+                // submitToZoteroBtn.disabled = false;
+
+                statusMessage.textContent = result.message;
+                if (result.status && result.status.includes('success')) { // Учитываем 'success' и 'partial_success'
+                    statusMessage.className = 'success';
+                } else {
+                    statusMessage.className = 'error';
+                }
+                statusMessage.classList.remove('hidden');
+                logOutput.textContent += `${new Date().toLocaleString()}: Результат импорта: ${result.message}\n`;
+                 if (result.processed !== undefined) {
+                    logOutput.textContent += `  Обработано: ${result.processed}, Пропущено: ${result.skipped}, Ошибки: ${result.errors}\n`;
+                }
+            } catch (error) {
+                loader.classList.add('hidden');
+                submitToZoteroBtn.disabled = false; // Разблокируем в случае ошибки fetch
+                statusMessage.textContent = 'Сетевая ошибка или ошибка сервера при импорте в Zotero.';
+                statusMessage.className = 'error';
+                statusMessage.classList.remove('hidden');
+                logOutput.textContent += `${new Date().toLocaleString()}: Критическая ошибка импорта (fetch): ${error}\n`;
+            }
+            logOutput.scrollTop = logOutput.scrollHeight;
+        });
+
+        // Опциональное периодическое обновление логов с сервера (если нужно)
+        /*
+        async function fetchFullLogs() {
+            // ... (код fetchFullLogs)
+        }
+        // setInterval(fetchFullLogs, 7000); // Обновлять раз в 7 секунд, например
+        */
+    </script>
+</body>
+</html>

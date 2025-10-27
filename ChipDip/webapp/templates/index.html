@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - ChipDip Парсер{% endblock %}
+
+{% block content %}
+<div class="home-actions">
+    <h2>Добро пожаловать в ChipDip Parser</h2>
+    <p class="info-text">Выберите действие ниже.</p>
+    <div class="actions-grid">
+        <a href="{{ url_for('main.my_products') if current_user.is_authenticated else url_for('main.all_products') }}" class="btn btn-primary btn-large">Посмотреть все товары</a>
+        <a href="{{ url_for('main.stats') }}" class="btn btn-secondary btn-large">Статистика / Графики</a>
+    </div>
+    {% if current_user.is_authenticated %}
+        <div class="auth-hint">
+            <p>Вы авторизованы как {{ current_user.username }}. По кнопке выше откроются ваши товары (с добавлением и удалением).</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

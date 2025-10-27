@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    container_name: t-helper
+    ports:
+      - "8091:8091"
+    volumes:
+      - type: volume
+        source: vault
+        target: /vault
+    secrets:
+      - google_api_key
+      - telegram_token
+    environment:
+      - NETWORK_USER=obsidian
+      - NETWORK_PATH=//192.168.1.10/Work/50_obsidian/vault
+      - LANG=C.UTF-8  # Добавляем переменные локалей
+      - LC_ALL=C.UTF-8
+    command: python app.py
+
+volumes:
+  vault:
+    driver_opts:
+      type: cifs
+      o: username=obsidian,password=Kfgecbr1!,vers=3.0,uid=1000,gid=1000,file_mode=0777,dir_mode=0777,noperm,iocharset=utf8
+      device: "//192.168.1.10/Work/50_obsidian/vault"
+
+secrets:
+  google_api_key:
+    file: ./secrets/google_api_key
+  telegram_token:
+    file: ./secrets/telegram_token

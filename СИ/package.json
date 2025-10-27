@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "pg": "^8.16.3"
+  }
+}

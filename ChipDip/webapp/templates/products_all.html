@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Все товары - ChipDip Парсер{% endblock %}
+
+{% block content %}
+<div class="products">
+    <h2>Все товары в системе</h2>
+    <div class="actions" style="margin: 10px 0;">
+        <form method="get" action="{{ url_for('main.all_products') }}" style="display:inline-block;">
+            <input type="text" name="q" placeholder="Поиск по названию" value="{{ q or '' }}" />
+            <button type="submit" class="btn btn-primary">Поиск</button>
+            {% if q %}
+            <a href="{{ url_for('main.all_products') }}" class="btn btn-small">Сброс</a>
+            {% endif %}
+        </form>
+    </div>
+    <p class="info-text">Здесь отображаются все активные товары всех пользователей и добавленные системой.</p>
+    {% if products %}
+    <table>
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Артикул</th>
+                <th>URL</th>
+                <th>Текущая цена</th>
+                <th>Остаток</th>
+                <th>Добавил</th>
+                <th>Последняя проверка</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.internal_sku }}</td>
+                <td><a href="{{ product.url }}" target="_blank">{{ product.url[:50] }}...</a></td>
+                <td>
+                    {% if product.current_price %}
+                        {{ "%.2f"|format(product.current_price) }} ₽
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if product.latest_stock is not none %}
+                        {{ product.latest_stock }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if product.added_by %}
+                        {{ product.added_by }}
+                    {% else %}
+                        <span style="color: #999; font-style: italic;">Система</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if product.last_checked_at %}
+                        {{ product.last_checked_at.strftime('%d.%m.%Y %H:%M') }}
+                    {% else %}
+                        Не проверялся
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('main.product_history', product_id=product.id) }}" class="btn btn-small">История</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>Товары не найдены.</p>
+    {% endif %}
+</div>
+{% endblock %}

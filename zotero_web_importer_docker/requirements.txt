@@ -1,0 +1,7 @@
+Flask
+pandas
+openpyxl
+pyzotero
+python-dotenv
+Werkzeug
+# gunicorn # Опционально для продакшена

@@ -1,0 +1,9 @@
+"secrets/" 
+".env" 
+**/__pycache__
+**/*.pyc
+**/.env
+**/secrets
+**/.git
+**/.idea
+**/*.md

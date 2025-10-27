@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Тест редактирования названий{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-edit text-primary me-2"></i>
+            Тестирование вариантов редактирования названий товаров
+        </h1>
+        <p class="lead">Выберите один из трех вариантов для сравнения удобства редактирования названий товаров:</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card variant-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-edit fa-3x text-primary"></i>
+                </div>
+                <h3 class="card-title">Вариант A</h3>
+                <h5 class="text-muted">Inline редактирование</h5>
+                <p class="card-text">
+                    Кликните на название товара, и оно станет редактируемым полем прямо в списке.
+                    Быстро и удобно для небольших изменений.
+                </p>
+                <div class="mt-4">
+                    <a href="/variant-a" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play me-2"></i>Попробовать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card variant-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-window-maximize fa-3x text-success"></i>
+                </div>
+                <h3 class="card-title">Вариант B</h3>
+                <h5 class="text-muted">Модальное окно</h5>
+                <p class="card-text">
+                    Кнопка "Редактировать" открывает модальное окно с формой.
+                    Подходит для редактирования нескольких полей одновременно.
+                </p>
+                <div class="mt-4">
+                    <a href="/variant-b" class="btn btn-success btn-lg">
+                        <i class="fas fa-play me-2"></i>Попробовать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card variant-card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-external-link-alt fa-3x text-warning"></i>
+                </div>
+                <h3 class="card-title">Вариант C</h3>
+                <h5 class="text-muted">Отдельная страница</h5>
+                <p class="card-text">
+                    Переход на отдельную страницу редактирования товара.
+                    Максимальное пространство для редактирования всех полей.
+                </p>
+                <div class="mt-4">
+                    <a href="/variant-c" class="btn btn-warning btn-lg">
+                        <i class="fas fa-play me-2"></i>Попробовать
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h4><i class="fas fa-info-circle me-2"></i>Инструкция по тестированию</h4>
+            <ol>
+                <li>Перейдите на любой из трех вариантов</li>
+                <li>Попробуйте отредактировать название товара</li>
+                <li>Сравните удобство использования</li>
+                <li>Обратите внимание на скорость и интуитивность интерфейса</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

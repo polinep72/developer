@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Сервис Telegram-бота
+  crb_bot:
+    build:
+      context: ./crb_bot # Путь к директории с Dockerfile бота
+      dockerfile: Dockerfile
+    network_mode: "host"
+    container_name: crb_bot_container
+    env_file:
+      - .env # Загружаем переменные из .env файла
+    restart: unless-stopped
+    volumes:
+      # Опционально: монтируем логи наружу
+      - ./crb_bot/logs:/app/logs
+    # Для доступа к хосту на Linux без host.docker.internal может потребоваться:
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway" # Для Docker Engine 20.10+
+    dns:
+      - 192.168.1.1
+      - 8.8.8.8
+      
+      
+  # Сервис визуализации (тепловая карта)
+  heatmap:
+    build:
+      context: ./heatmap_app # Путь к директории с Dockerfile визуализации
+      dockerfile: Dockerfile
+    container_name: crb_heatmap_container
+    env_file:
+      - .env # Используем те же переменные .env
+    ports:
+      # Пробрасываем порт 8081 контейнера на порт 8081 хоста
+      - "8081:8081"
+    restart: unless-stopped
+    # Для доступа к хосту на Linux без host.docker.internal может потребоваться:
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway" # Для Docker Engine 20.10+
+    #dns:
+    #  - 8.8.8.8
+    #  - 1.1.1.1
+
+# Сеть (опционально, но полезно для изоляции, если не используется host.docker.internal напрямую)
+# networks:
+#   default:
+#     driver: bridge

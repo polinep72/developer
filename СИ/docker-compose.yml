@@ -1,0 +1,58 @@
+services:
+  # Веб-приложение
+  web:
+    build: .
+    ports:
+      - "8084:8084"
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=192.168.1.139
+      - DB_PORT=5432
+      - DB_NAME=equipment
+      - DB_USER=postgres
+      - DB_PASSWORD=27915002
+  
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Инициализация базы данных
+  init-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=equipment
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=27915002
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    profiles:
+      - tools
+
+  # Утилиты для управления БД
+  db-tools:
+    build: .
+    environment:
+      - DB_HOST=192.168.1.139
+      - DB_PORT=5432
+      - DB_NAME=equipment
+      - DB_USER=postgres
+      - DB_PASSWORD=27915002
+    volumes:
+      - .:/app
+    command: python main_menu.py
+    profiles:
+      - tools
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

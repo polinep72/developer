@@ -1,0 +1,2433 @@
+2025-04-03 07:25:43 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 11517.63 мс. HTTP статус: 200
+2025-04-03 07:25:43 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:41:17 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 684.44 мс. HTTP статус: 200
+2025-04-03 07:41:17 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:41:21 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 554.37 мс. HTTP статус: 200
+2025-04-03 07:41:22 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:41:22 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:41:37 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:41:55 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:42:14 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:42:33 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:42:53 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:43:12 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:43:35 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:44:07 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:44:11 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 485.06 мс. HTTP статус: 200
+2025-04-03 07:44:12 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:44:17 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 432.21 мс. HTTP статус: 200
+2025-04-03 07:44:17 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:44:17 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:44:36 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:44:54 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:45:14 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:45:38 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 486.30 мс. HTTP статус: 200
+2025-04-03 07:45:38 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:45:38 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:45:54 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:46:09 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:46:24 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:46:39 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:46:54 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:47:09 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:47:24 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:47:39 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:47:54 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:48:09 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:48:24 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:48:39 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:48:55 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:49:10 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:49:25 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:49:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:49:55 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:50:10 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:50:25 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:50:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:50:55 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:51:10 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:51:25 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:51:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:51:56 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:52:11 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:52:26 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:52:41 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:52:56 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:53:11 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:53:26 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:53:41 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:53:56 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:54:11 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:54:27 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:54:42 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:54:57 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:55:12 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:55:27 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:55:43 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:55:58 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:56:13 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:56:37 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 11579.51 мс. HTTP статус: 200
+2025-04-03 07:56:37 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 07:56:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:56:59 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:57:17 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:57:36 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:57:54 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:58:13 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:58:34 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:58:53 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:59:16 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 07:59:47 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:00:35 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 557.51 мс. HTTP статус: 200
+2025-04-03 08:00:36 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 08:00:39 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 454.34 мс. HTTP статус: 200
+2025-04-03 08:00:39 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 08:00:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:00:55 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:01:10 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:01:25 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:01:51 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 451.67 мс. HTTP статус: 200
+2025-04-03 08:01:51 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 08:01:54 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:02:08 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 479.53 мс. HTTP статус: 200
+2025-04-03 08:02:08 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 08:02:36 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 511.26 мс. HTTP статус: 200
+2025-04-03 08:02:36 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 08:02:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:02:58 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:03:18 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:03:38 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:03:57 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:05:25 - BookingBot.network - INFO - [main.py:54] - Telegram API доступен. Ping: 488.91 мс. HTTP статус: 200
+2025-04-03 08:05:25 - BookingBot.network - INFO - [main.py:110] - Запуск основного цикла бота
+2025-04-03 08:05:28 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:05:47 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:06:06 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:06:26 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:06:45 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:07:09 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-04-03 08:07:40 - BookingBot.network - CRITICAL - [main.py:127] - Критическая ошибка: ApiTelegramException
+Traceback (most recent call last):
+  File "C:\Soft_IPK\WSB\main.py", line 113, in main
+    bot.infinity_polling(
+    ~~~~~~~~~~~~~~~~~~~~^
+        logger_level=logging.INFO,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        #restart_on_change=True
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 1094, in infinity_polling
+    self.__skip_updates()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 672, in __skip_updates
+    self.get_updates(offset=-1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\__init__.py", line 659, in get_updates
+    json_updates = apihelper.get_updates(
+        self.token, offset=offset, limit=limit, timeout=timeout, allowed_updates=allowed_updates,
+        long_polling_timeout=long_polling_timeout)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 330, in get_updates
+    return _make_request(token, method_url, params=payload)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 168, in _make_request
+    json_result = _check_result(method_name, result)
+  File "C:\Users\Администратор\AppData\Local\Programs\Python\Python313\Lib\site-packages\telebot\apihelper.py", line 195, in _check_result
+    raise ApiTelegramException(method_name, result, result_json)
+telebot.apihelper.ApiTelegramException: A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running

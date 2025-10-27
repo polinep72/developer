@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Вариант B - Модальное окно{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-window-maximize text-success me-2"></i>Вариант B: Модальное окно</h1>
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Назад к выбору
+            </a>
+        </div>
+        
+        <div class="alert alert-info">
+            <strong>Как использовать:</strong> Нажмите кнопку "Редактировать" рядом с товаром, чтобы открыть модальное окно с формой редактирования.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3>Мои товары</h3>
+        <div id="products-list">
+            {% for product in products %}
+            <div class="product-item" data-product-id="{{ product.id }}">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <div class="product-name">{{ product.name }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="product-meta">
+                            <strong>Цена:</strong> {{ "%.2f"|format(product.price) }} ₽
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="product-meta">
+                            <strong>Остаток:</strong> {{ product.stock_level or 0 }} шт.
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editModal"
+                                data-product-id="{{ product.id }}"
+                                data-product-name="{{ product.name }}">
+                            <i class="fas fa-edit me-1"></i>Редактировать
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <small class="text-muted">
+                            <i class="fas fa-link me-1"></i>
+                            <a href="{{ product.url }}" target="_blank" class="text-decoration-none">
+                                {{ product.url[:50] }}{% if product.url|length > 50 %}...{% endif %}
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">
+                    <i class="fas fa-edit me-2"></i>Редактирование товара
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="productId" name="product_id">
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Название товара</label>
+                        <input type="text" class="form-control" id="productName" name="name" required>
+                        <div class="form-text">Введите новое название товара</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productUrl" class="form-label">URL товара</label>
+                        <input type="url" class="form-control" id="productUrl" name="url" readonly>
+                        <div class="form-text">URL товара (не редактируется)</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productPrice" class="form-label">Цена (₽)</label>
+                                <input type="number" class="form-control" id="productPrice" name="price" step="0.01" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productStock" class="form-label">Остаток (шт.)</label>
+                                <input type="number" class="form-control" id="productStock" name="stock_level" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <button type="button" class="btn btn-primary" id="saveChanges">
+                    <i class="fas fa-save me-1"></i>Сохранить изменения
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-success">
+            <h5><i class="fas fa-check-circle me-2"></i>Преимущества этого варианта:</h5>
+            <ul class="mb-0">
+                <li>Четкое разделение режимов просмотра и редактирования</li>
+                <li>Возможность редактирования нескольких полей одновременно</li>
+                <li>Фокус на редактировании без отвлечения на список</li>
+                <li>Стандартный интерфейс, знакомый пользователям</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const saveButton = document.getElementById('saveChanges');
+    const productNameInput = document.getElementById('productName');
+    const productIdInput = document.getElementById('productId');
+    const productUrlInput = document.getElementById('productUrl');
+    const productPriceInput = document.getElementById('productPrice');
+    const productStockInput = document.getElementById('productStock');
+    
+    // Обработчик открытия модального окна
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+        
+        // Находим товар в списке для получения полной информации
+        const productItem = document.querySelector(`[data-product-id="${productId}"]`);
+        const priceText = productItem.querySelector('.product-meta strong').nextSibling.textContent.trim();
+        const stockText = productItem.querySelectorAll('.product-meta strong')[1].nextSibling.textContent.trim();
+        
+        // Заполняем форму
+        productIdInput.value = productId;
+        productNameInput.value = productName;
+        productUrlInput.value = productItem.querySelector('a').href;
+        productPriceInput.value = parseFloat(priceText.replace(' ₽', '').replace(',', '.'));
+        productStockInput.value = parseInt(stockText.replace(' шт.', ''));
+        
+        // Фокус на поле названия
+        setTimeout(() => {
+            productNameInput.focus();
+            productNameInput.select();
+        }, 300);
+    });
+    
+    // Обработчик сохранения
+    saveButton.addEventListener('click', function() {
+        const productId = productIdInput.value;
+        const newName = productNameInput.value.trim();
+        
+        if (!newName) {
+            alert('Название не может быть пустым');
+            productNameInput.focus();
+            return;
+        }
+        
+        // Показываем индикатор загрузки
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Сохранение...';
+        
+        fetch('/api/update-product-name', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                new_name: newName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновляем название в списке
+                const productItem = document.querySelector(`[data-product-id="${productId}"]`);
+                const nameElement = productItem.querySelector('.product-name');
+                nameElement.textContent = newName;
+                
+                // Обновляем data-атрибут кнопки
+                const editButton = productItem.querySelector('button[data-bs-toggle="modal"]');
+                editButton.setAttribute('data-product-name', newName);
+                
+                // Закрываем модальное окно
+                const modal = bootstrap.Modal.getInstance(editModal);
+                modal.hide();
+                
+                // Показываем уведомление об успехе
+                showNotification('Название успешно обновлено!', 'success');
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка при сохранении');
+        })
+        .finally(() => {
+            // Восстанавливаем кнопку
+            saveButton.disabled = false;
+            saveButton.innerHTML = '<i class="fas fa-save me-1"></i>Сохранить изменения';
+        });
+    });
+    
+    // Обработчик нажатия Enter в поле названия
+    productNameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveButton.click();
+        }
+    });
+    
+    // Обработчик закрытия модального окна
+    editModal.addEventListener('hidden.bs.modal', function() {
+        editForm.reset();
+    });
+    
+    function showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}
