@@ -103,6 +103,30 @@ def create_app():
         app.logger.error(f"Не удалось импортировать или зарегистрировать routes: {e_routes}", exc_info=True)
         raise RuntimeError(f"Ошибка импорта/регистрации маршрутов: {e_routes}")
 
+    # Добавляем app-level healthcheck на всякий случай
+    @app.route('/healthz', methods=['GET'])
+    def _app_health():
+        try:
+            from flask import current_app as _app
+            cfg = _app.config.get('DB_CONFIG')
+            if not cfg:
+                return {"status": "ok", "db": False}, 200
+            import psycopg2
+            conn = psycopg2.connect(**cfg)
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+                _ = cur.fetchone()
+            conn.close()
+            return {"status": "ok", "db": True}, 200
+        except Exception:
+            return {"status": "error", "db": False}, 500
+
+    # Выведем карту маршрутов в лог для диагностики
+    try:
+        rules = [str(r) for r in app.url_map.iter_rules()]
+        app.logger.info("URL Map: " + ", ".join(rules))
+    except Exception:
+        pass
 
     app.logger.info("Flask приложение успешно создано и сконфигурировано.")
     return app

@@ -246,6 +246,23 @@ def stats():
     return render_template('stats.html', products=products_list)
 
 
+# Healthcheck для мониторинга контейнера и доступности БД
+@bp.route('/health', methods=['GET'])
+@bp.route('/api/health', methods=['GET'])
+def healthcheck():
+    try:
+        conn = get_db_connection_webapp()
+        if not conn:
+            return {"status": "error", "db": False}, 500
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            _ = cur.fetchone()
+        conn.close()
+        return {"status": "ok", "db": True}, 200
+    except Exception as e:
+        current_app.logger.error(f"HEALTHCHECK error: {e}", exc_info=True)
+        return {"status": "error", "db": False}, 500
+
 # --- API: сводная статистика ---
 @bp.route('/api/stats/overview')
 def api_stats_overview():
@@ -677,7 +694,6 @@ def api_update_product_name(product_id: int):
 
 # --- API: экспорт данных в Excel ---
 @bp.route('/api/export/excel')
-@login_required
 def api_export_excel():
     """API для экспорта данных графиков в Excel"""
     from openpyxl import Workbook
@@ -793,7 +809,6 @@ def api_export_excel():
 
 # --- API: экспорт данных в PowerPoint ---
 @bp.route('/api/export/powerpoint')
-@login_required
 def api_export_powerpoint():
     """API для экспорта данных графиков в PowerPoint"""
     from pptx import Presentation
@@ -928,7 +943,6 @@ def api_export_powerpoint():
 
 # --- API: экспорт графика продаж по убыванию в Excel ---
 @bp.route('/api/export/chart/sales/excel')
-@login_required
 def api_export_chart_sales_excel():
     """API для экспорта графика продаж по убыванию в Excel"""
     from openpyxl import Workbook
@@ -1052,7 +1066,6 @@ def api_export_chart_sales_excel():
 
 # --- API: статистика выручки по месяцам (общий) ---
 @bp.route('/api/stats/revenue/monthly')
-@login_required
 def api_stats_revenue_monthly():
     """API для получения данных выручки по месяцам для всех товаров"""
     conn = get_db_connection_webapp()
@@ -1136,9 +1149,129 @@ def api_stats_revenue_monthly():
         current_app.logger.error(f"Ошибка получения данных выручки: {e}", exc_info=True)
         return {"error": "Ошибка получения данных выручки"}, 500
 
+
+# --- API: экспорт графика выручки (общий) в Excel ---
+@bp.route('/api/export/chart/revenue/excel')
+def api_export_chart_revenue_excel():
+    """Экспорт графика выручки по месяцам для всех товаров в Excel (как на графике 3)."""
+    from openpyxl import Workbook
+    from openpyxl.chart import BarChart, Reference
+    import tempfile
+    import os
+
+    try:
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Выручка по месяцам"
+
+        conn = get_db_connection_webapp()
+        if not conn:
+            return {"error": "Ошибка подключения к БД"}, 500
+
+        ws['A1'] = "График выручки по месяцам (все товары)"
+        ws['A2'] = "Дата экспорта: " + datetime.now().strftime('%d.%m.%Y %H:%M')
+
+        # Формируем таблицу: столбец A - Месяц; далее по одному столбцу на товар; строки - месяцы
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                WITH sh AS (
+                  SELECT
+                    p.name AS product_name,
+                    sh.check_timestamp,
+                    sh.stock_level,
+                    sh.price,
+                    LAG(sh.stock_level) OVER (PARTITION BY sh.product_id ORDER BY sh.check_timestamp) AS prev_stock
+                  FROM stock_history sh
+                  JOIN products p ON p.id = sh.product_id
+                  WHERE COALESCE(p.is_active, TRUE) = TRUE
+                    AND sh.stock_level IS NOT NULL
+                    AND sh.price IS NOT NULL
+                    AND sh.check_timestamp >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '11 months')
+                ),
+                sales_calc AS (
+                  SELECT
+                    product_name,
+                    DATE_TRUNC('month', check_timestamp) AS month_start,
+                    SUM(CASE WHEN prev_stock IS NOT NULL AND stock_level < prev_stock
+                             THEN (prev_stock - stock_level) * price ELSE 0 END) AS revenue
+                  FROM sh
+                  GROUP BY product_name, DATE_TRUNC('month', check_timestamp)
+                  HAVING SUM(CASE WHEN prev_stock IS NOT NULL AND stock_level < prev_stock
+                                  THEN (prev_stock - stock_level) * price ELSE 0 END) > 0
+                )
+                SELECT product_name, month_start, revenue
+                FROM sales_calc
+                ORDER BY month_start ASC, product_name ASC
+            """)
+
+            rows = cur.fetchall()
+
+        conn.close()
+
+        # Преобразуем в сводную форму: months x products
+        months_order = []
+        products_order = []
+        data_map = {}
+        for r in rows:
+            m = r['month_start'].strftime('%Y-%m')
+            p = r['product_name']
+            if m not in months_order:
+                months_order.append(m)
+            if p not in products_order:
+                products_order.append(p)
+            data_map.setdefault(m, {})[p] = float(r['revenue'])
+
+        # Заголовки
+        ws['A4'] = 'Месяц'
+        for idx, p in enumerate(products_order, start=2):
+            ws.cell(row=4, column=idx, value=p)
+
+        # Данные по строкам
+        row_idx = 4
+        for m in months_order:
+            row_idx += 1
+            ws.cell(row=row_idx, column=1, value=m)
+            for col_idx, p in enumerate(products_order, start=2):
+                ws.cell(row=row_idx, column=col_idx, value=data_map.get(m, {}).get(p, 0.0))
+
+        # Диаграмма: столбчатая накопительная (как на веб-графике)
+        chart = BarChart()
+        chart.type = "col"
+        chart.grouping = "stacked"
+        chart.overlap = 100
+        chart.title = "Выручка по месяцам (все товары)"
+        chart.y_axis.title = 'Выручка (руб)'
+        chart.x_axis.title = 'Месяц'
+
+        if products_order:
+            data = Reference(ws, min_col=2, max_col=1 + len(products_order), min_row=4, max_row=row_idx)
+            cats = Reference(ws, min_col=1, min_row=5, max_row=row_idx)
+            chart.add_data(data, titles_from_data=True)
+            chart.set_categories(cats)
+
+        ws.add_chart(chart, "E2")
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+            wb.save(tmp_file.name)
+            with open(tmp_file.name, 'rb') as f:
+                file_data = f.read()
+            os.unlink(tmp_file.name)
+
+            from flask import Response
+            return Response(
+                file_data,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                headers={
+                    'Content-Disposition': f'attachment; filename=chipdip_revenue_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+                }
+            )
+
+    except Exception as e:
+        current_app.logger.error(f"Ошибка экспорта графика выручки (общий) в Excel: {e}", exc_info=True)
+        return {"error": "Ошибка при создании Excel файла с графиком выручки"}, 500
+
 # --- API: экспорт графика продаж по месяцам в Excel ---
 @bp.route('/api/export/chart/monthly/excel')
-@login_required
 def api_export_chart_monthly_excel():
     """API для экспорта графика продаж по месяцам в Excel"""
     from openpyxl import Workbook
@@ -1255,7 +1388,6 @@ def api_export_chart_monthly_excel():
 
 # --- API: экспорт графика остатков на складе в Excel ---
 @bp.route('/api/export/chart/stock/excel')
-@login_required
 def api_export_chart_stock_excel():
     """API для экспорта графика остатков на складе в Excel для выбранного товара"""
     from openpyxl import Workbook
@@ -1348,7 +1480,6 @@ def api_export_chart_stock_excel():
 
 # --- API: экспорт графика стоимости товара в Excel ---
 @bp.route('/api/export/chart/price/excel')
-@login_required
 def api_export_chart_price_excel():
     """API для экспорта графика стоимости товара в Excel для выбранного товара"""
     from openpyxl import Workbook
@@ -1441,7 +1572,6 @@ def api_export_chart_price_excel():
 
 # --- API: статистика выручки по месяцам для выбранного товара ---
 @bp.route('/api/stats/revenue/product-monthly')
-@login_required
 def api_stats_revenue_product_monthly():
     """API для получения данных выручки по месяцам для выбранного товара"""
     product_id = request.args.get('product_id')
@@ -1525,7 +1655,6 @@ def api_stats_revenue_product_monthly():
 
 # --- API: экспорт графика продаж по месяцам для выбранного товара в Excel ---
 @bp.route('/api/export/chart/product-monthly/excel')
-@login_required
 def api_export_chart_product_monthly_excel():
     """API для экспорта графика продаж по месяцам для выбранного товара в Excel"""
     from openpyxl import Workbook
@@ -1648,9 +1777,118 @@ def api_export_chart_product_monthly_excel():
         return {"error": "Ошибка при создании Excel файла с графиком продаж по месяцам"}, 500
 
 
+# --- API: экспорт графика выручки выбранного товара в Excel ---
+@bp.route('/api/export/chart/product-revenue/excel')
+def api_export_chart_product_revenue_excel():
+    """Экспорт выручки по месяцам для выбранного товара в Excel (как последний график)."""
+    from openpyxl import Workbook
+    from openpyxl.chart import BarChart, Reference
+    import tempfile
+    import os
+
+    try:
+        product_id = request.args.get('product_id')
+        if not product_id:
+            return {"error": "Не указан ID товара"}, 400
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Выручка товара"
+
+        conn = get_db_connection_webapp()
+        if not conn:
+            return {"error": "Ошибка подключения к БД"}, 500
+
+        # Получаем название товара
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT name FROM products WHERE id = %s", (product_id,))
+            product = cur.fetchone()
+            if not product:
+                return {"error": "Товар не найден"}, 404
+            product_name = product['name']
+
+        ws['A1'] = f"Выручка по месяцам: {product_name}"
+        ws['A2'] = "Дата экспорта: " + datetime.now().strftime('%d.%m.%Y %H:%M')
+
+        # Данные выручки по месяцам для товара
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                WITH sh AS (
+                  SELECT
+                    sh.check_timestamp,
+                    sh.stock_level,
+                    sh.price,
+                    LAG(sh.stock_level) OVER (ORDER BY sh.check_timestamp) AS prev_stock
+                  FROM stock_history sh
+                  WHERE sh.product_id = %s
+                    AND sh.stock_level IS NOT NULL
+                    AND sh.price IS NOT NULL
+                    AND sh.check_timestamp >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '11 months')
+                ),
+                sales_calc AS (
+                  SELECT
+                    DATE_TRUNC('month', check_timestamp) AS month_start,
+                    SUM(CASE WHEN prev_stock IS NOT NULL AND stock_level < prev_stock
+                             THEN (prev_stock - stock_level) * price ELSE 0 END) AS revenue
+                  FROM sh
+                  GROUP BY DATE_TRUNC('month', check_timestamp)
+                  HAVING SUM(CASE WHEN prev_stock IS NOT NULL AND stock_level < prev_stock
+                                  THEN (prev_stock - stock_level) * price ELSE 0 END) > 0
+                )
+                SELECT month_start, revenue
+                FROM sales_calc
+                ORDER BY month_start ASC
+            """, (product_id,))
+
+            rows = cur.fetchall()
+
+        conn.close()
+
+        # Заголовки
+        ws['A4'] = 'Месяц'
+        ws['B4'] = 'Выручка (руб)'
+
+        r = 4
+        for row in rows:
+            r += 1
+            ws.cell(row=r, column=1, value=row['month_start'].strftime('%Y-%m'))
+            ws.cell(row=r, column=2, value=float(row['revenue']))
+
+        # Диаграмма: столбчатая (как договорились для последнего графика)
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = f"Выручка по месяцам: {product_name}"
+        chart.y_axis.title = 'Выручка (руб)'
+        chart.x_axis.title = 'Месяц'
+
+        data = Reference(ws, min_col=2, min_row=4, max_row=r)
+        cats = Reference(ws, min_col=1, min_row=5, max_row=r)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+
+        ws.add_chart(chart, "D2")
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+            wb.save(tmp_file.name)
+            with open(tmp_file.name, 'rb') as f:
+                file_data = f.read()
+            os.unlink(tmp_file.name)
+
+            from flask import Response
+            return Response(
+                file_data,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                headers={
+                    'Content-Disposition': f'attachment; filename=chipdip_product_revenue_{product_id}_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+                }
+            )
+
+    except Exception as e:
+        current_app.logger.error(f"Ошибка экспорта графика выручки товара в Excel: {e}", exc_info=True)
+        return {"error": "Ошибка при создании Excel файла с графиком выручки товара"}, 500
+
 # --- API: экспорт графика в PowerPoint ---
 @bp.route('/api/export/chart/powerpoint')
-@login_required
 def api_export_chart_powerpoint():
     """API для экспорта графика в PowerPoint"""
     from pptx import Presentation

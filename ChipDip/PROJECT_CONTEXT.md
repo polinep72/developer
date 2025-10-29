@@ -80,3 +80,9 @@ ChipDip/
 - Логирование и мониторинг
 - **Настройки экспорта Excel/PowerPoint**
 - **Конфигурация графиков Plotly.js**
+ - Публичные health‑эндпоинты: `GET /health`, `GET /api/health`, резерв `GET /healthz`
+ - Публичный доступ к статистике: API данных графиков не требуют авторизации (в т.ч. выручка)
+
+## Публичные API для графиков выручки
+- `GET /api/stats/revenue/monthly` — общая выручка (график 3)
+- `GET /api/stats/revenue/product-monthly?product_id=...` — выручка выбранного товара (график 6)

@@ -146,6 +146,25 @@ docker-compose build --no-cache
 docker-compose up -d
 ```
 
+### Пересоздание только webapp на свежем образе
+```bash
+docker-compose up -d --force-recreate --no-deps webapp
+```
+
+### Просмотр логов в PowerShell (Windows)
+```powershell
+# В PowerShell нельзя использовать '&&' как в bash — команды выполняйте отдельно
+docker-compose restart webapp
+docker-compose logs -f --tail=200 webapp
+```
+
+### Healthcheck сервисов
+```text
+GET http://localhost:8085/health
+GET http://localhost:8085/api/health
+GET http://localhost:8085/healthz
+```
+
 ### Проблемы с базой данных
 ```bash
 # Проверка подключения
