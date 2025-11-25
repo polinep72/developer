@@ -35,7 +35,7 @@ body {
 }
 
 .logo img {
-    height: 21px;
+    height: 42px;
     width: auto;
     display: block;
 }
@@ -262,8 +262,7 @@ body {
     font-size: 15px;
 }
 
-#refresh-heatmap,
-#dashboard-apply {
+#refresh-heatmap {
     padding: 12px 20px;
     border: none;
     border-radius: 10px;
@@ -271,6 +270,33 @@ body {
     color: white;
     cursor: pointer;
     font-weight: 600;
+}
+
+/* Убираем увеличенный padding у #dashboard-apply - он теперь в унифицирующем правиле */
+
+/* Кнопки должны иметь одинаковую высоту, как кнопка "+Добавить пользователя" (padding: 10px 20px) */
+#dashboard-apply,
+#refresh-bookings,
+#dashboard-export,
+#dashboard-export-excel,
+#export-bookings,
+#export-bookings-excel,
+.dashboard-controls .button-group button,
+.dashboard-controls .button-group .btn-primary,
+.dashboard-controls .button-group .btn-secondary,
+.booking-controls .button-group button,
+.booking-controls .button-group .btn-primary,
+.booking-controls .button-group .btn-secondary,
+.equipment-subtab-header .button-group button,
+.equipment-subtab-header .btn-export-equipment,
+.equipment-subtab-header .btn-add-equipment,
+.equipment-subtab-header .btn-secondary {
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    line-height: normal !important;
+    box-sizing: border-box !important;
 }
 
 .booking-form {
@@ -894,7 +920,7 @@ body {
     background: transparent;
     color: #027BBC;
     border: 1px dashed #027BBC;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;

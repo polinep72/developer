@@ -101,6 +101,13 @@ function initTabs() {
                 downloadEquipmentExcel(equipmentType);
             }
         }
+        // Обработчики экспорта оборудования в PDF
+        if (e.target.classList.contains("btn-export-equipment-pdf")) {
+            const equipmentType = e.target.dataset.type;
+            if (equipmentType) {
+                downloadEquipmentPdf(equipmentType);
+            }
+        }
     });
 
     // Проверяем активную вкладку по умолчанию
@@ -785,6 +792,17 @@ function initDashboard() {
                 return;
             }
             downloadDashboardExcel(latestDashboardPayload, latestDashboardFilters);
+        });
+    }
+
+    const dashboardExportPdfButton = document.getElementById("dashboard-export-pdf");
+    if (dashboardExportPdfButton) {
+        dashboardExportPdfButton.addEventListener("click", () => {
+            if (!latestDashboardPayload || !latestDashboardFilters) {
+                alert("Сначала обновите аналитику");
+                return;
+            }
+            downloadDashboardPdf(latestDashboardPayload, latestDashboardFilters);
         });
     }
 }
@@ -1766,6 +1784,18 @@ function initManageBookings() {
         });
     }
 
+    const exportPdfButton = document.getElementById("export-bookings-pdf");
+    if (exportPdfButton) {
+        exportPdfButton.addEventListener("click", () => {
+            const selectedDate = dateInput.value;
+            if (!selectedDate) {
+                alert("Укажите дату для экспорта.");
+                return;
+            }
+            downloadBookingsPdf(selectedDate);
+        });
+    }
+
     // Загружаем при первой активации вкладки
     const manageBookingsTab = document.getElementById("tab-manage-bookings");
     if (manageBookingsTab && manageBookingsTab.classList.contains("active")) {
@@ -2093,6 +2123,127 @@ async function downloadEquipmentExcel(equipmentType) {
         window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error("Ошибка экспорта оборудования в Excel:", error);
+        alert(error.message || "Не удалось выгрузить данные оборудования");
+    }
+}
+
+async function downloadBookingsPdf(selectedDate) {
+    const errorEl = document.getElementById("bookings-error");
+    try {
+        const params = new URLSearchParams();
+        params.set("selected_date", selectedDate);
+        if (currentUser?.is_admin) {
+            params.set("scope", "all");
+        }
+
+        const response = await fetch(`/api/bookings/export/pdf?${params.toString()}`, {
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            let message = "Не удалось выгрузить бронирования";
+            try {
+                const errorData = await response.json();
+                message = errorData.detail || errorData.error || message;
+            } catch {
+                // ignore
+            }
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `bookings_${selectedDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Ошибка экспорта бронирований в PDF:", error);
+        if (errorEl) {
+            errorEl.textContent = error.message || "Не удалось выгрузить бронирования";
+            errorEl.style.display = "block";
+        } else {
+            alert(error.message || "Не удалось выгрузить бронирования");
+        }
+    }
+}
+
+async function downloadDashboardPdf(payload, filters) {
+    try {
+        const response = await fetch("/api/dashboard/export/pdf", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                equipment: filters.equipment || [],
+                start_date: filters.start_date || "",
+                end_date: filters.end_date || "",
+                target_load: filters.target_load || 8,
+            }),
+        });
+
+        if (!response.ok) {
+            let message = "Не удалось выгрузить аналитику";
+            try {
+                const errorData = await response.json();
+                message = errorData.detail || errorData.error || message;
+            } catch {
+                // ignore
+            }
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const start = filters.start_date ? filters.start_date.replaceAll("-", "") : "";
+        const end = filters.end_date ? filters.end_date.replaceAll("-", "") : "";
+        link.href = url;
+        link.download = `dashboard_${start}_${end}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Ошибка экспорта аналитики в PDF:", error);
+        alert(error.message || "Не удалось выгрузить аналитику");
+    }
+}
+
+async function downloadEquipmentPdf(equipmentType) {
+    try {
+        const response = await fetch(`/api/equipment/${equipmentType}/export/pdf`, {
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            let message = "Не удалось выгрузить данные оборудования";
+            try {
+                const errorData = await response.json();
+                message = errorData.detail || errorData.error || message;
+            } catch {
+                // ignore
+            }
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const today = new Date().toISOString().split("T")[0].replaceAll("-", "");
+        link.href = url;
+        link.download = `equipment_${equipmentType}_${today}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Ошибка экспорта оборудования в PDF:", error);
         alert(error.message || "Не удалось выгрузить данные оборудования");
     }
 }

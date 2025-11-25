@@ -52,6 +52,16 @@ from .services.export_excel import (
     export_equipment_excel,
     export_bookings_excel as export_bookings_excel_func,
 )
+from .services.export_pdf import (
+    export_dashboard_pdf,
+    export_equipment_pdf,
+    export_bookings_pdf,
+)
+from .services.export_pdf import (
+    export_dashboard_pdf,
+    export_equipment_pdf,
+    export_bookings_pdf,
+)
 from .services import auth as auth_service
 from .services import users as users_service
 
@@ -442,6 +452,41 @@ async def export_bookings_excel(
     )
 
 
+@app.get("/api/bookings/export/pdf", response_class=StreamingResponse)
+async def export_bookings_pdf_endpoint(
+    selected_date: str = Query(..., description="Дата в формате YYYY-MM-DD"),
+    scope: str = Query("mine", description="mine или all (только для админов)"),
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    """Экспорт бронирований в PDF"""
+    try:
+        target_date = date.fromisoformat(selected_date)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректная дата")
+
+    include_all = bool(current_user.get("is_admin")) and scope == "all"
+    
+    # Получаем данные через CSV функцию (она уже форматирует данные)
+    result = export_bookings_csv(
+        target_date=target_date,
+        user_id=current_user["id"],
+        include_all=include_all,
+    )
+    if result.get("error"):
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    # Преобразуем CSV данные в PDF
+    csv_content = result.get("content", b"").decode("utf-8-sig")
+    pdf_content = export_bookings_pdf(csv_content, target_date, include_all)
+    filename = f"bookings_{target_date.isoformat()}.pdf"
+
+    return StreamingResponse(
+        BytesIO(pdf_content),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @app.post("/api/dashboard/export/excel", response_class=StreamingResponse)
 async def export_dashboard_excel_endpoint(
     request: DashboardRequest,
@@ -490,6 +535,58 @@ async def export_dashboard_excel_endpoint(
     return StreamingResponse(
         BytesIO(excel_content),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/api/dashboard/export/pdf", response_class=StreamingResponse)
+async def export_dashboard_pdf_endpoint(
+    request: DashboardRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    """Экспорт данных дашборда в PDF"""
+    from .services.dashboard import get_dashboard_dataframe, prepare_dashboard_payload
+    
+    if not request.equipment:
+        raise HTTPException(status_code=400, detail="Не выбрано оборудование")
+    
+    # Получаем данные дашборда
+    records = get_dashboard_dataframe(
+        start_date=request.start_date,
+        end_date=request.end_date,
+    )
+    
+    if not records:
+        raise HTTPException(status_code=500, detail="Нет данных для экспорта")
+    
+    # Подготавливаем payload
+    payload = prepare_dashboard_payload(
+        records=records,
+        equipment=request.equipment,
+        start_date=request.start_date,
+        end_date=request.end_date,
+        target_load=request.target_load,
+    )
+    
+    filters = {
+        "equipment": request.equipment,
+        "start_date": request.start_date.isoformat(),
+        "end_date": request.end_date.isoformat(),
+        "target_load": request.target_load,
+    }
+    
+    pdf_content = export_dashboard_pdf(
+        payload=payload,
+        filters=filters,
+        start_date=request.start_date,
+        end_date=request.end_date,
+    )
+    
+    filename = f"dashboard_{request.start_date.isoformat()}_{request.end_date.isoformat()}.pdf"
+    
+    return StreamingResponse(
+        BytesIO(pdf_content),
+        media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
@@ -701,6 +798,24 @@ async def export_equipment_excel_endpoint(equipment_type: str):
     return StreamingResponse(
         BytesIO(excel_content),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/api/equipment/{equipment_type}/export/pdf", response_class=StreamingResponse)
+async def export_equipment_pdf_endpoint(equipment_type: str):
+    """Экспорт данных модуля СИ в PDF"""
+    result = get_equipment_by_type(equipment_type)
+    if result.get("error"):
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    equipment_data = result.get("data", [])
+    pdf_content = export_equipment_pdf(equipment_data, equipment_type)
+    filename = f"equipment_{equipment_type}_{datetime.now().strftime('%Y%m%d')}.pdf"
+    
+    return StreamingResponse(
+        BytesIO(pdf_content),
+        media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
