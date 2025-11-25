@@ -4,15 +4,16 @@
 import io
 import logging
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,24 @@ PRIMARY_COLOR = colors.HexColor("#027BBC")
 HEADER_BG = PRIMARY_COLOR
 HEADER_TEXT = colors.white
 BORDER_COLOR = colors.grey
+
+# Подключаем шрифты с поддержкой кириллицы
+FONT_DIR = Path(__file__).resolve().parent.parent / "static" / "fonts"
+FONT_REGULAR_PATH = FONT_DIR / "DejaVuSans.ttf"
+FONT_BOLD_PATH = FONT_DIR / "DejaVuSans-Bold.ttf"
+FONT_REGULAR_NAME = "DejaVuSans"
+FONT_BOLD_NAME = "DejaVuSans-Bold"
+
+
+def _register_font(font_path: Path, font_name: str) -> None:
+    if font_path.exists():
+        pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
+    else:
+        logger.warning("Файл шрифта %s не найден по пути %s", font_name, font_path)
+
+
+_register_font(FONT_REGULAR_PATH, FONT_REGULAR_NAME)
+_register_font(FONT_BOLD_PATH, FONT_BOLD_NAME)
 
 # Стили текста
 styles = getSampleStyleSheet()
@@ -31,6 +50,7 @@ title_style = ParagraphStyle(
     textColor=PRIMARY_COLOR,
     alignment=1,  # center
     spaceAfter=20,
+    fontName=FONT_BOLD_NAME,
 )
 heading_style = ParagraphStyle(
     'CustomHeading',
@@ -38,8 +58,14 @@ heading_style = ParagraphStyle(
     fontSize=12,
     textColor=PRIMARY_COLOR,
     spaceAfter=10,
+    fontName=FONT_BOLD_NAME,
 )
-normal_style = styles['Normal']
+normal_style = ParagraphStyle(
+    'CustomNormal',
+    parent=styles['Normal'],
+    fontName=FONT_REGULAR_NAME,
+    fontSize=10,
+)
 
 
 def export_bookings_pdf(
@@ -49,7 +75,7 @@ def export_bookings_pdf(
 ) -> bytes:
     """Экспорт бронирований в PDF"""
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4))
     story = []
     
     # Заголовок
@@ -73,10 +99,12 @@ def export_bookings_pdf(
     
     # Определяем ширину колонок
     num_cols = len(headers)
-    if num_cols == 8:  # Все бронирования
-        col_widths = [2.5*cm, 2*cm, 2*cm, 2*cm, 4*cm, 2.5*cm, 3*cm, 2*cm]
-    else:  # Только мои бронирования
-        col_widths = [2.5*cm, 2*cm, 2*cm, 2*cm, 4*cm, 2.5*cm, 2*cm]
+    if num_cols == 9:  # Все бронирования (с пользователем)
+        col_widths = [2.3*cm, 1.8*cm, 1.8*cm, 2.5*cm, 1.8*cm, 4*cm, 3*cm, 3.2*cm, 2.1*cm]
+    elif num_cols == 8:
+        col_widths = [2.5*cm, 2*cm, 2*cm, 2.5*cm, 2*cm, 4*cm, 3*cm, 2.3*cm]
+    else:  # Только мои бронирования (без пользователя)
+        col_widths = [2.8*cm, 2*cm, 2*cm, 2.5*cm, 2.2*cm, 4*cm, 3.2*cm]
     
     table = Table(table_data, colWidths=col_widths)
     
@@ -86,7 +114,7 @@ def export_bookings_pdf(
         ('BACKGROUND', (0, 0), (-1, 0), HEADER_BG),
         ('TEXTCOLOR', (0, 0), (-1, 0), HEADER_TEXT),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD_NAME),
         ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('TOPPADDING', (0, 0), (-1, 0), 12),
@@ -94,7 +122,7 @@ def export_bookings_pdf(
         ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         # Данные
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 1), (-1, -1), FONT_REGULAR_NAME),
         ('FONTSIZE', (0, 1), (-1, -1), 9),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
     ]))
@@ -132,10 +160,10 @@ def export_dashboard_pdf(
         ["Фактическая загрузка", str(payload.get("utilization", "0%"))],
     ]
     
-    params_table = Table(params_data, colWidths=[5*cm, 10*cm])
+    params_table = Table(params_data, colWidths=[6*cm, 12*cm])
     params_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 0), (0, -1), FONT_BOLD_NAME),
+        ('FONTNAME', (1, 0), (1, -1), FONT_REGULAR_NAME),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -164,9 +192,9 @@ def export_dashboard_pdf(
             ('BACKGROUND', (0, 0), (-1, 0), HEADER_BG),
             ('TEXTCOLOR', (0, 0), (-1, 0), HEADER_TEXT),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD_NAME),
             ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (0, 1), (-1, -1), FONT_REGULAR_NAME),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -199,9 +227,9 @@ def export_dashboard_pdf(
             ('BACKGROUND', (0, 0), (-1, 0), HEADER_BG),
             ('TEXTCOLOR', (0, 0), (-1, 0), HEADER_TEXT),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD_NAME),
             ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (0, 1), (-1, -1), FONT_REGULAR_NAME),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -290,7 +318,7 @@ def export_equipment_pdf(
         ('BACKGROUND', (0, 0), (-1, 0), HEADER_BG),
         ('TEXTCOLOR', (0, 0), (-1, 0), HEADER_TEXT),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), FONT_BOLD_NAME),
         ('FONTSIZE', (0, 0), (-1, 0), 9),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
         ('TOPPADDING', (0, 0), (-1, 0), 10),
@@ -298,7 +326,7 @@ def export_equipment_pdf(
         ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         # Данные
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 1), (-1, -1), FONT_REGULAR_NAME),
         ('FONTSIZE', (0, 1), (-1, -1), 8),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),

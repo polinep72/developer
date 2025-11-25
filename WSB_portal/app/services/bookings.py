@@ -652,12 +652,11 @@ def export_bookings_csv(target_date: date, user_id: int, include_all: bool = Fal
         "Длительность (ч)",
         "Оборудование",
         "Категория",
-        "Статус",
     ]
+    header = common_header.copy()
     if include_all:
-        header = common_header + ["Пользователь"]
-    else:
-        header = common_header
+        header.append("Пользователь")
+    header.append("Статус")
     writer.writerow(header)
 
     for row in formatted_rows:
@@ -680,10 +679,10 @@ def export_bookings_csv(target_date: date, user_id: int, include_all: bool = Fal
             duration_str,
             row.get("equipment") or "",
             row.get("category") or "",
-            row.get("status") or "",
         ]
         if include_all:
             csv_row.append(row.get("user_name") or "")
+        csv_row.append(row.get("status") or "")
         writer.writerow(csv_row)
 
     csv_bytes = buffer.getvalue().encode("utf-8-sig")

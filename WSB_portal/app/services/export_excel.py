@@ -242,17 +242,30 @@ def export_bookings_excel(
     ws[f'A{row}'].alignment = center_align
     row += 2
     
-    # Определяем заголовки
-    if include_all:
-        headers = [
-            "Дата", "Время начала", "Время окончания", "Длительность (мин)",
-            "Оборудование", "Категория", "Пользователь", "Статус"
-        ]
-    else:
-        headers = [
-            "Дата", "Время начала", "Время окончания", "Длительность (мин)",
-            "Оборудование", "Категория", "Статус"
-        ]
+    # Определяем заголовки (приводим к реальному набору данных CSV)
+    csv_lines = csv_content.strip().split("\n")
+    if len(csv_lines) < 2:
+        ws.cell(row=row, column=1, value="Нет данных для экспорта")
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
+
+    csv_headers = [h.strip() for h in csv_lines[0].split(";")]
+    has_user_column = include_all and "Пользователь" in csv_headers
+
+    headers = [
+        "Дата",
+        "Время начала",
+        "Время окончания",
+        "Интервал",
+        "Длительность (мин)",
+        "Оборудование",
+        "Категория",
+    ]
+    if has_user_column:
+        headers.append("Пользователь")
+    headers.append("Статус")
     
     # Заголовки таблицы
     for col_idx, header in enumerate(headers, start=1):
@@ -264,27 +277,37 @@ def export_bookings_excel(
     
     row += 1
     
-    # Парсим CSV данные
-    lines = csv_content.strip().split("\n")
-    if len(lines) < 2:
-        # Нет данных
-        ws.cell(row=row, column=1, value="Нет данных для экспорта")
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-        return buffer.getvalue()
-    
     # Пропускаем заголовок (уже добавлен выше) и читаем данные
-    for line in lines[1:]:
+    for line in csv_lines[1:]:
         if not line.strip():
             continue
-        values = line.split(";")
-        col = 1
-        for value in values:
-            if col <= len(headers):
-                cell = ws.cell(row=row, column=col, value=value.strip())
-                cell.border = border
-                col += 1
+        values = [v.strip() for v in line.split(";")]
+        row_data = {csv_headers[i]: values[i] for i in range(min(len(csv_headers), len(values)))}
+        
+        duration_minutes = ""
+        duration_hours = row_data.get("Длительность (ч)")
+        if duration_hours:
+            try:
+                duration_minutes = str(int(float(duration_hours) * 60))
+            except ValueError:
+                duration_minutes = duration_hours
+        
+        excel_row = [
+            row_data.get("Дата", ""),
+            row_data.get("Время начала", ""),
+            row_data.get("Время окончания", ""),
+            row_data.get("Интервал", ""),
+            duration_minutes,
+            row_data.get("Оборудование", ""),
+            row_data.get("Категория", ""),
+        ]
+        if has_user_column:
+            excel_row.append(row_data.get("Пользователь", ""))
+        excel_row.append(row_data.get("Статус", ""))
+        
+        for col_idx, value in enumerate(excel_row, start=1):
+            cell = ws.cell(row=row, column=col_idx, value=value)
+            cell.border = border
         row += 1
     
     # Автоматическая ширина столбцов

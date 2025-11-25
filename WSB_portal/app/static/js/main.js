@@ -93,23 +93,6 @@ function initTabs() {
         });
     });
 
-    // Обработчики экспорта оборудования в Excel
-    document.addEventListener("click", (e) => {
-        if (e.target.classList.contains("btn-export-equipment")) {
-            const equipmentType = e.target.dataset.type;
-            if (equipmentType) {
-                downloadEquipmentExcel(equipmentType);
-            }
-        }
-        // Обработчики экспорта оборудования в PDF
-        if (e.target.classList.contains("btn-export-equipment-pdf")) {
-            const equipmentType = e.target.dataset.type;
-            if (equipmentType) {
-                downloadEquipmentPdf(equipmentType);
-            }
-        }
-    });
-
     // Проверяем активную вкладку по умолчанию
     const activeTab = document.querySelector(".tab-button.active");
     if (activeTab) {
@@ -795,16 +778,6 @@ function initDashboard() {
         });
     }
 
-    const dashboardExportPdfButton = document.getElementById("dashboard-export-pdf");
-    if (dashboardExportPdfButton) {
-        dashboardExportPdfButton.addEventListener("click", () => {
-            if (!latestDashboardPayload || !latestDashboardFilters) {
-                alert("Сначала обновите аналитику");
-                return;
-            }
-            downloadDashboardPdf(latestDashboardPayload, latestDashboardFilters);
-        });
-    }
 }
 
 function populateEquipmentSelect(select, options, selectedValues) {
@@ -919,6 +892,13 @@ let equipmentData = {
     gosregister: [],
 };
 
+const equipmentFilters = {
+    si: {query: "", status: "all"},
+    io: {query: "", status: "all"},
+    vo: {query: "", status: "all"},
+    gosregister: {query: "", status: "all"},
+};
+
 let currentSort = {
     column: null,
     direction: null,
@@ -929,6 +909,7 @@ function initEquipmentModule() {
     if (!siModuleTab) return;
 
     initEquipmentSubtabs();
+    initEquipmentFilters();
     
     // Данные загружаются только при активации вкладки (см. initTabs)
     // Статистику можно загрузить сразу, но лучше при активации
@@ -954,6 +935,36 @@ function initEquipmentSubtabs() {
                 renderEquipmentTable(type);
             }
         });
+    });
+}
+
+function initEquipmentFilters() {
+    const config = {
+        si: {search: "si-search", status: "si-status-filter"},
+        io: {search: "io-search", status: "io-status-filter"},
+        vo: {search: "vo-search", status: "vo-status-filter"},
+        gosregister: {search: "gosregister-search"},
+    };
+
+    Object.entries(config).forEach(([type, ids]) => {
+        if (ids.search) {
+            const input = document.getElementById(ids.search);
+            if (input) {
+                input.addEventListener("input", (event) => {
+                    equipmentFilters[type].query = event.target.value || "";
+                    renderEquipmentTable(type);
+                });
+            }
+        }
+        if (ids.status) {
+            const select = document.getElementById(ids.status);
+            if (select) {
+                select.addEventListener("change", (event) => {
+                    equipmentFilters[type].status = event.target.value || "all";
+                    renderEquipmentTable(type);
+                });
+            }
+        }
     });
 }
 
@@ -1102,6 +1113,7 @@ function renderEquipmentTable(type) {
     }
 
     let data = equipmentData[type] || [];
+    data = applyEquipmentFilters(type, data);
     console.log(`Рендеринг таблицы ${type}, записей: ${data.length}`);
     
     if (data.length === 0) {
@@ -1146,6 +1158,75 @@ function renderEquipmentTable(type) {
             handleEquipmentSort(type, column);
         });
     });
+}
+
+function applyEquipmentFilters(type, data) {
+    const filters = equipmentFilters[type];
+    if (!filters) {
+        return data;
+    }
+
+    let filtered = data;
+    const query = filters.query?.trim().toLowerCase();
+    if (query) {
+        filtered = filtered.filter((row) => getEquipmentSearchText(type, row).includes(query));
+    }
+
+    if (filters.status && filters.status !== "all" && type !== "gosregister") {
+        filtered = filtered.filter((row) => getCalibrationStatus(row) === filters.status);
+    }
+
+    return filtered;
+}
+
+function getEquipmentSearchText(type, row) {
+    const pieces = [];
+    if (type === "si") {
+        pieces.push(
+            row.name,
+            row.type_designation,
+            row.serial_number,
+            row.certificate_number,
+            row.gosregister_number,
+            row.manufacturer,
+            row.note,
+        );
+    } else if (type === "io") {
+        pieces.push(
+            row.name,
+            row.type_designation,
+            row.serial_number,
+            row.certificate_number,
+            row.note,
+        );
+    } else if (type === "vo") {
+        pieces.push(row.name, row.type_designation, row.serial_number, row.note);
+    } else if (type === "gosregister") {
+        pieces.push(row.gosregister_number, row.si_name, row.type_designation, row.manufacturer);
+    }
+
+    return pieces
+        .filter((value) => value !== null && value !== undefined)
+        .join(" ")
+        .toLowerCase();
+}
+
+function getCalibrationStatus(row) {
+    const rawValue = row?.days_until_calibration;
+    if (rawValue === null || rawValue === undefined || rawValue === "") {
+        return "no-data";
+    }
+    const days = Number(rawValue);
+    if (!Number.isFinite(days)) {
+        return "no-data";
+    }
+    if (days < 0) {
+        return "overdue";
+    }
+    if (days <= 30) {
+        return "soon";
+    }
+    return "normal";
 }
 
 function renderSIRow(row, index) {
@@ -1784,18 +1865,6 @@ function initManageBookings() {
         });
     }
 
-    const exportPdfButton = document.getElementById("export-bookings-pdf");
-    if (exportPdfButton) {
-        exportPdfButton.addEventListener("click", () => {
-            const selectedDate = dateInput.value;
-            if (!selectedDate) {
-                alert("Укажите дату для экспорта.");
-                return;
-            }
-            downloadBookingsPdf(selectedDate);
-        });
-    }
-
     // Загружаем при первой активации вкладки
     const manageBookingsTab = document.getElementById("tab-manage-bookings");
     if (manageBookingsTab && manageBookingsTab.classList.contains("active")) {
@@ -2171,49 +2240,7 @@ async function downloadBookingsPdf(selectedDate) {
     }
 }
 
-async function downloadDashboardPdf(payload, filters) {
-    try {
-        const response = await fetch("/api/dashboard/export/pdf", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                equipment: filters.equipment || [],
-                start_date: filters.start_date || "",
-                end_date: filters.end_date || "",
-                target_load: filters.target_load || 8,
-            }),
-        });
-
-        if (!response.ok) {
-            let message = "Не удалось выгрузить аналитику";
-            try {
-                const errorData = await response.json();
-                message = errorData.detail || errorData.error || message;
-            } catch {
-                // ignore
-            }
-            throw new Error(message);
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        const start = filters.start_date ? filters.start_date.replaceAll("-", "") : "";
-        const end = filters.end_date ? filters.end_date.replaceAll("-", "") : "";
-        link.href = url;
-        link.download = `dashboard_${start}_${end}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error("Ошибка экспорта аналитики в PDF:", error);
-        alert(error.message || "Не удалось выгрузить аналитику");
-    }
-}
+// downloadDashboardPdf удалён: экспорт PDF для истории бронирований больше не используется
 
 async function downloadEquipmentPdf(equipmentType) {
     try {

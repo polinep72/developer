@@ -144,12 +144,11 @@
                         </div>
                         <div class="control control--button">
                             <label>&nbsp;</label>
-                            <div class="button-group">
-                                <button id="refresh-bookings" class="btn-primary">Показать бронирования</button>
-                                <button id="export-bookings" class="btn-secondary">Экспорт CSV</button>
-                                <button id="export-bookings-excel" class="btn-secondary">Экспорт Excel</button>
-                                <button id="export-bookings-pdf" class="btn-secondary">Экспорт PDF</button>
-                            </div>
+                        <div class="button-group">
+                            <button id="refresh-bookings" class="btn-primary">Показать бронирования</button>
+                            <button id="export-bookings" class="btn-secondary">Экспорт CSV</button>
+                            <button id="export-bookings-excel" class="btn-secondary">Экспорт Excel</button>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -209,7 +208,6 @@
                         <button id="dashboard-apply" class="btn-primary">Обновить аналитику</button>
                         <button id="dashboard-export" class="btn-secondary">Экспорт CSV</button>
                         <button id="dashboard-export-excel" class="btn-secondary">Экспорт Excel</button>
-                        <button id="dashboard-export-pdf" class="btn-secondary">Экспорт PDF</button>
                     </div>
                 </div>
             </div>
@@ -305,9 +303,23 @@
             <div class="subtab-content active" id="subtab-si">
                 <div class="equipment-subtab-header">
                     <h3>Средства измерения (СИ)</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="si-search">Поиск</label>
+                            <input type="text" id="si-search" class="equipment-search-input" placeholder="Название, тип, серийный номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="si-status-filter">Статус поверки</label>
+                            <select id="si-status-filter" class="equipment-status-select">
+                                <option value="all">Все</option>
+                                <option value="overdue">Просрочено</option>
+                                <option value="soon">До 30 дней</option>
+                                <option value="normal">Более 30 дней</option>
+                                <option value="no-data">Без даты</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="button-group">
-                        <button class="btn-secondary btn-export-equipment" data-type="si">Экспорт Excel</button>
-                        <button class="btn-secondary btn-export-equipment-pdf" data-type="si">Экспорт PDF</button>
                         <button class="btn-secondary btn-add-equipment requires-admin" data-type="si">+ Добавить СИ</button>
                     </div>
                 </div>
@@ -336,9 +348,23 @@
             <div class="subtab-content" id="subtab-io">
                 <div class="equipment-subtab-header">
                     <h3>Испытательное оборудование (ИО)</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="io-search">Поиск</label>
+                            <input type="text" id="io-search" class="equipment-search-input" placeholder="Название, тип, серийный номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="io-status-filter">Статус поверки</label>
+                            <select id="io-status-filter" class="equipment-status-select">
+                                <option value="all">Все</option>
+                                <option value="overdue">Просрочено</option>
+                                <option value="soon">До 30 дней</option>
+                                <option value="normal">Более 30 дней</option>
+                                <option value="no-data">Без даты</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="button-group">
-                        <button class="btn-secondary btn-export-equipment" data-type="io">Экспорт Excel</button>
-                        <button class="btn-secondary btn-export-equipment-pdf" data-type="io">Экспорт PDF</button>
                         <button class="btn-secondary btn-add-equipment requires-admin" data-type="io">+ Добавить ИО</button>
                     </div>
                 </div>
@@ -367,9 +393,23 @@
             <div class="subtab-content" id="subtab-vo">
                 <div class="equipment-subtab-header">
                     <h3>Вспомогательное оборудование (ВО)</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="vo-search">Поиск</label>
+                            <input type="text" id="vo-search" class="equipment-search-input" placeholder="Название, тип, серийный номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="vo-status-filter">Статус поверки</label>
+                            <select id="vo-status-filter" class="equipment-status-select">
+                                <option value="all">Все</option>
+                                <option value="overdue">Просрочено</option>
+                                <option value="soon">До 30 дней</option>
+                                <option value="normal">Более 30 дней</option>
+                                <option value="no-data">Без даты</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="button-group">
-                        <button class="btn-secondary btn-export-equipment" data-type="vo">Экспорт Excel</button>
-                        <button class="btn-secondary btn-export-equipment-pdf" data-type="vo">Экспорт PDF</button>
                         <button class="btn-secondary btn-add-equipment requires-admin" data-type="vo">+ Добавить ВО</button>
                     </div>
                 </div>
@@ -392,9 +432,13 @@
             <div class="subtab-content" id="subtab-gosregister">
                 <div class="equipment-subtab-header">
                     <h3>Госреестр средств измерений</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="gosregister-search">Поиск</label>
+                            <input type="text" id="gosregister-search" class="equipment-search-input" placeholder="Наименование, тип, изготовитель...">
+                        </div>
+                    </div>
                     <div class="button-group">
-                        <button class="btn-secondary btn-export-equipment" data-type="gosregister">Экспорт Excel</button>
-                        <button class="btn-secondary btn-export-equipment-pdf" data-type="gosregister">Экспорт PDF</button>
                         <button class="btn-secondary btn-add-equipment requires-admin" data-type="gosregister">+ Добавить в Госреестр</button>
                     </div>
                 </div>

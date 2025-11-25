@@ -909,6 +909,34 @@ body {
     padding: 12px 0;
 }
 
+    .equipment-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .equipment-filters .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 180px;
+    }
+
+.equipment-filters .filter-group label {
+    font-size: 12px;
+    color: #64748b;
+}
+
+    .equipment-filters input,
+    .equipment-filters select {
+        padding: 6px 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #fff;
+    }
+
 .equipment-subtab-header h3 {
     margin: 0;
     font-size: 18px;
