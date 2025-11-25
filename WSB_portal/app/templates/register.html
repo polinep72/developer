@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация в WSB Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Регистрация в системе</h1>
+            <p class="auth-hint">Заполните все обязательные поля для создания учетной записи</p>
+            <form id="register-form">
+                <label for="phone-input">Номер телефона *</label>
+                <input type="tel" id="phone-input" required autocomplete="tel" placeholder="+7XXXXXXXXXX">
+                <p class="form-hint">Обязательное поле. Используется для входа в систему.</p>
+
+                <label for="email-input">Корпоративный e-mail</label>
+                <input type="email" id="email-input" autocomplete="email" placeholder="user@example.com">
+                <p class="form-hint">Необязательное поле. Можно использовать для входа в систему.</p>
+
+                <label for="telegram-id-input">Telegram ID *</label>
+                <input type="number" id="telegram-id-input" required placeholder="649315739">
+                <p class="form-hint">
+                    <strong>Как получить Telegram ID:</strong><br>
+                    1. Откройте Telegram<br>
+                    2. Найдите бота <strong>@userinfobot</strong><br>
+                    3. Отправьте команду <strong>/start</strong><br>
+                    4. Бот выдаст информацию, включая ваш ID (например: <code>Id: 649315739</code>)
+                </p>
+
+                <label for="first-name-input">Имя, Отчество *</label>
+                <input type="text" id="first-name-input" required autocomplete="given-name" placeholder="Иван Петрович">
+
+                <label for="last-name-input">Фамилия *</label>
+                <input type="text" id="last-name-input" required autocomplete="family-name" placeholder="Иванов">
+
+                <label for="password-input">Пароль *</label>
+                <input type="password" id="password-input" required autocomplete="new-password" minlength="6">
+                <p class="form-hint">Минимум 6 символов</p>
+
+                <label for="confirm-password-input">Подтверждение пароля *</label>
+                <input type="password" id="confirm-password-input" required autocomplete="new-password" minlength="6">
+
+                <button type="submit" class="btn-primary full-width">Зарегистрироваться</button>
+                <p class="auth-error hidden" id="register-error"></p>
+            </form>
+            <a class="auth-back" href="/login">← Вернуться ко входу</a>
+            <a class="auth-back" href="/">← Вернуться на главную</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("register-form");
+        const errorBox = document.getElementById("register-error");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorBox.textContent = "";
+            errorBox.classList.add("hidden");
+
+            const phone = document.getElementById("phone-input").value.trim();
+            const email = document.getElementById("email-input").value.trim();
+            const telegramId = document.getElementById("telegram-id-input").value.trim();
+            const firstName = document.getElementById("first-name-input").value.trim();
+            const lastName = document.getElementById("last-name-input").value.trim();
+            const password = document.getElementById("password-input").value;
+            const confirmPassword = document.getElementById("confirm-password-input").value;
+
+            // Валидация
+            if (!phone) {
+                errorBox.textContent = "Номер телефона обязателен для заполнения.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            if (!telegramId) {
+                errorBox.textContent = "Telegram ID обязателен для заполнения.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            const telegramIdNum = parseInt(telegramId);
+            if (isNaN(telegramIdNum) || telegramIdNum <= 0) {
+                errorBox.textContent = "Telegram ID должен быть положительным числом.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            if (!firstName || !lastName) {
+                errorBox.textContent = "Имя и фамилия обязательны для заполнения.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            if (!password || password.length < 6) {
+                errorBox.textContent = "Пароль должен содержать минимум 6 символов.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorBox.textContent = "Пароли не совпадают.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Регистрация...";
+
+            try {
+                const response = await fetch("/auth/register", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        phone: phone || null,
+                        email: email || null,
+                        telegram_id: telegramIdNum,
+                        first_name: firstName,
+                        last_name: lastName,
+                        password: password,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.detail || "Ошибка регистрации");
+                }
+
+                const result = await response.json();
+                alert(result.message || "Регистрация успешна! Теперь вы можете войти в систему.");
+                window.location.href = "/login";
+            } catch (error) {
+                errorBox.textContent = error.message || "Не удалось зарегистрироваться.";
+                errorBox.classList.remove("hidden");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Зарегистрироваться";
+            }
+        });
+    </script>
+</body>
+</html>
+
