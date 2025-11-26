@@ -1,0 +1,14 @@
+{
+  "venvPath": "WSB_portal",
+  "venv": ".venv",
+  "executionEnvironments": [
+    {
+      "root": "./WSB_portal",
+      "venv": ".venv",
+      "extraPaths": [
+        "./WSB_portal/.venv/Lib/site-packages"
+      ]
+    }
+  ]
+}
+

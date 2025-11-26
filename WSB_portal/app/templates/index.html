@@ -35,7 +35,7 @@
         <button class="tab-button active" data-tab="equipment">
             Бронирование оборудования
         </button>
-        <button class="tab-button" data-tab="manage-bookings">
+        <button class="tab-button hidden" data-tab="manage-bookings" data-requires-auth="true">
             Управление бронированием
         </button>
         <button class="tab-button" data-tab="workplaces">
@@ -131,7 +131,7 @@
         </section>
     </div>
 
-    <div class="tab-content" id="tab-manage-bookings">
+    <div class="tab-content hidden" id="tab-manage-bookings" data-requires-auth="true">
         <section class="booking-panel">
             <div class="booking-header">
                 <div class="booking-header-main">

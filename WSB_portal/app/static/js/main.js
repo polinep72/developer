@@ -1819,6 +1819,38 @@ function applyAuthState() {
         }
     });
 
+    // Скрываем вкладки, требующие авторизации, для неавторизованных пользователей
+    const authTabButtons = document.querySelectorAll('.tab-button[data-requires-auth="true"]');
+    const authTabContents = document.querySelectorAll('.tab-content[data-requires-auth="true"]');
+    const requireAuthHidden = !currentUser;
+
+    authTabButtons.forEach((button) => {
+        if (requireAuthHidden) {
+            button.classList.add("hidden");
+        } else {
+            button.classList.remove("hidden");
+        }
+    });
+
+    authTabContents.forEach((content) => {
+        if (requireAuthHidden) {
+            content.classList.add("hidden");
+        } else {
+            content.classList.remove("hidden");
+        }
+    });
+
+    // Если активна вкладка, требующая авторизации, и пользователь не авторизован - переключаем на первую доступную
+    if (requireAuthHidden) {
+        const activeButton = document.querySelector(".tab-button.active");
+        if (activeButton && activeButton.dataset.requiresAuth === "true") {
+            const fallback = document.querySelector('.tab-button:not(.hidden):not([data-requires-auth="true"])');
+            if (fallback) {
+                fallback.click();
+            }
+        }
+    }
+
     // Показываем/скрываем вкладку управления пользователями для админов
     const usersManagementTab = document.querySelector('.tab-button[data-tab="users-management"]');
     if (usersManagementTab) {

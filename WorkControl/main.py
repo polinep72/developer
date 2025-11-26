@@ -407,6 +407,63 @@ def _attempt_restart_container(container_name: str):
         return False, f"Ошибка при попытке перезапуска контейнера '{container_name}': {e}"
 
 
+def get_monitored_containers():
+    """Получает список всех Docker-контейнеров из мониторинга"""
+    containers = []
+    for service in SERVICES_TO_MONITOR:
+        if service["type"] == "docker_container_status":
+            container_name = service["check_params"].get("container_name")
+            if container_name:
+                containers.append({
+                    "name": service["name"],
+                    "container_name": container_name
+                })
+    return containers
+
+
+def restart_container(container_name: str):
+    """Перезапускает Docker-контейнер (публичная функция для бота)"""
+    global DOCKER_CLIENT
+    if DOCKER_CLIENT is None or DOCKER_CLIENT == "init_failed":
+        try:
+            DOCKER_CLIENT = docker.from_env()
+            DOCKER_CLIENT.ping()
+        except Exception as e:
+            return False, f"Ошибка подключения к Docker: {e}"
+    
+    try:
+        container = DOCKER_CLIENT.containers.get(container_name)
+        current_status = container.status
+        
+        # Если контейнер запущен, сначала останавливаем
+        if current_status == "running":
+            try:
+                container.restart(timeout=10)
+            except docker.errors.APIError as e:
+                return False, f"Не удалось перезапустить контейнер '{container_name}': {e}"
+        else:
+            # Если контейнер остановлен, просто запускаем
+            try:
+                container.start()
+            except docker.errors.APIError as e:
+                return False, f"Не удалось запустить контейнер '{container_name}': {e}"
+        
+        # Обновляем состояние
+        try:
+            container.reload()
+        except Exception:
+            pass
+        
+        status_after = container.status
+        if status_after == "running":
+            return True, f"Контейнер '{container_name}' успешно перезапущен."
+        return False, f"Контейнер '{container_name}' не запущен после перезапуска (status='{status_after}')."
+    except docker.errors.NotFound:
+        return False, f"Контейнер '{container_name}' не найден."
+    except Exception as e:
+        return False, f"Ошибка при перезапуске контейнера '{container_name}': {e}"
+
+
 def check_docker_container_status(container_name):
     # ... (код без изменений)
     global DOCKER_CLIENT
@@ -620,6 +677,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("🔍 Проверить сервисы", callback_data="check_services")],
         [InlineKeyboardButton("📊 Статус", callback_data="get_status")],
+        [InlineKeyboardButton("🔄 Перезапустить контейнер", callback_data="restart_menu")],
         [InlineKeyboardButton("🔄 Обновить", callback_data="refresh")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -677,6 +735,70 @@ async def db_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(report, parse_mode='Markdown')
 
 
+async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработчик команды /restart - показывает меню выбора контейнера для перезапуска"""
+    containers = get_monitored_containers()
+    
+    if not containers:
+        await update.message.reply_text("❌ Нет Docker-контейнеров в мониторинге.")
+        return
+    
+    keyboard = []
+    for container_info in containers:
+        service_name = escape_markdown_v2(container_info["name"])
+        container_name = container_info["container_name"]
+        # Используем короткое имя сервиса для кнопки, полное имя в callback_data
+        button_text = f"🔄 {container_info['name']}"
+        callback_data = f"restart_{container_name}"
+        keyboard.append([InlineKeyboardButton(button_text, callback_data=callback_data)])
+    
+    keyboard.append([InlineKeyboardButton("◀️ Назад", callback_data="refresh")])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        "🔄 *Перезапуск контейнеров*\n\n"
+        "Выберите контейнер для перезапуска:",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработчик команды /help - показывает список всех команд с описанием"""
+    help_text = """📖 *Справка по командам бота*
+
+*Основные команды:*
+
+/start \\- Главное меню с кнопками быстрого доступа
+
+/status \\- Показать текущий статус всех сервисов
+
+/check \\- Выполнить полную проверку всех сервисов
+
+/restart \\- Перезапустить Docker\\-контейнер
+   Выберите контейнер из списка для перезапуска
+
+/reload \\- Перезагрузить конфигурацию из базы данных
+   Обновляет список сервисов для мониторинга
+
+/db \\- Проверить новые записи в базе данных
+   Показывает статистику за последние 12 часов
+
+/help \\- Показать эту справку
+
+*Кнопки в меню:*
+
+🔍 *Проверить сервисы* \\- Выполнить проверку всех сервисов
+
+📊 *Статус* \\- Показать текущий статус
+
+🔄 *Перезапустить контейнер* \\- Меню выбора контейнера для перезапуска
+
+🔄 *Обновить* \\- Вернуться в главное меню"""
+    
+    await update.message.reply_text(help_text, parse_mode='MarkdownV2')
+
+
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик нажатий на кнопки"""
     query = update.callback_query
@@ -692,10 +814,67 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         report = generate_status_report()
         await query.edit_message_text(report, parse_mode='Markdown')
         
+    elif query.data == "restart_menu":
+        containers = get_monitored_containers()
+        
+        if not containers:
+            await query.edit_message_text("❌ Нет Docker-контейнеров в мониторинге.")
+            return
+        
+        keyboard = []
+        for container_info in containers:
+            container_name = container_info["container_name"]
+            button_text = f"🔄 {container_info['name']}"
+            callback_data = f"restart_{container_name}"
+            keyboard.append([InlineKeyboardButton(button_text, callback_data=callback_data)])
+        
+        keyboard.append([InlineKeyboardButton("◀️ Назад", callback_data="refresh")])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.edit_message_text(
+            "🔄 *Перезапуск контейнеров*\n\n"
+            "Выберите контейнер для перезапуска:",
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    
+    elif query.data.startswith("restart_"):
+        container_name = query.data.replace("restart_", "")
+        
+        # Находим имя сервиса по container_name
+        service_name = None
+        for service in SERVICES_TO_MONITOR:
+            if service["type"] == "docker_container_status":
+                if service["check_params"].get("container_name") == container_name:
+                    service_name = service["name"]
+                    break
+        
+        display_name = service_name if service_name else container_name
+        
+        await query.edit_message_text(f"🔄 Перезапускаю контейнер '{escape_markdown_v2(display_name)}'...")
+        
+        success, message = restart_container(container_name)
+        
+        if success:
+            result_text = f"✅ *Успешно*\n\n{escape_markdown_v2(message)}"
+            # Обновляем статус сервиса после перезапуска
+            if service_name:
+                check_service(next(s for s in SERVICES_TO_MONITOR if s["name"] == service_name))
+        else:
+            result_text = f"❌ *Ошибка*\n\n{escape_markdown_v2(message)}"
+        
+        keyboard = [
+            [InlineKeyboardButton("◀️ Назад к меню", callback_data="refresh")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.edit_message_text(result_text, reply_markup=reply_markup, parse_mode='Markdown')
+        
     elif query.data == "refresh":
         keyboard = [
             [InlineKeyboardButton("🔍 Проверить сервисы", callback_data="check_services")],
             [InlineKeyboardButton("📊 Статус", callback_data="get_status")],
+            [InlineKeyboardButton("🔄 Перезапустить контейнер", callback_data="restart_menu")],
             [InlineKeyboardButton("🔄 Обновить", callback_data="refresh")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -722,6 +901,8 @@ async def start_telegram_bot():
     TELEGRAM_APP.add_handler(CommandHandler("check", check_command))
     TELEGRAM_APP.add_handler(CommandHandler("reload", reload_command))
     TELEGRAM_APP.add_handler(CommandHandler("db", db_command))
+    TELEGRAM_APP.add_handler(CommandHandler("restart", restart_command))
+    TELEGRAM_APP.add_handler(CommandHandler("help", help_command))
     TELEGRAM_APP.add_handler(CallbackQueryHandler(button_callback))
     
     # Запускаем бота
