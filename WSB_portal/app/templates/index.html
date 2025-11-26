@@ -41,6 +41,9 @@
         <button class="tab-button" data-tab="workplaces">
             История бронирований (статистика и графики)
         </button>
+        <button class="tab-button" data-tab="calendar">
+            Календарь бронирований
+        </button>
         <button class="tab-button" data-tab="si-module">
             Система учета оборудования (СИ)
         </button>
@@ -269,6 +272,32 @@
                 {{ history_heatmap_error if history_heatmap_error else "" }}
             </div>
             <div id="history-heatmap-graph" class="heatmap-graph"></div>
+        </section>
+    </div>
+
+    <div class="tab-content" id="tab-calendar">
+        <section class="calendar-panel">
+            <div class="calendar-header">
+                <h2>Календарь бронирований</h2>
+                <p>Выберите месяц для просмотра бронирований. Кликните на дату, чтобы открыть детали бронирований.</p>
+            </div>
+            <div class="calendar-controls">
+                <div class="control">
+                    <button id="calendar-prev-month" class="btn-secondary">← Предыдущий месяц</button>
+                </div>
+                <div class="control">
+                    <label for="calendar-month">Месяц</label>
+                    <input type="month" id="calendar-month" value="">
+                </div>
+                <div class="control">
+                    <button id="calendar-next-month" class="btn-secondary">Следующий месяц →</button>
+                </div>
+                <div class="control">
+                    <button id="calendar-today" class="btn-secondary">Сегодня</button>
+                </div>
+            </div>
+            <div id="calendar-error" class="calendar-error hidden"></div>
+            <div id="calendar-grid" class="calendar-grid"></div>
         </section>
     </div>
 

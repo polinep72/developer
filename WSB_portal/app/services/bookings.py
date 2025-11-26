@@ -776,3 +776,69 @@ def _insert_booking(
         raise ValueError("Бронирование не создано.")
     return row["id"]
 
+
+def get_calendar_overview(year: int, month: int, user_id: Optional[int] = None) -> Dict[str, Any]:
+    """
+    Получить обзор бронирований для календаря на указанный месяц.
+    
+    Args:
+        year: Год
+        month: Месяц (1-12)
+        user_id: ID пользователя (если None, возвращаются все бронирования)
+    
+    Returns:
+        Словарь с данными календаря: {date: count, ...}
+    """
+    conn = _connect()
+    try:
+        with conn.cursor(row_factory=dict_row) as cur:
+            # Определяем диапазон дат для месяца
+            from calendar import monthrange
+            _, last_day = monthrange(year, month)
+            date_from = date(year, month, 1)
+            date_to = date(year, month, last_day)
+            
+            # Базовый запрос
+            query = """
+                SELECT 
+                    b.date,
+                    COUNT(*) as booking_count
+                FROM bookings b
+                WHERE b.date >= %s 
+                    AND b.date <= %s
+                    AND b.cancel = FALSE
+            """
+            params: List[Any] = [date_from, date_to]
+            
+            # Если указан user_id, фильтруем по пользователю
+            if user_id:
+                query += " AND b.user_id = %s"
+                params.append(user_id)
+            
+            query += " GROUP BY b.date ORDER BY b.date"
+            
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            
+            # Формируем словарь {date: count}
+            calendar_data: Dict[str, int] = {}
+            for row in rows:
+                date_str = row["date"].isoformat()
+                calendar_data[date_str] = int(row["booking_count"])
+            
+            return {
+                "year": year,
+                "month": month,
+                "bookings": calendar_data,
+            }
+    except Exception as e:
+        logger.error(f"Ошибка получения данных календаря: {e}", exc_info=True)
+        return {
+            "year": year,
+            "month": month,
+            "bookings": {},
+            "error": str(e),
+        }
+    finally:
+        conn.close()
+

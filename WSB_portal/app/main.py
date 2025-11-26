@@ -1,4 +1,7 @@
 import logging
+import os
+import platform
+import subprocess
 from datetime import date, timedelta, datetime
 from typing import List, Optional, Dict, Any, cast
 
@@ -46,6 +49,7 @@ from .services.bookings import (
     get_all_bookings,
     cancel_booking,
     export_bookings_csv,
+    get_calendar_overview,
 )
 from .services.export_excel import (
     export_dashboard_excel,
@@ -110,9 +114,90 @@ scheduler.add_job(
     replace_existing=True
 )
 
+def stop_previous_instances(port: int = 8090):
+    """Остановить все предыдущие экземпляры сервера на указанном порту"""
+    try:
+        if platform.system() == "Windows":
+            # Для Windows используем netstat и taskkill
+            # Находим процессы, слушающие порт
+            result = subprocess.run(
+                ["netstat", "-ano"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="ignore"
+            )
+            
+            pids_to_kill = set()
+            for line in result.stdout.split("\n"):
+                if f":{port}" in line and "LISTENING" in line:
+                    parts = line.split()
+                    if len(parts) >= 5:
+                        try:
+                            pid = int(parts[-1])
+                            pids_to_kill.add(pid)
+                        except (ValueError, IndexError):
+                            continue
+            
+            # Останавливаем найденные процессы
+            for pid in pids_to_kill:
+                try:
+                    # Проверяем, что это действительно Python процесс
+                    check_result = subprocess.run(
+                        ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV"],
+                        capture_output=True,
+                        text=True,
+                        encoding="utf-8",
+                        errors="ignore"
+                    )
+                    if "python" in check_result.stdout.lower():
+                        subprocess.run(
+                            ["taskkill", "/F", "/PID", str(pid)],
+                            capture_output=True,
+                            stderr=subprocess.DEVNULL
+                        )
+                        logger.info(f"Остановлен предыдущий процесс сервера (PID: {pid})")
+                except Exception as e:
+                    logger.warning(f"Не удалось остановить процесс {pid}: {e}")
+            
+            if pids_to_kill:
+                logger.info(f"Остановлено {len(pids_to_kill)} предыдущих экземпляров сервера")
+            else:
+                logger.info("Предыдущие экземпляры сервера не найдены")
+        else:
+            # Для Linux/Mac используем lsof и kill
+            result = subprocess.run(
+                ["lsof", "-ti", f":{port}"],
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                pids = result.stdout.strip().split("\n")
+                for pid in pids:
+                    try:
+                        subprocess.run(
+                            ["kill", "-9", pid],
+                            capture_output=True,
+                            stderr=subprocess.DEVNULL
+                        )
+                        logger.info(f"Остановлен предыдущий процесс сервера (PID: {pid})")
+                    except Exception as e:
+                        logger.warning(f"Не удалось остановить процесс {pid}: {e}")
+                logger.info(f"Остановлено {len(pids)} предыдущих экземпляров сервера")
+            else:
+                logger.info("Предыдущие экземпляры сервера не найдены")
+                
+    except Exception as e:
+        logger.warning(f"Ошибка при остановке предыдущих экземпляров: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
     """Запуск планировщика при старте приложения"""
+    # Останавливаем предыдущие экземпляры сервера
+    stop_previous_instances(port=8090)
+    
     scheduler.start()
     logger.info("Планировщик напоминаний запущен")
 
@@ -204,6 +289,21 @@ def clear_auth_cookie(response: Response):
 
 def get_token_from_request(request: Request) -> str | None:
     return request.cookies.get(AUTH_COOKIE_NAME)
+
+
+def get_optional_user(request: Request) -> Optional[Dict[str, Any]]:
+    """Получить пользователя, если он авторизован, иначе None"""
+    token = get_token_from_request(request)
+    if not token:
+        return None
+    try:
+        payload = auth_service.decode_access_token(token)
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        return auth_service.get_user_by_id(user_id)
+    except Exception:
+        return None
 
 
 def get_current_user(request: Request) -> Dict[str, Any]:
@@ -445,6 +545,28 @@ async def export_bookings_excel(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@app.get("/api/bookings/calendar", response_class=JSONResponse)
+async def get_bookings_calendar(
+    year: int = Query(..., description="Год"),
+    month: int = Query(..., description="Месяц (1-12)"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_user),
+):
+    """Получить данные календаря бронирований на указанный месяц"""
+    if not (1 <= month <= 12):
+        raise HTTPException(status_code=400, detail="Месяц должен быть от 1 до 12")
+    
+    user_id = current_user.get("id") if current_user else None
+    # Для неавторизованных пользователей показываем все бронирования
+    # Для авторизованных - только свои (если не админ)
+    if current_user and not current_user.get("is_admin"):
+        user_id = current_user.get("id")
+    else:
+        user_id = None  # Админы видят все
+    
+    result = get_calendar_overview(year=year, month=month, user_id=user_id)
+    return result
 
 
 @app.get("/api/bookings/export/pdf", response_class=StreamingResponse)

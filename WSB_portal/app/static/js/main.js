@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initBookingForm();
     initManageBookings();
     initDashboard();
+    initCalendar();
     initEquipmentModule();
     initUsersManagement();
     initUserProfilePanel();
@@ -67,7 +68,19 @@ function initTabs() {
             }
             
             if (`tab-${target}` === "tab-manage-bookings") {
-                loadBookingsList();
+                // Загружаем данные только если не отключена автоматическая загрузка
+                // (например, при переключении из календаря)
+                if (!window._tempDisableAutoLoad) {
+                    loadBookingsList();
+                }
+            }
+            
+            if (`tab-${target}` === "tab-calendar") {
+                // Календарь загружается автоматически при активации вкладки
+                const calendarMonthInput = document.getElementById("calendar-month");
+                if (calendarMonthInput && calendarMonthInput.value) {
+                    calendarMonthInput.dispatchEvent(new Event("change"));
+                }
             }
             
             if (`tab-${target}` === "tab-si-module") {
@@ -913,6 +926,249 @@ function initEquipmentModule() {
     
     // Данные загружаются только при активации вкладки (см. initTabs)
     // Статистику можно загрузить сразу, но лучше при активации
+}
+
+function initCalendar() {
+    const calendarMonthInput = document.getElementById("calendar-month");
+    const calendarPrevBtn = document.getElementById("calendar-prev-month");
+    const calendarNextBtn = document.getElementById("calendar-next-month");
+    const calendarTodayBtn = document.getElementById("calendar-today");
+    const calendarGrid = document.getElementById("calendar-grid");
+    const calendarError = document.getElementById("calendar-error");
+
+    if (!calendarMonthInput || !calendarGrid) {
+        return;
+    }
+
+    // Устанавливаем текущий месяц по умолчанию
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = String(today.getMonth() + 1).padStart(2, "0");
+    calendarMonthInput.value = `${currentYear}-${currentMonth}`;
+
+    // Загружаем календарь при изменении месяца
+    const loadCalendar = async () => {
+        const monthValue = calendarMonthInput.value;
+        if (!monthValue) {
+            return;
+        }
+
+        const [year, month] = monthValue.split("-").map(Number);
+        if (!year || !month) {
+            return;
+        }
+
+        calendarGrid.innerHTML = "<div>Загрузка...</div>";
+        if (calendarError) {
+            calendarError.classList.add("hidden");
+            calendarError.textContent = "";
+        }
+
+        try {
+            const response = await fetch(`/api/bookings/calendar?year=${year}&month=${month}`, {
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error("Не удалось загрузить календарь");
+            }
+
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            renderCalendar(year, month, data.bookings || {});
+        } catch (error) {
+            console.error("Ошибка загрузки календаря:", error);
+            if (calendarError) {
+                calendarError.textContent = error.message || "Ошибка загрузки календаря";
+                calendarError.classList.remove("hidden");
+            }
+            calendarGrid.innerHTML = "";
+        }
+    };
+
+    // Рендеринг календаря
+    const renderCalendar = (year, month, bookings) => {
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+        const daysInMonth = lastDay.getDate();
+        const startDayOfWeek = firstDay.getDay();
+        const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Понедельник = 0
+
+        const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+        let html = "";
+
+        // Заголовки дней недели
+        weekDays.forEach((day) => {
+            html += `<div class="calendar-day-header">${day}</div>`;
+        });
+
+        // Пустые ячейки до начала месяца
+        for (let i = 0; i < adjustedStartDay; i++) {
+            const prevMonthDate = new Date(year, month - 1, -i);
+            html += `<div class="calendar-day other-month"><span class="calendar-day-number">${prevMonthDate.getDate()}</span></div>`;
+        }
+
+        // Дни месяца
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month - 1, day);
+            const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const bookingCount = bookings[dateStr] || 0;
+            const isToday =
+                date.getFullYear() === today.getFullYear() &&
+                date.getMonth() === today.getMonth() &&
+                date.getDate() === today.getDate();
+
+            let dayClasses = "calendar-day";
+            if (isToday) {
+                dayClasses += " today";
+            }
+            if (bookingCount > 0) {
+                dayClasses += " has-bookings";
+            }
+
+            html += `<div class="${dayClasses}" data-date="${dateStr}">
+                <span class="calendar-day-number">${day}</span>
+                ${bookingCount > 0 ? `<span class="calendar-day-count">${bookingCount}</span>` : ""}
+            </div>`;
+        }
+
+        // Пустые ячейки после конца месяца
+        const totalCells = adjustedStartDay + daysInMonth;
+        const remainingCells = 7 - (totalCells % 7);
+        if (remainingCells < 7) {
+            for (let i = 1; i <= remainingCells; i++) {
+                html += `<div class="calendar-day other-month"><span class="calendar-day-number">${i}</span></div>`;
+            }
+        }
+
+        calendarGrid.innerHTML = html;
+
+        // Обработчики кликов на дни
+        calendarGrid.querySelectorAll(".calendar-day:not(.other-month)").forEach((dayEl) => {
+            dayEl.addEventListener("click", () => {
+                const dateStr = dayEl.dataset.date;
+                if (!dateStr) {
+                    return;
+                }
+
+                // Сохраняем дату для использования после переключения вкладки
+                const targetDate = dateStr;
+                
+                // Переключаемся на вкладку "Управление бронированием"
+                const manageBookingsTab = document.querySelector('.tab-button[data-tab="manage-bookings"]');
+                if (manageBookingsTab) {
+                    // Временно отключаем автоматическую загрузку при переключении вкладки
+                    const originalLoadBookings = window._tempDisableAutoLoad;
+                    window._tempDisableAutoLoad = true;
+                    
+                    manageBookingsTab.click();
+                    
+                    // Восстанавливаем через небольшую задержку
+                    setTimeout(() => {
+                        window._tempDisableAutoLoad = false;
+                    }, 500);
+                }
+
+                // Устанавливаем дату и загружаем данные
+                // Ждем, пока вкладка активируется и элементы появятся в DOM
+                const setDateAndLoad = (targetDate) => {
+                    const dateInput = document.getElementById("manage-booking-date");
+                    if (dateInput) {
+                        // Устанавливаем дату
+                        dateInput.value = targetDate;
+                        // Вызываем событие change для обновления значения
+                        dateInput.dispatchEvent(new Event("change", { bubbles: true }));
+                        
+                        // Проверяем, что дата действительно установлена, и загружаем данные
+                        if (typeof loadBookingsList === "function") {
+                            // Вызываем с задержкой, чтобы дата точно установилась и DOM обновился
+                            setTimeout(() => {
+                                // Дополнительная проверка, что дата установлена
+                                const currentDate = dateInput.value;
+                                if (currentDate === targetDate) {
+                                    loadBookingsList();
+                                } else {
+                                    // Если дата не установилась, пробуем еще раз
+                                    dateInput.value = targetDate;
+                                    setTimeout(() => {
+                                        loadBookingsList();
+                                    }, 100);
+                                }
+                            }, 300);
+                        } else {
+                            // Если функция еще не определена, нажимаем кнопку
+                            const showBtn = document.getElementById("refresh-bookings");
+                            if (showBtn) {
+                                setTimeout(() => {
+                                    showBtn.click();
+                                }, 300);
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+                };
+
+                // Пробуем сразу
+                if (!setDateAndLoad(dateStr)) {
+                    // Если не получилось, ждем и пробуем снова
+                    setTimeout(() => {
+                        if (!setDateAndLoad(dateStr)) {
+                            // Последняя попытка
+                            setTimeout(() => setDateAndLoad(dateStr), 400);
+                        }
+                    }, 300);
+                }
+            });
+        });
+    };
+
+    // Обработчики событий
+    calendarMonthInput.addEventListener("change", loadCalendar);
+    if (calendarPrevBtn) {
+        calendarPrevBtn.addEventListener("click", () => {
+            const [year, month] = calendarMonthInput.value.split("-").map(Number);
+            const prevMonth = month === 1 ? 12 : month - 1;
+            const prevYear = month === 1 ? year - 1 : year;
+            calendarMonthInput.value = `${prevYear}-${String(prevMonth).padStart(2, "0")}`;
+            loadCalendar();
+        });
+    }
+    if (calendarNextBtn) {
+        calendarNextBtn.addEventListener("click", () => {
+            const [year, month] = calendarMonthInput.value.split("-").map(Number);
+            const nextMonth = month === 12 ? 1 : month + 1;
+            const nextYear = month === 12 ? year + 1 : year;
+            calendarMonthInput.value = `${nextYear}-${String(nextMonth).padStart(2, "0")}`;
+            loadCalendar();
+        });
+    }
+    if (calendarTodayBtn) {
+        calendarTodayBtn.addEventListener("click", () => {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = String(today.getMonth() + 1).padStart(2, "0");
+            calendarMonthInput.value = `${currentYear}-${currentMonth}`;
+            loadCalendar();
+        });
+    }
+
+    // Загружаем календарь при активации вкладки
+    const calendarTab = document.querySelector('.tab-button[data-tab="calendar"]');
+    if (calendarTab) {
+        calendarTab.addEventListener("click", () => {
+            loadCalendar();
+        });
+    }
+
+    // Загружаем календарь при первой загрузке, если вкладка активна
+    if (document.getElementById("tab-calendar")?.classList.contains("active")) {
+        loadCalendar();
+    }
 }
 
 function initEquipmentSubtabs() {

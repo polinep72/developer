@@ -1437,3 +1437,142 @@ body {
     }
 }
 
+/* Календарь бронирований */
+.calendar-panel {
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.calendar-header {
+    margin-bottom: 24px;
+}
+
+.calendar-header h2 {
+    margin: 0 0 8px 0;
+    color: var(--text);
+    font-size: 24px;
+}
+
+.calendar-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.calendar-controls {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.calendar-controls .control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.calendar-controls label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.calendar-controls input[type="month"] {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 150px;
+}
+
+.calendar-error {
+    color: #dc2626;
+    padding: 12px;
+    background: #fef2f2;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+    color: #64748b;
+    padding: 8px;
+    text-transform: uppercase;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: #f1f5f9;
+    border-color: var(--primary);
+}
+
+.calendar-day.other-month {
+    opacity: 0.4;
+    background: #f8fafc;
+}
+
+.calendar-day.today {
+    background: #eff6ff;
+    border-color: var(--primary);
+    font-weight: 600;
+}
+
+.calendar-day.has-bookings {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+.calendar-day.has-bookings:hover {
+    background: #fde68a;
+}
+
+.calendar-day-number {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.calendar-day-count {
+    font-size: 11px;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-top: auto;
+}
+
+.calendar-day.has-bookings .calendar-day-count {
+    background: #f59e0b;
+    color: #ffffff;
+    font-weight: 600;
+}
+
