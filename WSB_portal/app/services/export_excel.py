@@ -4,12 +4,40 @@
 import io
 import logging
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.cell.cell import Cell
 
 logger = logging.getLogger(__name__)
+
+
+def _get_active_sheet(workbook: Workbook) -> Worksheet:
+    """Гарантированно возвращает активный лист"""
+    sheet = workbook.active
+    if sheet is None:
+        raise ValueError("Workbook has no active sheet")
+    return sheet
+
+
+def _get_cell(ws: Worksheet, coordinate: str) -> Cell:
+    """Типобезопасный доступ к ячейке по адресу вида 'A1'"""
+    cell = ws[coordinate]
+    if isinstance(cell, tuple):
+        # openpyxl typing возвращает кортежи при срезах; нам нужны одиночные ячейки
+        first = cell[0]
+        if isinstance(first, tuple):
+            first = first[0]
+        return cast(Cell, first)
+    return cast(Cell, cell)
+
+
+def _set_cell(ws: Worksheet, coordinate: str, value: Any) -> Cell:
+    cell = _get_cell(ws, coordinate)
+    cell.value = value
+    return cell
 
 
 def export_dashboard_excel(
@@ -20,7 +48,7 @@ def export_dashboard_excel(
 ) -> bytes:
     """Экспорт данных дашборда в Excel"""
     wb = Workbook()
-    ws = wb.active
+    ws = _get_active_sheet(wb)
     ws.title = "Аналитика бронирований"
     
     # Стили
@@ -39,45 +67,45 @@ def export_dashboard_excel(
     
     # Заголовок
     ws.merge_cells(f'A{row}:B{row}')
-    ws[f'A{row}'] = "Аналитика бронирований рабочих мест"
-    ws[f'A{row}'].font = title_font
-    ws[f'A{row}'].alignment = center_align
+    title_cell = _set_cell(ws, f'A{row}', "Аналитика бронирований рабочих мест")
+    title_cell.font = title_font
+    title_cell.alignment = center_align
     row += 2
     
     # Параметры фильтрации
-    ws[f'A{row}'] = "Параметры фильтрации"
-    ws[f'A{row}'].font = Font(bold=True, size=12)
+    params_title = _set_cell(ws, f'A{row}', "Параметры фильтрации")
+    params_title.font = Font(bold=True, size=12)
     row += 1
     
-    ws[f'A{row}'] = "Начало периода"
-    ws[f'B{row}'] = start_date.strftime("%d.%m.%Y")
+    _set_cell(ws, f'A{row}', "Начало периода")
+    _set_cell(ws, f'B{row}', start_date.strftime("%d.%m.%Y"))
     row += 1
     
-    ws[f'A{row}'] = "Конец периода"
-    ws[f'B{row}'] = end_date.strftime("%d.%m.%Y")
+    _set_cell(ws, f'A{row}', "Конец периода")
+    _set_cell(ws, f'B{row}', end_date.strftime("%d.%m.%Y"))
     row += 1
     
     equipment_list = filters.get("equipment", [])
-    ws[f'A{row}'] = "Оборудование"
-    ws[f'B{row}'] = ", ".join(equipment_list) if equipment_list else "Все"
+    _set_cell(ws, f'A{row}', "Оборудование")
+    _set_cell(ws, f'B{row}', ", ".join(equipment_list) if equipment_list else "Все")
     row += 1
     
-    ws[f'A{row}'] = "Целевая загрузка (ч/день)"
-    ws[f'B{row}'] = filters.get("target_load", 8)
+    _set_cell(ws, f'A{row}', "Целевая загрузка (ч/день)")
+    _set_cell(ws, f'B{row}', filters.get("target_load", 8))
     row += 1
     
-    ws[f'A{row}'] = "Фактическая загрузка"
-    ws[f'B{row}'] = payload.get("utilization", "0%")
+    _set_cell(ws, f'A{row}', "Фактическая загрузка")
+    _set_cell(ws, f'B{row}', payload.get("utilization", "0%"))
     row += 2
     
     # Суммарная наработка по оборудованию
-    ws[f'A{row}'] = "Суммарная наработка по оборудованию"
-    ws[f'A{row}'].font = Font(bold=True, size=12)
+    equipment_title = _set_cell(ws, f'A{row}', "Суммарная наработка по оборудованию")
+    equipment_title.font = Font(bold=True, size=12)
     row += 1
     
-    ws[f'A{row}'] = "Прибор"
-    ws[f'B{row}'] = "Часы"
-    for cell in [ws[f'A{row}'], ws[f'B{row}']]:
+    header_a = _set_cell(ws, f'A{row}', "Прибор")
+    header_b = _set_cell(ws, f'B{row}', "Часы")
+    for cell in [header_a, header_b]:
         cell.font = header_font
         cell.fill = header_fill
         cell.alignment = center_align
@@ -86,23 +114,23 @@ def export_dashboard_excel(
     
     equipment_summary = payload.get("equipmentSummary", [])
     for item in equipment_summary:
-        ws[f'A{row}'] = item.get("name", "")
-        ws[f'B{row}'] = item.get("hours", 0)
-        ws[f'B{row}'].number_format = "0.00"
-        for cell in [ws[f'A{row}'], ws[f'B{row}']]:
+        name_cell = _set_cell(ws, f'A{row}', item.get("name", ""))
+        hours_cell = _set_cell(ws, f'B{row}', item.get("hours", 0))
+        hours_cell.number_format = "0.00"
+        for cell in [name_cell, hours_cell]:
             cell.border = border
         row += 1
     
     row += 1
     
     # Активность пользователей
-    ws[f'A{row}'] = "Активность пользователей"
-    ws[f'A{row}'].font = Font(bold=True, size=12)
+    users_title = _set_cell(ws, f'A{row}', "Активность пользователей")
+    users_title.font = Font(bold=True, size=12)
     row += 1
     
-    ws[f'A{row}'] = "Пользователь"
-    ws[f'B{row}'] = "Часы"
-    for cell in [ws[f'A{row}'], ws[f'B{row}']]:
+    user_header = _set_cell(ws, f'A{row}', "Пользователь")
+    hours_header = _set_cell(ws, f'B{row}', "Часы")
+    for cell in [user_header, hours_header]:
         cell.font = header_font
         cell.fill = header_fill
         cell.alignment = center_align
@@ -111,10 +139,10 @@ def export_dashboard_excel(
     
     users = payload.get("users", [])
     for item in users:
-        ws[f'A{row}'] = item.get("name", "")
-        ws[f'B{row}'] = item.get("hours", 0)
-        ws[f'B{row}'].number_format = "0.00"
-        for cell in [ws[f'A{row}'], ws[f'B{row}']]:
+        user_cell = _set_cell(ws, f'A{row}', item.get("name", ""))
+        user_hours_cell = _set_cell(ws, f'B{row}', item.get("hours", 0))
+        user_hours_cell.number_format = "0.00"
+        for cell in [user_cell, user_hours_cell]:
             cell.border = border
         row += 1
     
@@ -135,7 +163,7 @@ def export_equipment_excel(
 ) -> bytes:
     """Экспорт данных модуля СИ в Excel"""
     wb = Workbook()
-    ws = wb.active
+    ws = _get_active_sheet(wb)
     
     # Название листа в зависимости от типа
     type_names = {
@@ -158,7 +186,7 @@ def export_equipment_excel(
     center_align = Alignment(horizontal='center', vertical='center')
     
     if not equipment_data:
-        ws['A1'] = "Нет данных для экспорта"
+        _set_cell(ws, 'A1', "Нет данных для экспорта")
         buffer = io.BytesIO()
         wb.save(buffer)
         buffer.seek(0)
@@ -217,7 +245,7 @@ def export_bookings_excel(
 ) -> bytes:
     """Экспорт бронирований в Excel"""
     wb = Workbook()
-    ws = wb.active
+    ws = _get_active_sheet(wb)
     ws.title = "Бронирования"
     
     # Стили
@@ -236,10 +264,9 @@ def export_bookings_excel(
     
     # Заголовок
     ws.merge_cells(f'A{row}:H{row}')
-    title = f"Бронирования за {target_date.strftime('%d.%m.%Y')}"
-    ws[f'A{row}'] = title
-    ws[f'A{row}'].font = title_font
-    ws[f'A{row}'].alignment = center_align
+    title_cell = _set_cell(ws, f'A{row}', f"Бронирования за {target_date.strftime('%d.%m.%Y')}")
+    title_cell.font = title_font
+    title_cell.alignment = center_align
     row += 2
     
     # Определяем заголовки (приводим к реальному набору данных CSV)
