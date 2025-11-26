@@ -695,6 +695,8 @@ def _format_booking_row(row: Dict[str, Any]) -> Dict[str, Any]:
     start_dt = row.get("time_start")
     end_dt = row.get("time_end")
     finish_dt = row.get("finish")
+    booking_date = row.get("date")
+    today = datetime.now().date()
     
     status = "Активное"
     if row.get("cancel"):
@@ -708,6 +710,13 @@ def _format_booking_row(row: Dict[str, Any]) -> Dict[str, Any]:
         elif now >= end_dt:
             status = "Завершено"
     
+    can_cancel = (
+        bool(booking_date)
+        and booking_date >= today
+        and not row.get("cancel")
+        and not finish_dt
+    )
+
     return {
         "id": row["id"],
         "date": row["date"].isoformat() if row.get("date") else None,
@@ -718,7 +727,7 @@ def _format_booking_row(row: Dict[str, Any]) -> Dict[str, Any]:
         "equipment": row.get("name_equip", ""),
         "category": row.get("name_cat", ""),
         "status": status,
-        "can_cancel": not row.get("cancel") and not finish_dt and (start_dt is None or datetime.now() < start_dt),
+        "can_cancel": can_cancel,
     }
 
 
@@ -727,7 +736,8 @@ def _format_booking_row_admin(row: Dict[str, Any]) -> Dict[str, Any]:
     formatted = _format_booking_row(row)
     formatted["user_id"] = row.get("user_id")
     formatted["user_name"] = row.get("user_name", "")
-    formatted["can_cancel"] = not row.get("cancel") and not row.get("finish")
+    # Для админа та же логика доступности отмены: только для сегодняшних и будущих дат
+    formatted["can_cancel"] = formatted.get("can_cancel", False)
     return formatted
 
 
