@@ -33,8 +33,10 @@ services:
     image: redis:7-alpine
     container_name: wsb-redis
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
-    ports:
-      - "6379:6379"
+    # Порт не пробрасываем наружу, так как Redis используется только внутри Docker сети
+    # Если нужен доступ снаружи, раскомментируйте строку ниже и измените порт
+    # ports:
+    #   - "6380:6379"
     restart: unless-stopped
     networks:
       - wsb-network

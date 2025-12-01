@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const config = getPortalConfig();
     await initAuth();
     initTabs();
+    initHistorySubtabs();
     initHeatmap({
         graphId: "heatmap-graph",
         buttonId: "refresh-heatmap",
@@ -55,6 +56,11 @@ function initTabs() {
 
     buttons.forEach((button) => {
         button.addEventListener("click", () => {
+            // Не переключаемся на скрытые вкладки
+            if (button.classList.contains("hidden")) {
+                return;
+            }
+            
             const target = button.dataset.tab;
 
             buttons.forEach((btn) => btn.classList.toggle("active", btn === button));
@@ -124,6 +130,38 @@ function initTabs() {
             }
         }
     }
+}
+
+function initHistorySubtabs() {
+    const buttons = document.querySelectorAll(".history-subtab-button");
+    const contents = document.querySelectorAll(".history-subtab-content");
+
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const target = button.dataset.subtab;
+
+            buttons.forEach((btn) => btn.classList.toggle("active", btn === button));
+            contents.forEach((content) => {
+                content.classList.toggle("active", content.id === `subtab-${target}`);
+            });
+
+            // Загружаем данные для активной подвкладки
+            if (target === "dashboard") {
+                // Даш-борд уже загружается через initDashboard
+                scheduleResize();
+            } else if (target === "heatmap") {
+                scheduleResize();
+                resizeHeatmaps();
+            } else if (target === "equipment-stats" || target === "user-stats" || 
+                       target === "temporal-patterns" || target === "forecast" || 
+                       target === "recommendations") {
+                loadAdvancedAnalytics();
+            }
+        });
+    });
+
+    // Инициализируем настройку виджетов для дашборда
+    initWidgetCustomizer();
 }
 
 function initHeatmap(options) {
@@ -820,18 +858,22 @@ function renderDashboard(payload) {
 
     const options = {responsive: true};
 
-    if (payload.relativeFigure) {
+    if (payload.relativeFigure && relativeContainer) {
         const fig = JSON.parse(payload.relativeFigure);
         enforceFullWidth(fig);
         Plotly.react(relativeContainer, fig.data, fig.layout, options).then(() => resizePlot(relativeContainer));
+        registerPlot(relativeContainer);
     }
-    if (payload.absoluteFigure) {
+    if (payload.absoluteFigure && absoluteContainer) {
         const fig = JSON.parse(payload.absoluteFigure);
         enforceFullWidth(fig);
         Plotly.react(absoluteContainer, fig.data, fig.layout, options).then(() => resizePlot(absoluteContainer));
+        registerPlot(absoluteContainer);
     }
 
-    utilization.textContent = payload.utilization || "—";
+    if (utilization) {
+        utilization.textContent = payload.utilization || "—";
+    }
 
     if (userTable) {
         userTable.innerHTML = payload.users
@@ -845,8 +887,14 @@ function renderDashboard(payload) {
             .join("");
     }
 
-    registerPlot(relativeContainer);
-    registerPlot(absoluteContainer);
+    // Рендерим ключевые показатели, если они есть
+    if (payload.insights) {
+        renderDashboardInsights(payload);
+    }
+
+    // Применяем настройки виджетов
+    const prefs = loadWidgetPrefs();
+    applyWidgetPrefs(prefs);
 
     // гарантируем пересчёт уже после первичной отрисовки
     window.requestAnimationFrame(scheduleResize);
@@ -895,6 +943,601 @@ function resizePlot(container) {
         width,
         height,
     });
+}
+
+// Расширенная аналитика
+async function loadAdvancedAnalytics() {
+    const today = new Date();
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const startDate = sixMonthsAgo.toISOString().split('T')[0];
+    const endDate = today.toISOString().split('T')[0];
+
+    try {
+        const response = await fetch("/api/dashboard/advanced", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                start_date: startDate,
+                end_date: endDate,
+                equipment: [], // Без фильтрации по оборудованию для рекомендаций
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Не удалось загрузить расширенную аналитику");
+        }
+
+        const data = await response.json();
+        
+        // Проверяем, какая подвкладка активна
+        const activeSubtab = document.querySelector(".history-subtab-button.active");
+        if (!activeSubtab) return;
+
+        const subtab = activeSubtab.dataset.subtab;
+        
+        if (subtab === "equipment-stats") {
+            renderAdvancedEquipmentStats(data);
+        } else if (subtab === "user-stats") {
+            renderAdvancedStaffStats(data);
+        } else if (subtab === "temporal-patterns") {
+            renderTemporalPatterns(data);
+        } else if (subtab === "forecast") {
+            renderForecastBlock(data);
+        } else if (subtab === "recommendations") {
+            renderRecommendationsBlock(data);
+        }
+    } catch (error) {
+        console.error("Ошибка загрузки расширенной аналитики:", error);
+    }
+}
+
+function formatUserName(fullName) {
+    if (!fullName) return "";
+    const parts = fullName.trim().split(/\s+/);
+    return parts.length > 0 ? parts[parts.length - 1] : fullName;
+}
+
+function renderAdvancedEquipmentStats(data) {
+    const container = document.getElementById("equipment-stats-grid");
+    if (!container || !data.equipment_stats) return;
+
+    let html = "";
+
+    // График топ оборудования
+    if (data.equipment_stats.equipment_figure) {
+        html += `<div class="advanced-card">
+            <h3>Топ оборудования по использованию</h3>
+            <div class="chart-container" id="equipment-stats-chart"></div>
+        </div>`;
+    }
+
+    // Детальная статистика по оборудованию
+    if (data.equipment_stats.equipment_detailed && data.equipment_stats.equipment_detailed.length > 0) {
+        html += `<div class="advanced-card">
+            <h3>Детальная статистика по оборудованию</h3>
+            <table>
+                <thead>
+                    <tr><th>Оборудование</th><th>Часы</th><th>Бронирований</th><th>Средняя длительность</th><th>Загрузка, %</th></tr>
+                </thead>
+                <tbody>`;
+        data.equipment_stats.equipment_detailed.forEach(eq => {
+            html += `<tr>
+                <td>${eq.name}</td>
+                <td>${eq.hours.toFixed(2)}</td>
+                <td>${eq.bookings_count}</td>
+                <td>${eq.avg_duration.toFixed(2)} ч</td>
+                <td>${eq.utilization_pct.toFixed(1)}%</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    // Статистика по оборудованию (полный список)
+    if (data.equipment_stats.category_stats && data.equipment_stats.category_stats.length > 0) {
+        html += `<div class="advanced-card">
+            <h3>Использование оборудования</h3>
+            <table>
+                <thead>
+                    <tr><th>Оборудование</th><th>Часы</th></tr>
+                </thead>
+                <tbody>`;
+        data.equipment_stats.category_stats.forEach(eq => {
+            html += `<tr><td>${eq.name}</td><td>${eq.hours.toFixed(2)}</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    // Топ пользователей оборудования
+    if (data.equipment_stats.equipment_detailed && data.equipment_stats.equipment_detailed.length > 0) {
+        html += `<div class="advanced-card">
+            <h3>Топ пользователей по оборудованию</h3>
+            <table>
+                <thead>
+                    <tr><th>Оборудование</th><th>Пользователь</th><th>Часы</th></tr>
+                </thead>
+                <tbody>`;
+        data.equipment_stats.equipment_detailed.forEach(eq => {
+            if (eq.top_users && eq.top_users.length > 0) {
+                eq.top_users.forEach((user, idx) => {
+                    html += `<tr>
+                        <td>${idx === 0 ? eq.name : ""}</td>
+                        <td>${formatUserName(user.name)}</td>
+                        <td>${user.hours.toFixed(2)}</td>
+                    </tr>`;
+                });
+            }
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    // График распределения по дням недели
+    if (data.equipment_stats.weekday_figure && data.equipment_stats.weekday_figure !== "{}") {
+        html += `<div class="advanced-card">
+            <h3>Распределение использования по дням недели</h3>
+            <div class="chart-container" id="equipment-weekday-chart"></div>
+        </div>`;
+    }
+
+    // График пиковых часов
+    if (data.equipment_stats.peak_hours_figure && data.equipment_stats.peak_hours_figure !== "{}") {
+        html += `<div class="advanced-card">
+            <h3>Пиковые часы использования</h3>
+            <div class="chart-container" id="equipment-peak-hours-chart"></div>
+        </div>`;
+    }
+
+    // График динамики использования
+    if (data.equipment_stats.monthly_figure && data.equipment_stats.monthly_figure !== "{}") {
+        html += `<div class="advanced-card">
+            <h3>Динамика использования по месяцам</h3>
+            <div class="chart-container" id="equipment-monthly-chart"></div>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Рендерим графики
+    if (data.equipment_stats.equipment_figure) {
+        const fig = JSON.parse(data.equipment_stats.equipment_figure);
+        const chartContainer = document.getElementById("equipment-stats-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("equipment-stats-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+
+    if (data.equipment_stats.weekday_figure && data.equipment_stats.weekday_figure !== "{}") {
+        const fig = JSON.parse(data.equipment_stats.weekday_figure);
+        const chartContainer = document.getElementById("equipment-weekday-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("equipment-weekday-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+
+    if (data.equipment_stats.peak_hours_figure && data.equipment_stats.peak_hours_figure !== "{}") {
+        const fig = JSON.parse(data.equipment_stats.peak_hours_figure);
+        const chartContainer = document.getElementById("equipment-peak-hours-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("equipment-peak-hours-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+
+    if (data.equipment_stats.monthly_figure && data.equipment_stats.monthly_figure !== "{}") {
+        const fig = JSON.parse(data.equipment_stats.monthly_figure);
+        const chartContainer = document.getElementById("equipment-monthly-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("equipment-monthly-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+}
+
+function renderAdvancedStaffStats(data) {
+    const container = document.getElementById("user-stats-grid");
+    if (!container || !data.user_stats) return;
+
+    let html = "";
+
+    // График топ пользователей
+    if (data.user_stats.user_figure) {
+        html += `<div class="advanced-card">
+            <h3>Топ пользователей по использованию</h3>
+            <div class="chart-container" id="user-stats-chart"></div>
+        </div>`;
+    }
+
+    // Детальная статистика по пользователям
+    if (data.user_stats.user_detailed && data.user_stats.user_detailed.length > 0) {
+        html += `<div class="advanced-card">
+            <h3>Детальная статистика по пользователям</h3>
+            <table>
+                <thead>
+                    <tr><th>Пользователь</th><th>Часы</th><th>Бронирований</th><th>Средняя длительность</th><th>Разнообразие оборудования</th></tr>
+                </thead>
+                <tbody>`;
+        data.user_stats.user_detailed.forEach(user => {
+            html += `<tr>
+                <td>${formatUserName(user.name)}</td>
+                <td>${user.hours.toFixed(2)}</td>
+                <td>${user.bookings_count}</td>
+                <td>${user.avg_duration.toFixed(2)} ч</td>
+                <td>${user.equipment_diversity}</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    // Таблица топ пользователей
+    if (data.user_stats.top_users && data.user_stats.top_users.length > 0) {
+        html += `<div class="advanced-card">
+            <h3>Список пользователей</h3>
+            <table>
+                <thead>
+                    <tr><th>Пользователь</th><th>Часы</th></tr>
+                </thead>
+                <tbody>`;
+        data.user_stats.top_users.forEach(user => {
+            const surname = formatUserName(user.name);
+            html += `<tr><td>${surname}</td><td>${user.hours.toFixed(2)}</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    // Часто используемое оборудование пользователями
+    if (data.user_stats.user_detailed && data.user_stats.user_detailed.length > 0) {
+        html += `<div class="advanced-card">
+            <h3>Часто используемое оборудование</h3>
+            <table>
+                <thead>
+                    <tr><th>Пользователь</th><th>Оборудование</th><th>Часы</th></tr>
+                </thead>
+                <tbody>`;
+        data.user_stats.user_detailed.forEach(user => {
+            if (user.frequent_equipment && user.frequent_equipment.length > 0) {
+                user.frequent_equipment.forEach((eq, idx) => {
+                    html += `<tr>
+                        <td>${idx === 0 ? formatUserName(user.name) : ""}</td>
+                        <td>${eq.name}</td>
+                        <td>${eq.hours.toFixed(2)}</td>
+                    </tr>`;
+                });
+            }
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    // График распределения по дням недели
+    if (data.user_stats.weekday_figure && data.user_stats.weekday_figure !== "{}") {
+        html += `<div class="advanced-card">
+            <h3>Распределение активности по дням недели</h3>
+            <div class="chart-container" id="user-weekday-chart"></div>
+        </div>`;
+    }
+
+    // График пиковых часов работы
+    if (data.user_stats.peak_hours_figure && data.user_stats.peak_hours_figure !== "{}") {
+        html += `<div class="advanced-card">
+            <h3>Пиковые часы работы</h3>
+            <div class="chart-container" id="user-peak-hours-chart"></div>
+        </div>`;
+    }
+
+    // График динамики активности
+    if (data.user_stats.monthly_figure && data.user_stats.monthly_figure !== "{}") {
+        html += `<div class="advanced-card">
+            <h3>Динамика активности по месяцам</h3>
+            <div class="chart-container" id="user-monthly-chart"></div>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Рендерим графики
+    if (data.user_stats.user_figure) {
+        const fig = JSON.parse(data.user_stats.user_figure);
+        const chartContainer = document.getElementById("user-stats-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("user-stats-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+
+    if (data.user_stats.weekday_figure && data.user_stats.weekday_figure !== "{}") {
+        const fig = JSON.parse(data.user_stats.weekday_figure);
+        const chartContainer = document.getElementById("user-weekday-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("user-weekday-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+
+    if (data.user_stats.peak_hours_figure && data.user_stats.peak_hours_figure !== "{}") {
+        const fig = JSON.parse(data.user_stats.peak_hours_figure);
+        const chartContainer = document.getElementById("user-peak-hours-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("user-peak-hours-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+
+    if (data.user_stats.monthly_figure && data.user_stats.monthly_figure !== "{}") {
+        const fig = JSON.parse(data.user_stats.monthly_figure);
+        const chartContainer = document.getElementById("user-monthly-chart");
+        if (chartContainer) {
+            const containerWidth = chartContainer.offsetWidth || 600;
+            const containerHeight = chartContainer.offsetHeight || 400;
+            fig.layout.width = containerWidth;
+            fig.layout.height = containerHeight;
+            Plotly.newPlot("user-monthly-chart", fig.data, fig.layout, {responsive: true, useResizeHandler: true});
+        }
+    }
+}
+
+function renderTemporalPatterns(data) {
+    const container = document.getElementById("temporal-patterns-grid");
+    if (!container || !data.temporal_patterns) return;
+
+    let html = "";
+
+    // Почасовые паттерны
+    if (data.temporal_patterns.hourly && data.temporal_patterns.hourly.figure) {
+        html += `<div class="advanced-card">
+            <h3>Использование по часам дня</h3>
+            <div class="chart-container" id="hourly-patterns-chart"></div>
+        </div>`;
+    }
+
+    // Недельные паттерны
+    if (data.temporal_patterns.weekly && data.temporal_patterns.weekly.figure) {
+        html += `<div class="advanced-card">
+            <h3>Использование по дням недели</h3>
+            <div class="chart-container" id="weekly-patterns-chart"></div>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Рендерим графики
+    if (data.temporal_patterns.hourly && data.temporal_patterns.hourly.figure) {
+        const fig = JSON.parse(data.temporal_patterns.hourly.figure);
+        Plotly.newPlot("hourly-patterns-chart", fig.data, fig.layout, {responsive: true});
+    }
+
+    if (data.temporal_patterns.weekly && data.temporal_patterns.weekly.figure) {
+        const fig = JSON.parse(data.temporal_patterns.weekly.figure);
+        Plotly.newPlot("weekly-patterns-chart", fig.data, fig.layout, {responsive: true});
+    }
+}
+
+function renderForecastBlock(data) {
+    const container = document.getElementById("forecast-container");
+    if (!container || !data.forecast) return;
+
+    const forecast = data.forecast;
+    let html = '<div class="chart-container" id="forecast-chart"></div>';
+    
+    if (forecast.legend && forecast.legend.length > 0) {
+        html += '<div class="forecast-legend">';
+        forecast.legend.forEach(item => {
+            html += `<div class="forecast-legend-item">
+                <div class="forecast-legend-color" style="background-color: ${item.color};"></div>
+                <span>${item.label}</span>
+            </div>`;
+        });
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
+
+    if (forecast.figure) {
+        const fig = JSON.parse(forecast.figure);
+        Plotly.newPlot("forecast-chart", fig.data, fig.layout, {responsive: true});
+    }
+}
+
+function renderRecommendationsBlock(data) {
+    if (!data.recommendations) return;
+
+    const systemic = document.querySelector("#recommendations-systemic ul");
+    const peak = document.querySelector("#recommendations-peak ul");
+    const recent = document.querySelector("#recommendations-recent ul");
+
+    if (systemic && data.recommendations.systemic) {
+        systemic.innerHTML = data.recommendations.systemic.map(r => `<li>${r}</li>`).join("");
+    }
+
+    if (peak && data.recommendations.peak) {
+        peak.innerHTML = data.recommendations.peak.map(r => `<li>${r}</li>`).join("");
+    }
+
+    if (recent && data.recommendations.recent) {
+        recent.innerHTML = data.recommendations.recent.map(r => `<li>${r}</li>`).join("");
+    }
+}
+
+// Настройка виджетов дашборда
+const DASHBOARD_WIDGETS = [
+    {id: "insights", label: "Ключевые показатели"},
+    {id: "relative", label: "Относительная загрузка"},
+    {id: "absolute", label: "Абсолютная загрузка"},
+    {id: "users", label: "Список пользователей"},
+    {id: "equipment", label: "Суммарная наработка"},
+];
+
+function getDefaultWidgetPrefs() {
+    return DASHBOARD_WIDGETS.map(w => ({id: w.id, visible: true}));
+}
+
+function loadWidgetPrefs() {
+    const stored = localStorage.getItem("dashboard-widget-prefs");
+    if (!stored) return getDefaultWidgetPrefs();
+    try {
+        const parsed = JSON.parse(stored);
+        return normalizeWidgetPrefs(parsed);
+    } catch {
+        return getDefaultWidgetPrefs();
+    }
+}
+
+function normalizeWidgetPrefs(prefs) {
+    const defaultIds = new Set(DASHBOARD_WIDGETS.map(w => w.id));
+    const valid = prefs.filter(p => defaultIds.has(p.id));
+    const missing = DASHBOARD_WIDGETS.filter(w => !valid.find(p => p.id === w.id));
+    return [...valid, ...missing.map(w => ({id: w.id, visible: true}))];
+}
+
+function saveWidgetPrefs(prefs) {
+    localStorage.setItem("dashboard-widget-prefs", JSON.stringify(prefs));
+}
+
+function applyWidgetPrefs(prefs) {
+    const widgets = document.querySelectorAll(".dashboard-widget-card");
+    widgets.forEach(widget => {
+        const id = widget.dataset.widgetId;
+        const pref = prefs.find(p => p.id === id);
+        if (pref) {
+            widget.style.display = pref.visible ? "block" : "none";
+        }
+    });
+}
+
+function initWidgetCustomizer() {
+    const btn = document.getElementById("widget-customizer-btn");
+    const modal = document.getElementById("widget-customizer");
+    const closeBtn = document.getElementById("widget-customizer-close");
+    const saveBtn = document.getElementById("widget-customizer-save");
+    const resetBtn = document.getElementById("widget-customizer-reset");
+    const list = document.getElementById("widget-list");
+
+    if (!btn || !modal || !list) return;
+
+    let currentPrefs = loadWidgetPrefs();
+
+    function renderList() {
+        list.innerHTML = "";
+        currentPrefs.forEach((pref, index) => {
+            const widget = DASHBOARD_WIDGETS.find(w => w.id === pref.id);
+            if (!widget) return;
+
+            const li = document.createElement("li");
+            li.className = "widget-list-item";
+            li.draggable = true;
+            li.dataset.index = index;
+            
+            li.innerHTML = `
+                <span class="widget-list-handle">☰</span>
+                <input type="checkbox" id="widget-${pref.id}" ${pref.visible ? "checked" : ""}>
+                <label for="widget-${pref.id}">${widget.label}</label>
+            `;
+
+            li.querySelector("input").addEventListener("change", (e) => {
+                pref.visible = e.target.checked;
+            });
+
+            li.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text/plain", index);
+            });
+
+            li.addEventListener("dragover", (e) => {
+                e.preventDefault();
+            });
+
+            li.addEventListener("drop", (e) => {
+                e.preventDefault();
+                const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                const toIndex = index;
+                if (fromIndex !== toIndex) {
+                    const [moved] = currentPrefs.splice(fromIndex, 1);
+                    currentPrefs.splice(toIndex, 0, moved);
+                    renderList();
+                }
+            });
+
+            list.appendChild(li);
+        });
+    }
+
+    btn.addEventListener("click", () => {
+        currentPrefs = loadWidgetPrefs();
+        renderList();
+        modal.classList.add("active");
+    });
+
+    closeBtn?.addEventListener("click", () => {
+        modal.classList.remove("active");
+    });
+
+    modal.querySelector(".widget-customizer-overlay")?.addEventListener("click", () => {
+        modal.classList.remove("active");
+    });
+
+    saveBtn?.addEventListener("click", () => {
+        saveWidgetPrefs(currentPrefs);
+        applyWidgetPrefs(currentPrefs);
+        modal.classList.remove("active");
+    });
+
+    resetBtn?.addEventListener("click", () => {
+        currentPrefs = getDefaultWidgetPrefs();
+        renderList();
+    });
+
+    // Применяем сохраненные настройки при загрузке
+    applyWidgetPrefs(currentPrefs);
+}
+
+function renderDashboardInsights(data) {
+    const container = document.getElementById("dashboard-insights");
+    if (!container || !data.insights) return;
+
+    let html = "";
+    if (data.insights.topCategories) {
+        html += `<div class="insight-card">
+            <h4>Топ категорий по загрузке</h4>
+            <ul>`;
+        data.insights.topCategories.forEach(cat => {
+            html += `<li>${cat.name}: ${cat.hours.toFixed(1)} ч</li>`;
+        });
+        html += `</ul></div>`;
+    }
+    if (data.insights.leadTime !== undefined) {
+        html += `<div class="insight-card">
+            <h4>Время подготовки</h4>
+            <p>${data.insights.leadTime.toFixed(1)} ч</p>
+        </div>`;
+    }
+    if (data.insights.weekendHolidayShare !== undefined) {
+        html += `<div class="insight-card">
+            <h4>Выходные и праздники</h4>
+            <p>${(data.insights.weekendHolidayShare * 100).toFixed(1)}%</p>
+        </div>`;
+    }
+    container.innerHTML = html;
 }
 
 // Модуль СИ (оборудование)

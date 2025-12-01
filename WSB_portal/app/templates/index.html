@@ -41,7 +41,7 @@
         <button class="tab-button" data-tab="workplaces">
             История бронирований (статистика и графики)
         </button>
-        <button class="tab-button" data-tab="calendar">
+        <button class="tab-button hidden" data-tab="calendar" data-requires-auth="true">
             Календарь бронирований
         </button>
         <button class="tab-button" data-tab="si-module">
@@ -184,98 +184,188 @@
     </div>
 
     <div class="tab-content" id="tab-workplaces">
-        <section class="dashboard-panel">
-            <div class="dashboard-header">
-                <h2>Даш-борд бронирования рабочих мест</h2>
-            </div>
-            <div class="dashboard-controls">
-                <div class="control">
-                    <label for="dashboard-equipment">Измерительные приборы</label>
-                    <select id="dashboard-equipment" multiple size="6"></select>
-                </div>
-                <div class="control range">
-                    <label>Период</label>
-                    <div class="range-inputs">
-                        <input type="date" id="dashboard-start">
-                        <span>→</span>
-                        <input type="date" id="dashboard-end">
-                    </div>
-                </div>
-                <div class="control">
-                    <label for="dashboard-target">Целевая загрузка (часов в день)</label>
-                    <input type="number" id="dashboard-target" min="1" max="24" step="1" value="8">
-                </div>
-                <div class="control control--button">
-                    <label>&nbsp;</label>
-                    <div class="button-group">
-                        <button id="dashboard-apply" class="btn-primary">Обновить аналитику</button>
-                        <button id="dashboard-export" class="btn-secondary">Экспорт CSV</button>
-                        <button id="dashboard-export-excel" class="btn-secondary">Экспорт Excel</button>
-                    </div>
-                </div>
-            </div>
-            <div class="dashboard-status">
-                <div>
-                    <span class="summary-label">Обобщенная загрузка</span>
-                    <span class="summary-value" id="dashboard-utilization">—</span>
-                </div>
-                <div id="dashboard-message" class="dashboard-message"></div>
-            </div>
-            <div class="dashboard-charts">
-                <div id="dashboard-relative" class="chart-container full-width"></div>
-                <div id="dashboard-absolute" class="chart-container full-width"></div>
-            </div>
-            <div class="dashboard-tables">
-                <div class="table-wrapper">
-                    <h3>Список пользователей</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Пользователь</th>
-                                <th>Длительность (ч)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboard-users"></tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Суммарная наработка</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Прибор</th>
-                                <th>Часы</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboard-equipment-table"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+        <div class="history-subtabs">
+            <button class="history-subtab-button active" data-subtab="dashboard">Даш-борд</button>
+            <button class="history-subtab-button" data-subtab="heatmap">Тепловая карта</button>
+            <button class="history-subtab-button" data-subtab="equipment-stats">Статистика по оборудованию</button>
+            <button class="history-subtab-button" data-subtab="user-stats">Статистика по пользователям</button>
+            <button class="history-subtab-button" data-subtab="temporal-patterns">Временные паттерны</button>
+            <button class="history-subtab-button" data-subtab="forecast">Прогноз загрузки</button>
+            <button class="history-subtab-button" data-subtab="recommendations">Рекомендации</button>
+        </div>
 
-        <section class="heatmap-section history">
-            <div class="heatmap-header">
-                <h2>История бронирований (тепловая карта)</h2>
-                <p>Выберите дату не позже сегодняшнего дня, чтобы просмотреть архивные данные.</p>
-            </div>
-            <div class="booking-controls history">
-                        <div class="control">
-                    <label for="history-date">Дата истории</label>
-                            <input type="date" id="history-date" max="{{ today }}" value="{{ history_selected_date }}">
+        <div class="history-subtab-content active" id="subtab-dashboard">
+            <section class="dashboard-panel">
+                <div class="dashboard-header">
+                    <h2>Даш-борд бронирования рабочих мест</h2>
+                    <button id="widget-customizer-btn" class="btn-secondary" data-tooltip="Настроить видимость и порядок виджетов">Настроить виджеты</button>
                 </div>
-                <div class="control">
-                    <label>&nbsp;</label>
-                    <button id="history-heatmap-btn" class="btn-primary">Показать историю</button>
+                <div class="dashboard-controls">
+                    <div class="control">
+                        <label for="dashboard-equipment">Измерительные приборы</label>
+                        <select id="dashboard-equipment" multiple size="6"></select>
+                    </div>
+                    <div class="control range">
+                        <label>Период</label>
+                        <div class="range-inputs">
+                            <input type="date" id="dashboard-start">
+                            <span>→</span>
+                            <input type="date" id="dashboard-end">
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="dashboard-target">Целевая загрузка (часов в день)</label>
+                        <input type="number" id="dashboard-target" min="1" max="24" step="1" value="8">
+                    </div>
+                    <div class="control control--button">
+                        <label>&nbsp;</label>
+                        <div class="button-group">
+                            <button id="dashboard-apply" class="btn-primary">Обновить аналитику</button>
+                            <button id="dashboard-export" class="btn-secondary">Экспорт CSV</button>
+                            <button id="dashboard-export-excel" class="btn-secondary">Экспорт Excel</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div id="history-heatmap-error" class="heatmap-error">
-                {{ history_heatmap_error if history_heatmap_error else "" }}
-            </div>
-            <div id="history-heatmap-graph" class="heatmap-graph"></div>
-        </section>
+                <div class="dashboard-status">
+                    <div>
+                        <span class="summary-label">Обобщенная загрузка</span>
+                        <span class="summary-value" id="dashboard-utilization">—</span>
+                    </div>
+                    <div id="dashboard-message" class="dashboard-message"></div>
+                </div>
+                <div class="dashboard-widgets" id="dashboard-widgets">
+                    <div class="dashboard-widget-card" data-widget-id="insights" data-tooltip="Ключевые показатели использования оборудования">
+                        <h3>Ключевые показатели</h3>
+                        <div id="dashboard-insights"></div>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="relative" data-tooltip="Относительная загрузка оборудования по дням">
+                        <h3>Относительная загрузка</h3>
+                        <div id="dashboard-relative" class="chart-container"></div>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="absolute" data-tooltip="Абсолютная загрузка оборудования в часах">
+                        <h3>Абсолютная загрузка</h3>
+                        <div id="dashboard-absolute" class="chart-container"></div>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="users" data-tooltip="Список пользователей и их наработка">
+                        <h3>Список пользователей</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Пользователь</th>
+                                    <th>Длительность (ч)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-users"></tbody>
+                        </table>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="equipment" data-tooltip="Суммарная наработка по каждому прибору">
+                        <h3>Суммарная наработка</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Прибор</th>
+                                    <th>Часы</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-equipment-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-heatmap">
+            <section class="heatmap-section history">
+                <div class="heatmap-header">
+                    <h2>История бронирований (тепловая карта)</h2>
+                    <p>Выберите дату не позже сегодняшнего дня, чтобы просмотреть архивные данные.</p>
+                </div>
+                <div class="booking-controls history">
+                    <div class="control">
+                        <label for="history-date">Дата истории</label>
+                        <input type="date" id="history-date" max="{{ today }}" value="{{ history_selected_date }}">
+                    </div>
+                    <div class="control">
+                        <label>&nbsp;</label>
+                        <button id="history-heatmap-btn" class="btn-primary">Показать историю</button>
+                    </div>
+                </div>
+                <div id="history-heatmap-error" class="heatmap-error">
+                    {{ history_heatmap_error if history_heatmap_error else "" }}
+                </div>
+                <div id="history-heatmap-graph" class="heatmap-graph"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-equipment-stats">
+            <section class="advanced-panel">
+                <h2>Расширенная статистика по оборудованию</h2>
+                <p class="advanced-note">Статистика построена на информации за последние 6 месяцев.</p>
+                <div class="advanced-grid" id="equipment-stats-grid"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-user-stats">
+            <section class="advanced-panel">
+                <h2>Расширенная статистика по пользователям</h2>
+                <p class="advanced-note">Статистика построена на информации за последние 6 месяцев.</p>
+                <div class="advanced-grid" id="user-stats-grid"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-temporal-patterns">
+            <section class="advanced-panel">
+                <h2>Временные паттерны</h2>
+                <p class="advanced-note">Паттерны построены на информации за последние 6 месяцев.</p>
+                <div class="advanced-grid" id="temporal-patterns-grid"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-forecast">
+            <section class="advanced-panel">
+                <h2>Прогноз загрузки</h2>
+                <p class="advanced-note">Прогноз построен на основе исторических данных за последние 6 месяцев.</p>
+                <div id="forecast-container"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-recommendations">
+            <section class="advanced-panel">
+                <h2>Рекомендации</h2>
+                <p class="advanced-note">Рекомендации построены на информации за последние 6 месяцев.</p>
+                <div id="recommendations-systemic" class="recommendations-list">
+                    <h3>Системные перегрузки</h3>
+                    <ul></ul>
+                </div>
+                <div id="recommendations-peak" class="recommendations-list">
+                    <h3>Пиковые инциденты</h3>
+                    <ul></ul>
+                </div>
+                <div id="recommendations-recent" class="recommendations-list">
+                    <h3>Свежие события (последняя неделя)</h3>
+                    <ul></ul>
+                </div>
+            </section>
+        </div>
     </div>
 
-    <div class="tab-content" id="tab-calendar">
+    <div class="widget-customizer" id="widget-customizer">
+        <div class="widget-customizer-overlay"></div>
+        <div class="widget-customizer-panel">
+            <div class="widget-customizer-header">
+                <h3>Настройка виджетов</h3>
+                <button class="widget-customizer-close" id="widget-customizer-close">×</button>
+            </div>
+            <p class="widget-customizer-hint">Перетащите виджеты для изменения порядка. Снимите галочку, чтобы скрыть виджет.</p>
+            <ul id="widget-list"></ul>
+            <div class="widget-customizer-actions">
+                <button id="widget-customizer-save" class="btn-primary">Сохранить</button>
+                <button id="widget-customizer-reset" class="btn-secondary">Сбросить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-calendar" data-requires-auth="true">
         <section class="calendar-panel">
             <div class="calendar-header">
                 <h2>Календарь бронирований</h2>

@@ -29,6 +29,9 @@ DB_HOST = _get_env("DB_HOST", "POSTGRE_HOST", "localhost")
 DB_PORT = _get_env("DB_PORT", "POSTGRE_PORT", "5432")
 DB_SSLMODE = _get_env("DB_SSLMODE", None, "prefer")
 
+# Сдвиг локального времени относительно UTC (в минутах), по умолчанию +3 часа (МСК)
+LOCAL_TIME_OFFSET_MINUTES = int(os.getenv("LOCAL_TIME_OFFSET_MINUTES", "180"))
+
 STATUS_CODES = {
     "free": 0,
     "booked_future": 1,
@@ -117,7 +120,9 @@ def fetch_heatmap_data(target_date: date):
             )
             bookings = [dict(row) for row in cur.fetchall()]
 
-        now_local = datetime.now()
+        # Используем время с учётом локального сдвига относительно UTC,
+        # чтобы статусы "Забронировано" / "В работе" корректно отражали реальное время.
+        now_local = datetime.utcnow() + timedelta(minutes=LOCAL_TIME_OFFSET_MINUTES)
         if target_date < date.today():
             effective_now = datetime.combine(target_date, time(23, 59, 59))
         elif target_date > date.today():
@@ -303,12 +308,17 @@ def get_heatmap_payload(target_date: date):
     from .cache import get_heatmap, set_heatmap
     
     date_str = target_date.strftime("%Y-%m-%d")
-    
-    # Пытаемся получить из кэша
-    cached = get_heatmap(date_str)
-    if cached:
-        logger.info(f"Тепловая карта загружена из кэша для {date_str}")
-        return cached
+
+    # Для прошлых и будущих дат используем кэш,
+    # для текущей даты всегда пересчитываем тепловую карту,
+    # чтобы корректно отражать переход слотов из "Забронировано" в "В работе".
+    use_cache = target_date != date.today()
+
+    if use_cache:
+        cached = get_heatmap(date_str)
+        if cached:
+            logger.info(f"Тепловая карта загружена из кэша для {date_str}")
+            return cached
     
     # Если нет в кэше - загружаем из БД
     equipment_names, usage, hover, summary, error = fetch_heatmap_data(target_date)
@@ -328,9 +338,10 @@ def get_heatmap_payload(target_date: date):
         "error": None,
     }
     
-    # Сохраняем в кэш
-    set_heatmap(date_str, result)
-    logger.info(f"Тепловая карта сохранена в кэш для {date_str}")
+    # Сохраняем в кэш только для дат, отличных от сегодняшней
+    if use_cache:
+        set_heatmap(date_str, result)
+        logger.info(f"Тепловая карта сохранена в кэш для {date_str}")
     
     return result
 

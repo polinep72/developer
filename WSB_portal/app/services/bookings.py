@@ -35,7 +35,7 @@ DB_SSLMODE = os.getenv("POSTGRE_SSLMODE") or os.getenv("DB_SSLMODE") or "prefer"
 SLOT_MINUTES = 30
 BOOKING_STEP = timedelta(minutes=SLOT_MINUTES)
 BOOKING_START_TIME = time(7, 0)
-BOOKING_END_TIME = time(20, 0)
+BOOKING_END_TIME = time(22, 0)
 MAX_DURATION = timedelta(hours=12)
 
 

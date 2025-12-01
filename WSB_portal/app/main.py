@@ -749,6 +749,19 @@ async def dashboard_data(request: DashboardRequest):
     return JSONResponse(payload)
 
 
+@app.post("/api/dashboard/advanced", response_class=JSONResponse)
+async def dashboard_advanced(request: DashboardRequest):
+    from .services.dashboard import get_advanced_dashboard_data
+    
+    data = get_advanced_dashboard_data(
+        start_date=request.start_date,
+        end_date=request.end_date,
+        equipment=request.equipment if request.equipment else None,
+    )
+    
+    return JSONResponse(data)
+
+
 # API для модуля СИ (оборудование)
 # ВАЖНО: Специфичные маршруты должны быть ПЕРЕД параметризованными!
 @app.get("/api/equipment/types", response_class=JSONResponse)
