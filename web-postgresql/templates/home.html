@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+        }
+        .header {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            width: 200px; /* Фиксированная ширина */
+            text-align: center; /* Центрируем текст */
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+		.header {
+        width: 100%;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		}
+
+		.user-menu {
+			display: flex;
+			align-items: center;
+		}
+
+		.user-info {
+			margin-right: 10px;
+			font-weight: bold;
+			color: #333;
+		}
+
+		.user-icon {
+			font-size: 24px;
+			cursor: pointer;
+		}
+
+		.logout-button {
+			padding: 5px 15px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+    .logout-button:hover {
+        background-color: #4CAF50;
+    }
+		
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">ИПК ЭЛЕКТРОН-МАШ</div>
+		<div class="user-menu">
+			{% if session.get('username') %}
+				<span class="user-info">{{ session['username'] }}</span>
+				<button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+			{% else %}
+				<i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+			{% endif %}
+		</div>
+    </div>
+    <div class="container">
+        <h1>Склад кристаллов</h1>
+        <a href="/search" class="button">Поиск</a>
+        <a href="/inflow" class="button">Поступление</a>
+        <a href="/outflow" class="button">Расход</a>
+        <a href="/refund" class="button">Возврат</a>
+    </div>
+</body>
+</html>

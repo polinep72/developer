@@ -1,0 +1,19 @@
+# Idea
+*.iml
+.idea
+out
+*.zip
+
+# Gradle
+.gradle
+build
+
+# Libs
+lib/*.jar
+
+# Mac OS
+.DS_*
+
+#ENV
+/ENV
+.env
