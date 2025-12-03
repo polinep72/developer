@@ -251,5 +251,3 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8090
 - `POST /api/equipment/add-io` — добавление испытательного оборудования
 - `POST /api/equipment/add-vo` — добавление вспомогательного оборудования
 - `POST /api/equipment/add-gosregister` — добавление записи в Госреестр
-
-
