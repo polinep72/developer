@@ -1017,11 +1017,12 @@ function renderAdvancedEquipmentStats(data) {
     if (data.equipment_stats.equipment_detailed && data.equipment_stats.equipment_detailed.length > 0) {
         html += `<div class="advanced-card">
             <h3>Детальная статистика по оборудованию</h3>
-            <table>
-                <thead>
-                    <tr><th>Оборудование</th><th>Часы</th><th>Бронирований</th><th>Средняя длительность</th><th>Загрузка, %</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Оборудование</th><th>Часы</th><th>Бронирований</th><th>Средняя длительность</th><th>Загрузка, %</th></tr>
+                    </thead>
+                    <tbody>`;
         data.equipment_stats.equipment_detailed.forEach(eq => {
             html += `<tr>
                 <td>${eq.name}</td>
@@ -1031,33 +1032,35 @@ function renderAdvancedEquipmentStats(data) {
                 <td>${eq.utilization_pct.toFixed(1)}%</td>
             </tr>`;
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
     }
 
     // Статистика по оборудованию (полный список)
     if (data.equipment_stats.category_stats && data.equipment_stats.category_stats.length > 0) {
         html += `<div class="advanced-card">
             <h3>Использование оборудования</h3>
-            <table>
-                <thead>
-                    <tr><th>Оборудование</th><th>Часы</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Оборудование</th><th>Часы</th></tr>
+                    </thead>
+                    <tbody>`;
         data.equipment_stats.category_stats.forEach(eq => {
             html += `<tr><td>${eq.name}</td><td>${eq.hours.toFixed(2)}</td></tr>`;
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
     }
 
     // Топ пользователей оборудования
     if (data.equipment_stats.equipment_detailed && data.equipment_stats.equipment_detailed.length > 0) {
         html += `<div class="advanced-card">
             <h3>Топ пользователей по оборудованию</h3>
-            <table>
-                <thead>
-                    <tr><th>Оборудование</th><th>Пользователь</th><th>Часы</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Оборудование</th><th>Пользователь</th><th>Часы</th></tr>
+                    </thead>
+                    <tbody>`;
         data.equipment_stats.equipment_detailed.forEach(eq => {
             if (eq.top_users && eq.top_users.length > 0) {
                 eq.top_users.forEach((user, idx) => {
@@ -1069,7 +1072,7 @@ function renderAdvancedEquipmentStats(data) {
                 });
             }
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
     }
 
     // График распределения по дням недели
@@ -1166,11 +1169,12 @@ function renderAdvancedStaffStats(data) {
     if (data.user_stats.user_detailed && data.user_stats.user_detailed.length > 0) {
         html += `<div class="advanced-card">
             <h3>Детальная статистика по пользователям</h3>
-            <table>
-                <thead>
-                    <tr><th>Пользователь</th><th>Часы</th><th>Бронирований</th><th>Средняя длительность</th><th>Разнообразие оборудования</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Пользователь</th><th>Часы</th><th>Бронирований</th><th>Средняя длительность</th><th>Разнообразие оборудования</th></tr>
+                    </thead>
+                    <tbody>`;
         data.user_stats.user_detailed.forEach(user => {
             html += `<tr>
                 <td>${formatUserName(user.name)}</td>
@@ -1180,34 +1184,36 @@ function renderAdvancedStaffStats(data) {
                 <td>${user.equipment_diversity}</td>
             </tr>`;
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
     }
 
     // Таблица топ пользователей
     if (data.user_stats.top_users && data.user_stats.top_users.length > 0) {
         html += `<div class="advanced-card">
             <h3>Список пользователей</h3>
-            <table>
-                <thead>
-                    <tr><th>Пользователь</th><th>Часы</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Пользователь</th><th>Часы</th></tr>
+                    </thead>
+                    <tbody>`;
         data.user_stats.top_users.forEach(user => {
             const surname = formatUserName(user.name);
             html += `<tr><td>${surname}</td><td>${user.hours.toFixed(2)}</td></tr>`;
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
     }
 
     // Часто используемое оборудование пользователями
     if (data.user_stats.user_detailed && data.user_stats.user_detailed.length > 0) {
         html += `<div class="advanced-card">
             <h3>Часто используемое оборудование</h3>
-            <table>
-                <thead>
-                    <tr><th>Пользователь</th><th>Оборудование</th><th>Часы</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Пользователь</th><th>Оборудование</th><th>Часы</th></tr>
+                    </thead>
+                    <tbody>`;
         data.user_stats.user_detailed.forEach(user => {
             if (user.frequent_equipment && user.frequent_equipment.length > 0) {
                 user.frequent_equipment.forEach((eq, idx) => {
@@ -1219,7 +1225,7 @@ function renderAdvancedStaffStats(data) {
                 });
             }
         });
-        html += `</tbody></table></div>`;
+        html += `</tbody></table></div></div>`;
     }
 
     // График распределения по дням недели

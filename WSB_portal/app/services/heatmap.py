@@ -308,7 +308,7 @@ def get_heatmap_payload(target_date: date):
     from .cache import get_heatmap, set_heatmap
     
     date_str = target_date.strftime("%Y-%m-%d")
-
+    
     # Для прошлых и будущих дат используем кэш,
     # для текущей даты всегда пересчитываем тепловую карту,
     # чтобы корректно отражать переход слотов из "Забронировано" в "В работе".
