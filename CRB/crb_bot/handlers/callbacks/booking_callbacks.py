@@ -266,7 +266,7 @@ def handle_extend_select_time(
     db: Database,
     call: CallbackQuery,
     scheduler: Optional[BackgroundScheduler],
-    active_timers: Dict[int, Any], # Передаем, т.к. вызываем schedule_all_notifications
+    active_timers: Dict[int, Any],
     scheduled_jobs_registry: Set[Tuple[str, int]]
 ):
     """
@@ -348,8 +348,8 @@ def handle_extend_select_time(
     if success and scheduler:
         logger.debug(f"Бронь {booking_id} успешно продлена, обновляем уведомления (ВЫЗЫВАЕМ schedule_all_notifications)...")
         try:
-            # Вызываем адаптированный сервис уведомлений
-            notificationService.schedule_all_notifications(db, bot, scheduler, active_timers, scheduled_jobs_registry)
+            # Вызываем перепланировку уведомлений (используются глобальные зависимости внутри сервиса)
+            notificationService.schedule_all_notifications()
         except Exception as e_reschedule:
             logger.error(f"Ошибка перепланирования уведомлений после продления брони {booking_id}: {e_reschedule}", exc_info=True)
     elif success and not scheduler: logger.warning("Планировщик (scheduler) не передан, уведомления не обновлены после продления.")

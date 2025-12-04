@@ -71,6 +71,33 @@ function initTabs() {
             if (`tab-${target}` === workplacesTabId || `tab-${target}` === "tab-equipment") {
                 scheduleResize();
                 resizeHeatmaps();
+                
+                // Автоматически обновляем тепловую карту при открытии вкладки "Бронирование оборудования"
+                if (`tab-${target}` === "tab-equipment") {
+                    // Просто нажимаем кнопку "Показать занятость" после небольшой задержки
+                    setTimeout(() => {
+                        const heatmapDateInput = document.getElementById("heatmap-date");
+                        const refreshHeatmapButton = document.getElementById("refresh-heatmap");
+                        
+                        // Если есть отложенное обновление (после отмены бронирования), используем эту дату
+                        if (window._pendingHeatmapUpdateDate && heatmapDateInput) {
+                            heatmapDateInput.value = window._pendingHeatmapUpdateDate;
+                            delete window._pendingHeatmapUpdateDate;
+                        }
+                        
+                        // Если дата не выбрана, устанавливаем сегодняшнюю дату
+                        if (heatmapDateInput && !heatmapDateInput.value) {
+                            const today = new Date().toISOString().split('T')[0];
+                            heatmapDateInput.value = today;
+                        }
+                        
+                        // Нажимаем кнопку "Показать занятость"
+                        if (refreshHeatmapButton) {
+                            refreshHeatmapButton.disabled = false;
+                            refreshHeatmapButton.click();
+                        }
+                    }, 300);
+                }
             }
             
             if (`tab-${target}` === "tab-manage-bookings") {
@@ -216,7 +243,8 @@ function initHeatmap(options) {
         updateHeatmapSummary(summaryConfig, initialSummary);
     }
 
-    refreshButton.addEventListener("click", () => {
+    // Создаем функцию обновления, доступную глобально
+    const refreshHeatmapData = () => {
         const selectedDate = dateInput.value;
         if (!selectedDate) {
             errorBox.textContent = "Укажите дату.";
@@ -226,7 +254,14 @@ function initHeatmap(options) {
         refreshButton.disabled = true;
         refreshButton.textContent = "Обновление...";
 
-        fetch(`/api/heatmap?selected_date=${selectedDate}`)
+        // Добавляем timestamp для обхода кэша браузера
+        const cacheBuster = `&_t=${Date.now()}`;
+        fetch(`/api/heatmap?selected_date=${selectedDate}${cacheBuster}`, {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        })
             .then((response) => response.json())
             .then((data) => {
                 if (data.error) {
@@ -256,7 +291,14 @@ function initHeatmap(options) {
                     }
                 }
             });
-    });
+    };
+    
+    // Сохраняем функцию глобально для доступа из других мест
+    if (graphId === "heatmap-graph") {
+        window.refreshHeatmapData = refreshHeatmapData;
+    }
+    
+    refreshButton.addEventListener("click", refreshHeatmapData);
 
     registerHeatmap(graphContainer);
 }
@@ -497,6 +539,19 @@ function initBookingForm() {
                 throw new Error(result.error || "Не удалось создать бронирование");
             }
             setStatus(result.message || "Бронирование создано.", "success");
+            
+            // Обновляем тепловую карту для даты созданного бронирования
+            if (payload.date) {
+                const heatmapDateInput = document.getElementById("heatmap-date");
+                const refreshHeatmapButton = document.getElementById("refresh-heatmap");
+                
+                if (heatmapDateInput && refreshHeatmapButton) {
+                    // Если дата в тепловой карте совпадает с датой созданного бронирования, обновляем
+                    if (heatmapDateInput.value === payload.date) {
+                        refreshHeatmapButton.click();
+                    }
+                }
+            }
             durationSelect.value = "";
             startSelect.value = "";
             submitButton.disabled = true;
@@ -3229,6 +3284,31 @@ async function cancelBooking(bookingId) {
         
         // Перезагружаем список
         loadBookingsList();
+        
+        // Всегда обновляем тепловую карту при отмене бронирования
+        if (result.data && result.data.date) {
+            const cancelledDate = result.data.date;
+            const heatmapDateInput = document.getElementById("heatmap-date");
+            const refreshHeatmapButton = document.getElementById("refresh-heatmap");
+            const bookingTab = document.getElementById("tab-equipment");
+            
+            if (heatmapDateInput && refreshHeatmapButton) {
+                // Если вкладка "Бронирование оборудования" активна, обновляем сразу
+                if (bookingTab && bookingTab.classList.contains("active")) {
+                    // Устанавливаем дату отмененного бронирования, если она отличается
+                    if (heatmapDateInput.value !== cancelledDate) {
+                        heatmapDateInput.value = cancelledDate;
+                    }
+                    // Обновляем тепловую карту с небольшой задержкой
+                    setTimeout(() => {
+                        refreshHeatmapButton.click();
+                    }, 100);
+                } else {
+                    // Если вкладка не активна, сохраняем дату для обновления при открытии
+                    window._pendingHeatmapUpdateDate = cancelledDate;
+                }
+            }
+        }
     } catch (error) {
         console.error("Ошибка отмены бронирования:", error);
         alert(error.message || "Не удалось отменить бронирование");
