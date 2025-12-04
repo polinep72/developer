@@ -4,13 +4,15 @@ import platform
 import subprocess
 from datetime import date, timedelta, datetime
 from typing import List, Optional, Dict, Any, cast
+from io import BytesIO
+from pathlib import Path
+import sys
 
 from fastapi import FastAPI, HTTPException, Request, Depends, Response, status, Query, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
-from io import BytesIO
 
 # Настройка логирования
 logging.basicConfig(
@@ -22,6 +24,18 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+# Подключаем ядро WSB_core, если оно находится в соседней папке с проектом
+try:
+    BASE_DIR = Path(__file__).resolve().parents[2]  # .../WSB_portal
+    CORE_DIR = BASE_DIR / "WSB_core"
+    if CORE_DIR.exists():
+        core_path = str(CORE_DIR)
+        if core_path not in sys.path:
+            sys.path.append(core_path)
+            logger.info(f"WSB_core добавлен в sys.path: {core_path}")
+except Exception as e:
+    logger.warning(f"Не удалось добавить WSB_core в sys.path: {e}")
 
 from .services.heatmap import get_heatmap_payload
 from .services.dashboard import (
@@ -378,11 +392,20 @@ async def api_heatmap(selected_date: str):
     try:
         target_date = date.fromisoformat(selected_date)
     except ValueError:
-        return JSONResponse({"error": "Некорректная дата"}, status_code=400)
+        response = JSONResponse({"error": "Некорректная дата"}, status_code=400)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
     payload = get_heatmap_payload(target_date)
-    status = 200 if not payload.get("error") else 500
-    return JSONResponse(payload, status_code=status)
+    status_code = 200 if not payload.get("error") else 500
+    response = JSONResponse(payload, status_code=status_code)
+    # Запрещаем кэширование ответа браузером
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.get("/api/bookings/categories", response_class=JSONResponse)

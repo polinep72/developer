@@ -1034,7 +1034,7 @@ def _build_recommendations(
                 incidents.sort(key=lambda x: x[0], reverse=True)
                 # Берем последние 3 инцидента
                 for target_date, hours_in_day in incidents[:3]:
-                    peak.append(
+                peak.append(
                         f"Оборудование {eq} было перегружено {target_date.strftime('%d.%m.%Y')}: "
                         f"использовано {hours_in_day:.1f} часов за день. "
                         f"Рекомендуется распределить нагрузку на другие дни или оборудование."

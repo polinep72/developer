@@ -32,10 +32,21 @@ DB_USER = os.getenv("POSTGRE_USER") or os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("POSTGRE_PASSWORD") or os.getenv("DB_PASSWORD")
 DB_SSLMODE = os.getenv("POSTGRE_SSLMODE") or os.getenv("DB_SSLMODE") or "prefer"
 
-SLOT_MINUTES = 30
+# Флаг: использовать ли таблицу слотов ядра wsb_time_slots
+USE_CORE_SLOTS = (os.getenv("USE_CORE_SLOTS", "false").lower() == "true")
+
+# Пытаемся использовать общие константы ядра WSB_core, при недоступности — используем локальные значения
+try:
+    from wsb_core.constants import WORKING_HOURS_START, WORKING_HOURS_END, BOOKING_TIME_STEP_MINUTES
+except ImportError:
+    WORKING_HOURS_START = time(7, 0)
+    WORKING_HOURS_END = time(22, 0)
+    BOOKING_TIME_STEP_MINUTES = 30
+
+SLOT_MINUTES = BOOKING_TIME_STEP_MINUTES
 BOOKING_STEP = timedelta(minutes=SLOT_MINUTES)
-BOOKING_START_TIME = time(7, 0)
-BOOKING_END_TIME = time(22, 0)
+BOOKING_START_TIME = WORKING_HOURS_START
+BOOKING_END_TIME = WORKING_HOURS_END
 MAX_DURATION = timedelta(hours=12)
 
 
@@ -121,8 +132,18 @@ def get_equipment_by_category(category_id: int) -> Dict[str, Any]:
 
 def get_available_slots(equipment_id: int, target_date: date) -> Dict[str, Any]:
     try:
-        bookings = _fetch_bookings(equipment_id, target_date)
-        slots = _build_slots(target_date, bookings)
+        if USE_CORE_SLOTS:
+            try:
+                slots = _get_slots_from_core_table(equipment_id, target_date)
+            except Exception as core_exc:
+                logger.error(f"Ошибка получения слотов из wsb_time_slots: {core_exc}", exc_info=True)
+                # Фоллбэк на старый механизм
+                bookings = _fetch_bookings(equipment_id, target_date)
+                slots = _build_slots(target_date, bookings)
+        else:
+            bookings = _fetch_bookings(equipment_id, target_date)
+            slots = _build_slots(target_date, bookings)
+
         return {
             "data": {
                 "slots": slots,
@@ -132,7 +153,146 @@ def get_available_slots(equipment_id: int, target_date: date) -> Dict[str, Any]:
             }
         }
     except Exception as exc:
+        logger.error(f"Не удалось получить доступные интервалы: {exc}", exc_info=True)
         return {"error": f"Не удалось получить доступные интервалы: {exc}"}
+
+
+def _get_slots_from_core_table(equipment_id: int, target_date: date) -> List[Dict[str, Any]]:
+    """
+    Получить слоты из таблицы ядра wsb_time_slots.
+
+    Таблица хранит слоты с шагом SLOT_MINUTES. Здесь мы аггрегируем
+    последовательные свободные слоты в один слот с max_duration_minutes,
+    чтобы интерфейс портала оставался прежним.
+    """
+    now = datetime.now()
+
+    query = """
+        SELECT slot_start, slot_end, status
+        FROM wsb_time_slots
+        WHERE equipment_id = %s
+          AND DATE(slot_start) = %s
+        ORDER BY slot_start ASC
+    """
+
+    rows: List[Dict[str, Any]] = []
+    with _connect() as conn, conn.cursor() as cur:
+        # Убеждаемся, что слоты для этой даты существуют
+        _ensure_core_slots_exist(cur, equipment_id, target_date)
+        conn.commit()
+        
+        cur.execute(query, (equipment_id, target_date))
+        rows = cast(List[Dict[str, Any]], cur.fetchall())
+
+    # Фильтруем только свободные слоты, с учётом текущего времени
+    free_slots: List[Tuple[datetime, datetime]] = []
+    now_floor = now.replace(second=0, microsecond=0)
+
+    for row in rows:
+        status = row.get("status")
+        slot_start = row.get("slot_start")
+        slot_end = row.get("slot_end")
+        if status != "free" or not slot_start or not slot_end:
+            continue
+        # Логика совпадает с прежней: для сегодняшнего дня не показываем прошедшие слоты
+        if target_date > now.date() or slot_start >= now_floor:
+            free_slots.append((cast(datetime, slot_start), cast(datetime, slot_end)))
+
+    # Формируем список отдельных слотов - каждый свободный слот становится отдельным временем начала
+    # Используем ту же логику, что и _build_slots: для каждого слота рассчитываем максимальную доступную длительность
+    result: List[Dict[str, Any]] = []
+    if not free_slots:
+        return result
+
+    # Сортируем слоты по времени начала
+    free_slots.sort(key=lambda x: x[0])
+    
+    # Создаём словарь для быстрого поиска: начало -> конец
+    slots_dict = {start: end for start, end in free_slots}
+    
+    # Для каждого свободного слота рассчитываем максимальную доступную длительность
+    step_minutes = SLOT_MINUTES
+    max_end_time = datetime.combine(target_date, BOOKING_END_TIME) + timedelta(minutes=step_minutes)
+    max_duration_minutes = int(MAX_DURATION.total_seconds() // 60)
+    
+    for slot_start, slot_end in free_slots:
+        # Рассчитываем максимальную доступную длительность с этого момента
+        available_minutes = step_minutes  # минимум один слот доступен
+        probe_end = slot_end
+        
+        # Проверяем, сколько последовательных свободных слотов доступно
+        while probe_end < max_end_time and available_minutes < max_duration_minutes:
+            # Ищем следующий слот в словаре (конец текущего должен совпадать с началом следующего)
+            if probe_end in slots_dict:
+                available_minutes += step_minutes
+                probe_end = slots_dict[probe_end]
+            else:
+                break
+        
+        result.append(
+            {
+                "time": slot_start.strftime("%H:%M"),
+                "max_duration_minutes": available_minutes,
+            }
+        )
+
+    return result
+
+
+def _update_core_slots_on_booking(
+    cur: psycopg.Cursor,  # pyright: ignore
+    equipment_id: int,
+    start_dt: datetime,
+    end_dt: datetime,
+    status: str,  # "booked" или "free"
+    booking_id: int | None = None,
+) -> int:
+    """Обновить слоты в wsb_time_slots при создании/отмене бронирования.
+
+    Возвращает количество обновлённых слотов.
+    """
+    try:
+        # Помечаем слоты в указанном интервале
+        query = """
+            UPDATE wsb_time_slots
+            SET status = %s, booking_id = %s
+            WHERE equipment_id = %s
+              AND slot_start >= %s AND slot_end <= %s
+        """
+        cur.execute(query, (status, booking_id, equipment_id, start_dt, end_dt))
+        return cur.rowcount
+    except Exception as exc:
+        logger.warning(f"Ошибка обновления wsb_time_slots: {exc}")
+        return 0
+
+
+def _ensure_core_slots_exist(cur: psycopg.Cursor, equipment_id: int, target_date: date) -> None:  # pyright: ignore
+    """Убедиться, что слоты для оборудования/даты существуют в wsb_time_slots."""
+    try:
+        from wsb_core.slots import DDL_CREATE_TIME_SLOTS_TABLE, build_slots_specs_for_day
+
+        # Гарантируем наличие таблицы
+        cur.execute(DDL_CREATE_TIME_SLOTS_TABLE)
+        
+        # Проверяем, есть ли уже слоты для этой даты
+        check_query = """
+            SELECT COUNT(*) as cnt FROM wsb_time_slots
+            WHERE equipment_id = %s AND DATE(slot_start) = %s
+        """
+        cur.execute(check_query, (equipment_id, target_date))
+        row = cast(Optional[Dict[str, Any]], cur.fetchone())
+        count = row.get("cnt", 0) if row else 0
+        
+        if count == 0:
+            # Генерируем и вставляем слоты
+            specs = build_slots_specs_for_day(equipment_id, target_date)
+            for spec in specs:
+                cur.execute(
+                    "INSERT INTO wsb_time_slots (equipment_id, slot_start, slot_end, status) VALUES (%s, %s, %s, %s)",
+                    (spec.equipment_id, spec.slot_start, spec.slot_end, "free"),
+                )
+    except Exception as exc:
+        logger.warning(f"Ошибка инициализации слотов в wsb_time_slots: {exc}")
 
 
 def create_booking(
@@ -205,6 +365,15 @@ def create_booking(
                 return {"error": "Интервал занят", "conflicts": conflicts}
 
             booking_id = _insert_booking(cur, user_id, equipment_id, start_dt, end_dt, duration)
+            
+            # Синхронизация с wsb_time_slots при использовании ядра
+            if USE_CORE_SLOTS:
+                try:
+                    _ensure_core_slots_exist(cur, equipment_id, target_date)
+                    _update_core_slots_on_booking(cur, equipment_id, start_dt, end_dt, "booked", booking_id)
+                except Exception as exc:
+                    logger.warning(f"Ошибка синхронизации с wsb_time_slots при создании бронирования: {exc}")
+            
             conn.commit()
             
             # Инвалидация кэша тепловой карты для этой даты
@@ -290,13 +459,20 @@ def _fetch_bookings(equipment_id: int, target_date: date) -> List[Tuple[datetime
 
 
 def _build_slots(target_date: date, bookings: List[Tuple[datetime, datetime]]) -> List[Dict[str, Any]]:
+    """
+    Построение списка доступных слотов по дате и списку уже занятых интервалов.
+
+    Список базовых слотов (по времени дня) берём из ядра WSB_core (generate_daily_slots),
+    а фильтрацию по текущему времени и занятым интервалам делаем здесь.
+    """
+    from wsb_core.slots import generate_daily_slots  # локальный импорт, чтобы не ломать импорт, если ядро недоступно
+
     slots: List[Dict[str, Any]] = []
     now = datetime.now()
-    start_dt = datetime.combine(target_date, BOOKING_START_TIME)
-    end_dt = datetime.combine(target_date, BOOKING_END_TIME)
 
-    iter_dt = start_dt
-    while iter_dt <= end_dt:
+    base_slots = generate_daily_slots(target_date)
+
+    for iter_dt in base_slots:
         if target_date > now.date() or iter_dt >= now.replace(second=0, microsecond=0):
             available_minutes = _calculate_available_minutes(iter_dt, bookings, target_date)
             if available_minutes >= SLOT_MINUTES:
@@ -306,7 +482,6 @@ def _build_slots(target_date: date, bookings: List[Tuple[datetime, datetime]]) -
                         "max_duration_minutes": available_minutes,
                     }
                 )
-        iter_dt += BOOKING_STEP
     return slots
 
 
@@ -503,7 +678,7 @@ def cancel_booking(booking_id: int, user_id: int, is_admin: bool = False) -> Dic
             # Проверяем существование и права, получаем данные для уведомления
             if is_admin:
                 query = """
-                    SELECT b.user_id, b.cancel, b.finish, b.date, b.time_start, b.time_end,
+                    SELECT b.user_id, b.equip_id, b.cancel, b.finish, b.date, b.time_start, b.time_end,
                            e.name_equip, u.email, u.first_name, u.last_name
                     FROM bookings b
                     JOIN equipment e ON b.equip_id = e.id
@@ -513,7 +688,7 @@ def cancel_booking(booking_id: int, user_id: int, is_admin: bool = False) -> Dic
                 cur.execute(query, (booking_id,))
             else:
                 query = """
-                    SELECT b.user_id, b.cancel, b.finish, b.date, b.time_start, b.time_end,
+                    SELECT b.user_id, b.equip_id, b.cancel, b.finish, b.date, b.time_start, b.time_end,
                            e.name_equip, u.email, u.first_name, u.last_name
                     FROM bookings b
                     JOIN equipment e ON b.equip_id = e.id
@@ -534,6 +709,7 @@ def cancel_booking(booking_id: int, user_id: int, is_admin: bool = False) -> Dic
             
             # Сохраняем данные для уведомления
             booking_user_id = row["user_id"]
+            equipment_id = row.get("equip_id")
             booking_date = row["date"]
             booking_start = row["time_start"]
             booking_end = row["time_end"]
@@ -545,6 +721,20 @@ def cancel_booking(booking_id: int, user_id: int, is_admin: bool = False) -> Dic
             # Отменяем
             update_query = "UPDATE bookings SET cancel = TRUE WHERE id = %s"
             cur.execute(update_query, (booking_id,))
+            
+            # Синхронизация с wsb_time_slots при использовании ядра
+            if USE_CORE_SLOTS and equipment_id and booking_start and booking_end:
+                try:
+                    booking_date_obj = booking_date if isinstance(booking_date, date) else booking_date.date() if isinstance(booking_date, datetime) else None
+                    start_dt = booking_start if isinstance(booking_start, datetime) else None
+                    end_dt = booking_end if isinstance(booking_end, datetime) else None
+                    
+                    if booking_date_obj and start_dt and end_dt:
+                        _ensure_core_slots_exist(cur, equipment_id, booking_date_obj)
+                        _update_core_slots_on_booking(cur, equipment_id, start_dt, end_dt, "free", None)
+                except Exception as exc:
+                    logger.warning(f"Ошибка синхронизации с wsb_time_slots при отмене бронирования: {exc}")
+            
             conn.commit()
             
             # Инвалидация кэша тепловой карты для этой даты
@@ -581,7 +771,14 @@ def cancel_booking(booking_id: int, user_id: int, is_admin: bool = False) -> Dic
                 # Не прерываем выполнение при ошибке уведомления
                 print(f"[NOTIFICATION ERROR] Failed to send booking cancelled notification: {exc}")
             
-            return {"data": {"message": "Бронирование отменено", "booking_id": booking_id}}
+            return {
+                "data": {
+                    "message": "Бронирование отменено",
+                    "booking_id": booking_id,
+                    "date": booking_date.isoformat() if isinstance(booking_date, date) else (booking_date.date().isoformat() if isinstance(booking_date, datetime) else str(booking_date)),
+                    "equipment_id": equipment_id,
+                }
+            }
     except Exception as exc:
         return {"error": f"Не удалось отменить бронирование: {exc}"}
 

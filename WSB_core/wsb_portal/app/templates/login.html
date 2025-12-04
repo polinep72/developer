@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход в WSB Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Вход в систему</h1>
+            <p class="auth-hint">Используйте телефон или e-mail в качестве логина</p>
+            <form id="login-form">
+                <label for="login-input">Телефон или e-mail</label>
+                <input type="text" id="login-input" required autocomplete="username">
+
+                <label for="password-input">Пароль</label>
+                <input type="password" id="password-input" required autocomplete="current-password">
+
+                <button type="submit" class="btn-primary full-width">Войти</button>
+                <p class="auth-error hidden" id="login-error"></p>
+            </form>
+            <div class="auth-links">
+                <a class="auth-back" href="/register">Регистрация</a>
+                <span class="auth-separator">|</span>
+                <a class="auth-back" href="/reset-password">Забыли пароль?</a>
+            </div>
+            <a class="auth-back" href="/">← Вернуться на главную</a>
+        </div>
+    </div>
+</body>
+</html>
+    </div>
+
+    <script>
+        const form = document.getElementById("login-form");
+        const errorBox = document.getElementById("login-error");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorBox.textContent = "";
+            errorBox.classList.add("hidden");
+
+            const login = document.getElementById("login-input").value.trim();
+            const password = document.getElementById("password-input").value;
+
+            if (!login || !password) {
+                errorBox.textContent = "Заполните логин и пароль.";
+                errorBox.classList.remove("hidden");
+                return;
+            }
+
+            try {
+                const response = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({login, password}),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.detail || "Ошибка входа");
+                }
+
+                window.location.href = "/";
+            } catch (error) {
+                errorBox.textContent = error.message || "Не удалось выполнить вход.";
+                errorBox.classList.remove("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
+
+

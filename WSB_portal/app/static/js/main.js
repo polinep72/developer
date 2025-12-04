@@ -1095,11 +1095,11 @@ function renderAdvancedEquipmentStats(data) {
         html += `<div class="advanced-card">
             <h3>Использование оборудования</h3>
             <div class="table-wrapper">
-                <table>
-                    <thead>
+            <table>
+                <thead>
                         <tr><th>Оборудование</th><th>Часы</th></tr>
-                    </thead>
-                    <tbody>`;
+                </thead>
+                <tbody>`;
         data.equipment_stats.category_stats.forEach(eq => {
             html += `<tr><td>${eq.name}</td><td>${eq.hours.toFixed(2)}</td></tr>`;
         });
@@ -1247,11 +1247,11 @@ function renderAdvancedStaffStats(data) {
         html += `<div class="advanced-card">
             <h3>Список пользователей</h3>
             <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr><th>Пользователь</th><th>Часы</th></tr>
-                    </thead>
-                    <tbody>`;
+            <table>
+                <thead>
+                    <tr><th>Пользователь</th><th>Часы</th></tr>
+                </thead>
+                <tbody>`;
         data.user_stats.top_users.forEach(user => {
             const surname = formatUserName(user.name);
             html += `<tr><td>${surname}</td><td>${user.hours.toFixed(2)}</td></tr>`;

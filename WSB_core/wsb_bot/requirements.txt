@@ -1,0 +1,7 @@
+psycopg2-binary
+python-dotenv
+pyTelegramBotAPI
+APScheduler
+pandas
+Pillow # Добавлено, т.к. используется 'from PIL import Image' в оригинальном коде, хотя и не применяется
+schedule # Добавлено, т.к. используется 'import schedule', хотя и не применяется активно

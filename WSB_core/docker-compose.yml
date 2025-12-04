@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  # Telegram-бот WSB (ядро в WSB/wsb_bot)
+  wsb-bot:
+    build:
+      context: ../WSB/wsb_bot
+      dockerfile: Dockerfile
+    container_name: wsb-core-bot
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - wsb-core-net
+    volumes:
+      - ../WSB/wsb_bot/logs:/app/logs
+
+  # Веб-портал WSB (WSB_portal)
+  wsb-portal:
+    build:
+      context: ../WSB_portal
+      dockerfile: Dockerfile
+    container_name: wsb-core-portal
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=wsb-core-redis
+      - REDIS_PORT=6379
+    depends_on:
+      wsb-core-redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - wsb-core-net
+    volumes:
+      - ../WSB_portal/.env:/app/.env:ro
+
+  # Redis для кеширования портала (имя изменено, чтобы не конфликтовать с существующим wsb-redis)
+  wsb-core-redis:
+    image: redis:7-alpine
+    container_name: wsb-core-redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    networks:
+      - wsb-core-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - redis-data:/data
+
+networks:
+  wsb-core-net:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

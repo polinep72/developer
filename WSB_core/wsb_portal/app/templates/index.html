@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>WSB Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body data-config='{
+        "initialFigure": {{ heatmap_json | safe if heatmap_json else "null" }},
+        "historyFigure": {{ history_heatmap_json | safe if history_heatmap_json else "null" }},
+        "selectedDate": "{{ selected_date }}",
+        "today": "{{ today }}",
+        "errorMessage": {{ (heatmap_error or "") | tojson }},
+        "historyError": {{ (history_heatmap_error or "") | tojson }},
+        "initialSummary": {{ heatmap_summary | tojson }}
+    }'>
+    <div class="header">
+        <a class="logo" href="/">
+            <img src="/static/img/logo.webp" alt="ИПК Электрон-Маш">
+        </a>
+        <div class="user-menu">
+            <button class="user-login-btn" id="login-button">Войти</button>
+            <div class="user-info hidden" id="user-info">
+                <button class="user-profile-trigger" id="user-profile-button" type="button">
+                    <span class="user-name" id="user-name"></span>
+                </button>
+                <button class="logout-btn" id="logout-button">Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" data-tab="equipment">
+            Бронирование оборудования
+        </button>
+        <button class="tab-button hidden" data-tab="manage-bookings" data-requires-auth="true">
+            Управление бронированием
+        </button>
+        <button class="tab-button" data-tab="workplaces">
+            История бронирований (статистика и графики)
+        </button>
+        <button class="tab-button hidden" data-tab="calendar" data-requires-auth="true">
+            Календарь бронирований
+        </button>
+        <button class="tab-button" data-tab="si-module">
+            Система учета оборудования (СИ)
+        </button>
+        <button class="tab-button admin-only" data-tab="users-management" style="display: none;">
+            Управление пользователями
+        </button>
+    </div>
+
+    <div class="tab-content active" id="tab-equipment">
+        <section class="booking-panel">
+            <div class="booking-header">
+                <div class="booking-header-main">
+                    <h2>Бронирование оборудования</h2>
+                    <p>Планируйте работу с оборудованием и контролируйте занятость.</p>
+                    <div class="booking-controls">
+                        <div class="control">
+                            <label for="booking-date">Дата бронирования</label>
+                            <input type="date" id="booking-date" value="{{ selected_date }}">
+                        </div>
+                        <div class="control control--button">
+                            <label>&nbsp;</label>
+                            <button id="refresh-heatmap" class="btn-primary">Показать занятость</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="booking-summary-card">
+                    <div class="summary-item">
+                        <span class="summary-label">Активные брони</span>
+                        <span class="summary-value" id="active-bookings">{{ heatmap_summary.get("active_bookings", "—") }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Свободные слоты</span>
+                        <span class="summary-value" id="free-slots">{{ heatmap_summary.get("free_slots", "—") }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Обновлено</span>
+                        <span class="summary-value" id="updated-at">только что</span>
+                    </div>
+                </div>
+            </div>
+            <div class="booking-form">
+                <div class="booking-form-header">
+                    <h3>Создать бронирование</h3>
+                    <p>Выберите доступное оборудование и подходящий интервал.</p>
+                </div>
+                <div class="booking-form-fields">
+                    <div class="form-group">
+                        <label for="booking-category">Категория оборудования</label>
+                        <select id="booking-category">
+                            <option value="">Выберите категорию</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="booking-equipment">Оборудование</label>
+                        <select id="booking-equipment" disabled>
+                            <option value="">Сначала выберите категорию</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="booking-start-time">Время начала</label>
+                        <select id="booking-start-time" disabled>
+                            <option value="">Нет доступных интервалов</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="booking-duration">Время работы</label>
+                        <select id="booking-duration" disabled>
+                            <option value="">Сначала выберите время начала</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="booking-form-footer">
+                    <button id="booking-submit" class="btn-primary" disabled>Забронировать</button>
+                    <span id="booking-status" class="booking-status"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="heatmap-section">
+            <div class="heatmap-header">
+                <h2>Отображение занятости</h2>
+                <p>Ниже показана тепловая карта бронирования измерительного оборудования.</p>
+            </div>
+            <div id="heatmap-error" class="heatmap-error">
+                {{ heatmap_error if heatmap_error else "" }}
+            </div>
+            <div id="heatmap-graph" class="heatmap-graph"></div>
+        </section>
+    </div>
+
+    <div class="tab-content hidden" id="tab-manage-bookings" data-requires-auth="true">
+        <section class="booking-panel">
+            <div class="booking-header">
+                <div class="booking-header-main">
+                    <h2>Управление бронированием</h2>
+                    <p>Просматривайте и управляйте своими бронированиями.</p>
+                    <div class="booking-controls">
+                        <div class="control">
+                            <label for="manage-booking-date">Дата бронирования</label>
+                            <input type="date" id="manage-booking-date" value="{{ selected_date }}">
+                        </div>
+                        <div class="control control--button">
+                            <label>&nbsp;</label>
+                        <div class="button-group">
+                            <button id="refresh-bookings" class="btn-primary">Показать бронирования</button>
+                            <button id="export-bookings" class="btn-secondary">Экспорт CSV</button>
+                            <button id="export-bookings-excel" class="btn-secondary">Экспорт Excel</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="bookings-list-container" class="bookings-list-container">
+                <div id="bookings-loading" class="bookings-loading" style="display: none;">
+                    Загрузка...
+                </div>
+                <div id="bookings-error" class="bookings-error" style="display: none;"></div>
+                <table id="bookings-table" class="bookings-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Оборудование</th>
+                            <th>Время</th>
+                            <th>Длительность</th>
+                            <th>Статус</th>
+                            <th class="requires-admin">Пользователь</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-table-body">
+                    </tbody>
+                </table>
+                <div id="bookings-empty" class="bookings-empty" style="display: none;">
+                    Нет бронирований на выбранную дату.
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="tab-content" id="tab-workplaces">
+        <div class="history-subtabs">
+            <button class="history-subtab-button active" data-subtab="dashboard">Даш-борд</button>
+            <button class="history-subtab-button" data-subtab="heatmap">Тепловая карта</button>
+            <button class="history-subtab-button" data-subtab="equipment-stats">Статистика по оборудованию</button>
+            <button class="history-subtab-button" data-subtab="user-stats">Статистика по пользователям</button>
+            <button class="history-subtab-button" data-subtab="temporal-patterns">Временные паттерны</button>
+            <button class="history-subtab-button" data-subtab="forecast">Прогноз загрузки</button>
+            <button class="history-subtab-button" data-subtab="recommendations">Рекомендации</button>
+        </div>
+
+        <div class="history-subtab-content active" id="subtab-dashboard">
+            <section class="dashboard-panel">
+                <div class="dashboard-header">
+                    <h2>Даш-борд бронирования рабочих мест</h2>
+                    <button id="widget-customizer-btn" class="btn-secondary" data-tooltip="Настроить видимость и порядок виджетов">Настроить виджеты</button>
+                </div>
+                <div class="dashboard-controls">
+                    <div class="control">
+                        <label for="dashboard-equipment">Измерительные приборы</label>
+                        <select id="dashboard-equipment" multiple size="6"></select>
+                    </div>
+                    <div class="control range">
+                        <label>Период</label>
+                        <div class="range-inputs">
+                            <input type="date" id="dashboard-start">
+                            <span>→</span>
+                            <input type="date" id="dashboard-end">
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="dashboard-target">Целевая загрузка (часов в день)</label>
+                        <input type="number" id="dashboard-target" min="1" max="24" step="1" value="8">
+                    </div>
+                    <div class="control control--button">
+                        <label>&nbsp;</label>
+                        <div class="button-group">
+                            <button id="dashboard-apply" class="btn-primary">Обновить аналитику</button>
+                            <button id="dashboard-export" class="btn-secondary">Экспорт CSV</button>
+                            <button id="dashboard-export-excel" class="btn-secondary">Экспорт Excel</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-status">
+                    <div>
+                        <span class="summary-label">Обобщенная загрузка</span>
+                        <span class="summary-value" id="dashboard-utilization">—</span>
+                    </div>
+                    <div id="dashboard-message" class="dashboard-message"></div>
+                </div>
+                <div class="dashboard-widgets" id="dashboard-widgets">
+                    <div class="dashboard-widget-card" data-widget-id="insights" data-tooltip="Ключевые показатели использования оборудования">
+                        <h3>Ключевые показатели</h3>
+                        <div id="dashboard-insights"></div>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="relative" data-tooltip="Относительная загрузка оборудования по дням">
+                        <h3>Относительная загрузка</h3>
+                        <div id="dashboard-relative" class="chart-container"></div>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="absolute" data-tooltip="Абсолютная загрузка оборудования в часах">
+                        <h3>Абсолютная загрузка</h3>
+                        <div id="dashboard-absolute" class="chart-container"></div>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="users" data-tooltip="Список пользователей и их наработка">
+                        <h3>Список пользователей</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Пользователь</th>
+                                    <th>Длительность (ч)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-users"></tbody>
+                        </table>
+                    </div>
+                    <div class="dashboard-widget-card" data-widget-id="equipment" data-tooltip="Суммарная наработка по каждому прибору">
+                        <h3>Суммарная наработка</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Прибор</th>
+                                    <th>Часы</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-equipment-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-heatmap">
+            <section class="heatmap-section history">
+                <div class="heatmap-header">
+                    <h2>История бронирований (тепловая карта)</h2>
+                    <p>Выберите дату не позже сегодняшнего дня, чтобы просмотреть архивные данные.</p>
+                </div>
+                <div class="booking-controls history">
+                    <div class="control">
+                        <label for="history-date">Дата истории</label>
+                        <input type="date" id="history-date" max="{{ today }}" value="{{ history_selected_date }}">
+                    </div>
+                    <div class="control">
+                        <label>&nbsp;</label>
+                        <button id="history-heatmap-btn" class="btn-primary">Показать историю</button>
+                    </div>
+                </div>
+                <div id="history-heatmap-error" class="heatmap-error">
+                    {{ history_heatmap_error if history_heatmap_error else "" }}
+                </div>
+                <div id="history-heatmap-graph" class="heatmap-graph"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-equipment-stats">
+            <section class="advanced-panel">
+                <h2>Расширенная статистика по оборудованию</h2>
+                <p class="advanced-note">Статистика построена на информации за последние 6 месяцев.</p>
+                <div class="advanced-grid" id="equipment-stats-grid"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-user-stats">
+            <section class="advanced-panel">
+                <h2>Расширенная статистика по пользователям</h2>
+                <p class="advanced-note">Статистика построена на информации за последние 6 месяцев.</p>
+                <div class="advanced-grid" id="user-stats-grid"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-temporal-patterns">
+            <section class="advanced-panel">
+                <h2>Временные паттерны</h2>
+                <p class="advanced-note">Паттерны построены на информации за последние 6 месяцев.</p>
+                <div class="advanced-grid" id="temporal-patterns-grid"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-forecast">
+            <section class="advanced-panel">
+                <h2>Прогноз загрузки</h2>
+                <p class="advanced-note">Прогноз построен на основе исторических данных за последние 6 месяцев.</p>
+                <div id="forecast-container"></div>
+            </section>
+        </div>
+
+        <div class="history-subtab-content" id="subtab-recommendations">
+            <section class="advanced-panel">
+                <h2>Рекомендации</h2>
+                <p class="advanced-note">Рекомендации построены на информации за последние 6 месяцев.</p>
+                <div id="recommendations-systemic" class="recommendations-list">
+                    <h3>Системные перегрузки</h3>
+                    <ul></ul>
+                </div>
+                <div id="recommendations-peak" class="recommendations-list">
+                    <h3>Пиковые инциденты</h3>
+                    <ul></ul>
+                </div>
+                <div id="recommendations-recent" class="recommendations-list">
+                    <h3>Свежие события (последняя неделя)</h3>
+                    <ul></ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="widget-customizer" id="widget-customizer">
+        <div class="widget-customizer-overlay"></div>
+        <div class="widget-customizer-panel">
+            <div class="widget-customizer-header">
+                <h3>Настройка виджетов</h3>
+                <button class="widget-customizer-close" id="widget-customizer-close">×</button>
+            </div>
+            <p class="widget-customizer-hint">Перетащите виджеты для изменения порядка. Снимите галочку, чтобы скрыть виджет.</p>
+            <ul id="widget-list"></ul>
+            <div class="widget-customizer-actions">
+                <button id="widget-customizer-save" class="btn-primary">Сохранить</button>
+                <button id="widget-customizer-reset" class="btn-secondary">Сбросить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content hidden" id="tab-calendar" data-requires-auth="true">
+        <section class="calendar-panel">
+            <div class="calendar-header">
+                <h2>Календарь бронирований</h2>
+                <p>Выберите месяц для просмотра бронирований. Кликните на дату, чтобы открыть детали бронирований.</p>
+            </div>
+            <div class="calendar-controls">
+                <div class="control">
+                    <button id="calendar-prev-month" class="btn-secondary">← Предыдущий месяц</button>
+                </div>
+                <div class="control">
+                    <label for="calendar-month">Месяц</label>
+                    <input type="month" id="calendar-month" value="">
+                </div>
+                <div class="control">
+                    <button id="calendar-next-month" class="btn-secondary">Следующий месяц →</button>
+                </div>
+                <div class="control">
+                    <button id="calendar-today" class="btn-secondary">Сегодня</button>
+                </div>
+            </div>
+            <div id="calendar-error" class="calendar-error hidden"></div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+        </section>
+    </div>
+
+    <div class="tab-content" id="tab-si-module">
+        <section class="equipment-panel">
+            <div class="equipment-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Средства измерения (СИ)</span>
+                    <span class="stat-value" id="si-count">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Испытательное оборудование (ИО)</span>
+                    <span class="stat-value" id="io-count">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Вспомогательное оборудование (ВО)</span>
+                    <span class="stat-value" id="vo-count">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Записей в Госреестре</span>
+                    <span class="stat-value" id="gosregister-count">0</span>
+                </div>
+            </div>
+
+            <div class="equipment-subtabs">
+                <button class="subtab-button active" data-subtab="si">СИ</button>
+                <button class="subtab-button" data-subtab="io">ИО</button>
+                <button class="subtab-button" data-subtab="vo">ВО</button>
+                <button class="subtab-button" data-subtab="gosregister">Госреестр</button>
+            </div>
+
+            <div class="subtab-content active" id="subtab-si">
+                <div class="equipment-subtab-header">
+                    <h3>Средства измерения (СИ)</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="si-search">Поиск</label>
+                            <input type="text" id="si-search" class="equipment-search-input" placeholder="Название, тип, серийный номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="si-status-filter">Статус поверки</label>
+                            <select id="si-status-filter" class="equipment-status-select">
+                                <option value="all">Все</option>
+                                <option value="overdue">Просрочено</option>
+                                <option value="soon">До 30 дней</option>
+                                <option value="normal">Более 30 дней</option>
+                                <option value="no-data">Без даты</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary btn-add-equipment requires-admin" data-type="si">+ Добавить СИ</button>
+                    </div>
+                </div>
+                <div class="equipment-table-wrapper">
+                    <table class="equipment-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="row_number">№</th>
+                                <th class="sortable" data-sort="name">Наименование</th>
+                                <th class="sortable" data-sort="type_designation">Обозначение типа</th>
+                                <th class="sortable" data-sort="serial_number">Зав. №</th>
+                                <th class="sortable" data-sort="certificate_number">№ св-ва о поверке</th>
+                                <th class="sortable" data-sort="certificate_date">Дата поверки</th>
+                                <th class="sortable" data-sort="next_calibration_date">След. поверка</th>
+                                <th class="sortable" data-sort="days_until_calibration">Дней до поверки</th>
+                                <th class="sortable" data-sort="gosregister_number">№ Госреестра</th>
+                                <th class="sortable" data-sort="calibration_cost">Стоимость поверки</th>
+                                <th class="sortable" data-sort="note">Примечание</th>
+                            </tr>
+                        </thead>
+                        <tbody id="si-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="subtab-content" id="subtab-io">
+                <div class="equipment-subtab-header">
+                    <h3>Испытательное оборудование (ИО)</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="io-search">Поиск</label>
+                            <input type="text" id="io-search" class="equipment-search-input" placeholder="Название, тип, серийный номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="io-status-filter">Статус поверки</label>
+                            <select id="io-status-filter" class="equipment-status-select">
+                                <option value="all">Все</option>
+                                <option value="overdue">Просрочено</option>
+                                <option value="soon">До 30 дней</option>
+                                <option value="normal">Более 30 дней</option>
+                                <option value="no-data">Без даты</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary btn-add-equipment requires-admin" data-type="io">+ Добавить ИО</button>
+                    </div>
+                </div>
+                <div class="equipment-table-wrapper">
+                    <table class="equipment-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="row_number">№</th>
+                                <th class="sortable" data-sort="name">Наименование</th>
+                                <th class="sortable" data-sort="type_designation">Обозначение типа</th>
+                                <th class="sortable" data-sort="serial_number">Зав. №</th>
+                                <th class="sortable" data-sort="certificate_number">№ аттестата</th>
+                                <th class="sortable" data-sort="mpi">МПИ</th>
+                                <th class="sortable" data-sort="certificate_date">Дата аттестации</th>
+                                <th class="sortable" data-sort="next_calibration_date">След. аттестация</th>
+                                <th class="sortable" data-sort="days_until_calibration">Дней до аттестации</th>
+                                <th class="sortable" data-sort="calibration_cost">Стоимость аттестации</th>
+                                <th class="sortable" data-sort="note">Примечание</th>
+                            </tr>
+                        </thead>
+                        <tbody id="io-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="subtab-content" id="subtab-vo">
+                <div class="equipment-subtab-header">
+                    <h3>Вспомогательное оборудование (ВО)</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="vo-search">Поиск</label>
+                            <input type="text" id="vo-search" class="equipment-search-input" placeholder="Название, тип, серийный номер...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="vo-status-filter">Статус поверки</label>
+                            <select id="vo-status-filter" class="equipment-status-select">
+                                <option value="all">Все</option>
+                                <option value="overdue">Просрочено</option>
+                                <option value="soon">До 30 дней</option>
+                                <option value="normal">Более 30 дней</option>
+                                <option value="no-data">Без даты</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary btn-add-equipment requires-admin" data-type="vo">+ Добавить ВО</button>
+                    </div>
+                </div>
+                <div class="equipment-table-wrapper">
+                    <table class="equipment-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="row_number">№</th>
+                                <th class="sortable" data-sort="name">Наименование оборудования</th>
+                                <th class="sortable" data-sort="type_designation">Тип оборудования</th>
+                                <th class="sortable" data-sort="serial_number">Зав. №</th>
+                                <th class="sortable" data-sort="note">Примечание</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vo-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="subtab-content" id="subtab-gosregister">
+                <div class="equipment-subtab-header">
+                    <h3>Госреестр средств измерений</h3>
+                    <div class="equipment-filters">
+                        <div class="filter-group">
+                            <label for="gosregister-search">Поиск</label>
+                            <input type="text" id="gosregister-search" class="equipment-search-input" placeholder="Наименование, тип, изготовитель...">
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-secondary btn-add-equipment requires-admin" data-type="gosregister">+ Добавить в Госреестр</button>
+                    </div>
+                </div>
+                <div class="equipment-table-wrapper">
+                    <table class="equipment-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="row_number">№</th>
+                                <th class="sortable" data-sort="gosregister_number">Номер в Госреестре</th>
+                                <th class="sortable" data-sort="si_name">Наименование СИ</th>
+                                <th class="sortable" data-sort="type_designation">Обозначение типа СИ</th>
+                                <th class="sortable" data-sort="manufacturer">Изготовитель</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gosregister-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="tab-content" id="tab-users-management">
+        <section class="users-management-panel">
+            <div class="users-management-header">
+                <h2>Управление пользователями</h2>
+                <p>Просматривайте, создавайте и редактируйте пользователей системы.</p>
+                <button class="btn-primary" id="add-user-button">+ Добавить пользователя</button>
+            </div>
+            <div id="users-loading" class="loading-indicator" style="display: none;">Загрузка пользователей...</div>
+            <div id="users-error" class="error-message" style="display: none;"></div>
+            <div class="table-wrapper">
+                <table class="users-table" id="users-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Фамилия</th>
+                            <th>Имя, Отчество</th>
+                            <th>Телефон</th>
+                            <th>Email</th>
+                            <th>Админ</th>
+                            <th>Заблокирован</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                        <!-- Users will be loaded here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Модальные окна для добавления оборудования -->
+    <!-- Модальное окно добавления СИ (выбор из Госреестра) -->
+    <div class="modal" id="modal-add-si-select">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить СИ из Госреестра</h3>
+                <button class="modal-close" data-modal="modal-add-si-select">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label>Выберите СИ из Госреестра:</label>
+                <select id="gosregister-select" size="10" style="width: 100%; padding: 8px; margin-top: 8px;">
+                    <option value="">Загрузка...</option>
+                </select>
+                <p class="form-hint">Выберите средство измерения из списка для добавления в оборудование</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-add-si-select">Отмена</button>
+                <button class="btn-primary" id="select-si-button" disabled>Выбрать СИ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно формы добавления СИ -->
+    <div class="modal" id="modal-add-si-form">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить СИ в оборудование</h3>
+                <button class="modal-close" data-modal="modal-add-si-form">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-si-info">
+                    <h4>Выбранное СИ из Госреестра</h4>
+                    <p><strong>Номер Госреестра:</strong> <span id="selected-gosregister-number">-</span></p>
+                    <p><strong>Наименование:</strong> <span id="selected-si-name">-</span></p>
+                    <p><strong>Тип:</strong> <span id="selected-si-type">-</span></p>
+                    <p><strong>Изготовитель:</strong> <span id="selected-si-manufacturer">-</span></p>
+                </div>
+                <form id="add-si-form">
+                    <div class="form-group">
+                        <label for="si-type">Тип *</label>
+                        <input type="text" id="si-type" required>
+                        <p class="form-hint">Укажите конкретный тип/модель СИ</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="si-serial-number">Заводской номер *</label>
+                        <input type="text" id="si-serial-number" required>
+                        <p class="form-hint">Серийный номер устройства</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="si-certificate-number">Номер свидетельства о поверке</label>
+                        <input type="text" id="si-certificate-number">
+                        <p class="form-hint">Если есть действующее свидетельство о поверке</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="si-calibration-date">Дата поверки</label>
+                        <input type="date" id="si-calibration-date">
+                        <p class="form-hint">Дата последней поверки</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-add-si-form">Отмена</button>
+                <button class="btn-primary" id="add-si-button">Добавить СИ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления ИО -->
+    <div class="modal" id="modal-add-io">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить испытательное оборудование</h3>
+                <button class="modal-close" data-modal="modal-add-io">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-io-form">
+                    <div class="form-group">
+                        <label for="io-name">Наименование *</label>
+                        <input type="text" id="io-name" required>
+                        <p class="form-hint">Укажите полное наименование ИО</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="io-type">Обозначение типа *</label>
+                        <input type="text" id="io-type" required>
+                        <p class="form-hint">Укажите тип или модель ИО</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="io-serial-number">Зав. № *</label>
+                        <input type="text" id="io-serial-number" required>
+                        <p class="form-hint">Укажите заводской номер</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="io-mpi">МПИ</label>
+                        <input type="text" id="io-mpi" value="1 год" placeholder="1 год">
+                        <p class="form-hint">Межповерочный интервал (по умолчанию 1 год)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="io-certificate-number">№ аттестата</label>
+                        <input type="text" id="io-certificate-number">
+                        <p class="form-hint">Номер аттестата (если есть)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="io-certificate-date">Дата аттестации</label>
+                        <input type="date" id="io-certificate-date">
+                        <p class="form-hint">Дата последней аттестации</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="io-note">Примечание</label>
+                        <textarea id="io-note" rows="3" placeholder="Дополнительная информация об оборудовании"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-add-io">Отмена</button>
+                <button class="btn-primary" id="add-io-button">Внести данные в БД</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления ВО -->
+    <div class="modal" id="modal-add-vo">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить вспомогательное оборудование</h3>
+                <button class="modal-close" data-modal="modal-add-vo">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-vo-form">
+                    <div class="form-group">
+                        <label for="vo-name">Наименование оборудования *</label>
+                        <input type="text" id="vo-name" required>
+                        <p class="form-hint">Укажите полное наименование оборудования</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="vo-type">Тип оборудования *</label>
+                        <input type="text" id="vo-type" required>
+                        <p class="form-hint">Укажите тип или модель оборудования</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="vo-serial-number">Зав. № *</label>
+                        <input type="text" id="vo-serial-number" required>
+                        <p class="form-hint">Серийный номер устройства</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="vo-note">Примечание</label>
+                        <textarea id="vo-note" rows="3"></textarea>
+                        <p class="form-hint">Дополнительная информация об оборудовании (необязательно)</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-add-vo">Отмена</button>
+                <button class="btn-primary" id="add-vo-button">Внести данные в БД</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления в Госреестр -->
+    <div class="modal" id="modal-add-gosregister">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить в Госреестр</h3>
+                <button class="modal-close" data-modal="modal-add-gosregister">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-gosregister-form">
+                    <div class="form-group">
+                        <label for="gosregister-number">Номер в Госреестре *</label>
+                        <input type="text" id="gosregister-number" required>
+                        <p class="form-hint">Номер регистрации в Госреестре</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="gosregister-si-name">Наименование СИ *</label>
+                        <input type="text" id="gosregister-si-name" required>
+                        <p class="form-hint">Полное наименование средства измерения</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="gosregister-type-designation">Обозначение типа СИ *</label>
+                        <input type="text" id="gosregister-type-designation" required>
+                        <p class="form-hint">Обозначение типа средства измерения</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="gosregister-manufacturer">Изготовитель</label>
+                        <input type="text" id="gosregister-manufacturer">
+                        <p class="form-hint">Название производителя</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="gosregister-web-url">URL в Госреестре</label>
+                        <input type="url" id="gosregister-web-url" placeholder="https://...">
+                        <p class="form-hint">Ссылка на страницу в Госреестре (если есть)</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-add-gosregister">Отмена</button>
+                <button class="btn-primary" id="add-gosregister-button">Внести данные в БД</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Личный кабинет -->
+    <div class="modal" id="modal-user-profile">
+        <div class="modal-content modal-profile">
+            <div class="modal-header">
+                <h3>Личный кабинет</h3>
+                <button class="modal-close" data-modal="modal-user-profile">&times;</button>
+            </div>
+            <div class="modal-body user-profile-body">
+                <div class="profile-section">
+                    <h4>Личные данные</h4>
+                    <div class="profile-grid profile-grid--two">
+                        <div class="form-group">
+                            <label for="profile-first-name">Имя, Отчество</label>
+                            <input type="text" id="profile-first-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-last-name">Фамилия</label>
+                            <input type="text" id="profile-last-name" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-section">
+                    <h4>Контактная информация</h4>
+                    <div class="profile-grid profile-grid--two">
+                        <div class="form-group">
+                            <label for="profile-phone">Телефон</label>
+                            <input type="tel" id="profile-phone" placeholder="+7XXXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-email">Корпоративный e-mail</label>
+                            <input type="email" id="profile-email" placeholder="user@example.com">
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-section">
+                    <h4>Настройки уведомлений</h4>
+                    <div class="form-group inline-checkbox">
+                        <label>
+                            <input type="checkbox" id="email-notifications-checkbox">
+                            Email-уведомления
+                        </label>
+                        <p class="form-hint">Получать уведомления на email о создании и отмене бронирований</p>
+                    </div>
+                    <div class="form-group inline-checkbox">
+                        <label>
+                            <input type="checkbox" id="sms-notifications-checkbox" disabled>
+                            SMS-уведомления
+                        </label>
+                        <p class="form-hint">Функциональность будет доступна позже</p>
+                    </div>
+                </div>
+                <div class="profile-section">
+                    <h4>Смена пароля</h4>
+                    <div class="profile-grid">
+                        <div class="form-group">
+                            <label for="current-password">Текущий пароль</label>
+                            <input type="password" id="current-password" autocomplete="current-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Новый пароль</label>
+                            <input type="password" id="new-password" autocomplete="new-password" minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Подтверждение пароля</label>
+                            <input type="password" id="confirm-password" autocomplete="new-password" minlength="8">
+                        </div>
+                    </div>
+                    <p class="form-hint">Пароль должен содержать не менее 8 символов. Оставьте поля пустыми, если менять пароль не нужно.</p>
+                </div>
+                <p class="auth-error hidden" id="user-profile-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-user-profile">Отмена</button>
+                <button class="btn-primary" id="user-profile-save">Применить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна для управления пользователями -->
+    <!-- Модальное окно добавления/редактирования пользователя -->
+    <div class="modal" id="modal-user-form">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-user-form-title">Добавить пользователя</h3>
+                <button class="modal-close" data-modal="modal-user-form">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <input type="hidden" id="user-form-id">
+                    <div class="form-group">
+                        <label for="user-form-first-name">Имя *</label>
+                        <input type="text" id="user-form-first-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-form-last-name">Фамилия *</label>
+                        <input type="text" id="user-form-last-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-form-phone">Телефон</label>
+                        <input type="tel" id="user-form-phone" placeholder="+7XXXXXXXXXX">
+                        <p class="form-hint">Необходимо указать телефон или email</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-form-email">Email</label>
+                        <input type="email" id="user-form-email" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group" id="user-form-password-group">
+                        <label for="user-form-password">Пароль *</label>
+                        <input type="password" id="user-form-password" minlength="6">
+                        <p class="form-hint">Минимум 6 символов</p>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="user-form-is-admin">
+                            Администратор
+                        </label>
+                    </div>
+                    <div class="form-group" id="user-form-blocked-group" style="display: none;">
+                        <label>
+                            <input type="checkbox" id="user-form-is-blocked">
+                            Заблокирован
+                        </label>
+                    </div>
+                    <p class="auth-error hidden" id="user-form-error"></p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-user-form">Отмена</button>
+                <button class="btn-primary" id="submit-user-form">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно сброса пароля пользователя -->
+    <div class="modal" id="modal-reset-user-password">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Сбросить пароль</h3>
+                <button class="modal-close" data-modal="modal-reset-user-password">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Введите новый пароль для пользователя <strong id="reset-password-user-name"></strong>:</p>
+                <form id="reset-user-password-form">
+                    <input type="hidden" id="reset-password-user-id">
+                    <div class="form-group">
+                        <label for="reset-password-new">Новый пароль *</label>
+                        <input type="password" id="reset-password-new" required minlength="6">
+                        <p class="form-hint">Минимум 6 символов</p>
+                    </div>
+                    <p class="auth-error hidden" id="reset-password-error"></p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-modal="modal-reset-user-password">Отмена</button>
+                <button class="btn-primary" id="submit-reset-password">Изменить пароль</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
+
