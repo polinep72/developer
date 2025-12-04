@@ -14,7 +14,7 @@ from logger import logger
 
 # --- Грузим боевой модуль callback_handlers по прямому пути, чтобы избежать конфликтов пакетов ---
 ROOT_DIR = Path(__file__).resolve().parents[2]  # C:\Soft_IPK\WSB_core
-SOFT_DIR = ROOT_DIR.parent                      # C:\Soft_IPK
+SOFT_DIR = ROOT_DIR.parent  # C:\Soft_IPK
 WSB_CALLBACKS_PATH = SOFT_DIR / "WSB" / "wsb_bot" / "handlers" / "callback_handlers.py"
 
 try:
@@ -42,6 +42,30 @@ user_booking_states: Dict[int, Dict[str, Any]] = _base_user_booking_states
 def clear_user_state(user_id: int) -> None:
     """Прокси к боевой clear_user_state, чтобы не дублировать логику FSM."""
     _base_clear_user_state(user_id)
+
+
+def handle_callback_query(
+    bot: telebot.TeleBot,
+    db: Database,
+    scheduler: Optional[BackgroundScheduler],
+    active_timers: Optional[Dict[int, Any]],
+    scheduled_jobs_registry: Optional[Set[Tuple[str, int]]],
+    call: CallbackQuery,
+    source_command: Optional[str] = None,
+) -> None:
+    """
+    Прокси к боевой handle_callback_query, чтобы сохранить сигнатуру
+    и поведение оригинального обработчика.
+    """
+    _base_handle_callback_query(
+        bot,
+        db,
+        scheduler,
+        active_timers,
+        scheduled_jobs_registry,
+        call,
+        source_command=source_command,
+    )
 
 
 def register_callback_handlers(

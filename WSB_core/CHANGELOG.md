@@ -4,28 +4,42 @@
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-12-04
+_(пока без изменений — следующая версия в разработке)_
+
+## [0.2.0] - 2025-12-04
+
 ### Added
-- Инициализация подпроекта `WSB_core` с базовыми файлами контекста и описанием целей
-- Скопированы все файлы из `WSB/` (Telegram бот) в `wsb_bot/`
-- Скопированы все файлы из `WSB_portal/` (веб-портал) в `wsb_portal/`
-- Создана структура проекта с разделением на общее ядро (`wsb_core/`), бот (`wsb_bot/`) и портал (`wsb_portal/`)
-- Боевые версии `WSB/` и `WSB_portal/` зафиксированы и больше не изменяются
-- Вся дальнейшая разработка ведется только в `WSB_core/`
+- Модуль `wsb_core/notifications_logic.py` с единой политикой уведомлений (интервалы до начала/конца, правила предложения продления).
+- Логика продления в ядре `wsb_core/bookings_core.extend_booking_core` (права, рабочий день, лимиты, конфликты, обновление duration/extension).
+- Интеграция продления портала и бота с ядром (`extend_booking_core`) с сохранением локального fallback в боте.
+- Кнопка «Продлить» в портале на вкладке «Управление бронированием» с вызовом ядра продления.
+- Кнопка «Завершить» в портале (между «Продлить» и «Отменить») только для активных броней, с учётом прав пользователя/админа.
 
 ### Changed
-- Адаптированы импорты в `wsb_bot/services/booking_service.py` для использования `wsb_core.constants`
-- Обновлен `wsb_bot/constants.py` для использования констант из `wsb_core.constants`
-- Обновлен `wsb_portal/app/services/bookings.py` для использования констант из `wsb_core.constants`
-- Унифицированы константы времени работы: 7:00-22:00, шаг 30 минут, максимальная длительность 8 часов
-- Расширен `wsb_core/slots.py` функцией `calculate_available_slots_from_bookings()` для унифицированного расчета слотов
-- Адаптирован `wsb_bot/services/booking_service.py` для использования `wsb_core.slots.calculate_available_slots_from_bookings()` вместо локальной реализации
-- Добавлен модуль `wsb_core/bookings_core.py` с общей бизнес-логикой (создание/отмена, проверка конфликтов, синхронизация слотов)
-- `wsb_portal/app/services/bookings.py` переведен на использование `wsb_core.bookings_core` для создания и отмены бронирований
-- Расширен `wsb_core/models.py`:
-  - Добавлен статус `PLANNED` в `BookingStatus`
-  - Расширена модель `Booking` для соответствия структуре БД (добавлены поля: cancel, finish, time_interval, duration, data_booking, user_fio, equipment_name)
-  - Добавлена функция `determine_booking_status()` для определения статуса брони на основе полей БД
-  - Добавлена функция `booking_from_db_row()` для создания объекта Booking из строки БД с поддержкой разных вариантов именования полей
-- Обновлена документация: README.md, PROJECT_CONTEXT.md с описанием текущей структуры
+- Документация ядра обновлена с учётом продления и политики уведомлений (`PROJECT_CONTEXT.md`, `SOLUTIONS_HISTORY.md`, `CHAT_HISTORY.md`).
+- Подвкладки «Истории бронирований» закреплены (position: sticky), чтобы оставаться видимыми при прокрутке.
 
+## [0.1.0] - 2025-12-04
+### Added
+- Инициализация подпроекта `WSB_core` с базовыми файлами контекста и описанием целей.
+- Скопированы все файлы из `WSB/` (Telegram‑бот) в `wsb_bot/`.
+- Скопированы все файлы из `WSB_portal/` (веб‑портал) в `wsb_portal/`.
+- Создана структура проекта с разделением на общее ядро (`wsb_core/`), бот (`wsb_bot/`) и портал (`wsb_portal/`).
+- Боевые версии `WSB/` и `WSB_portal/` зафиксированы и больше не изменяются.
+- Вся дальнейшая разработка ведётся только в `WSB_core/`.
+
+### Changed
+- Адаптированы импорты в `wsb_bot/services/booking_service.py` для использования `wsb_core.constants`.
+- Обновлён `wsb_bot/constants.py` для использования констант из `wsb_core.constants`.
+- Обновлён `wsb_portal/app/services/bookings.py` для использования констант из `wsb_core.constants`.
+- Унифицированы константы времени работы: 7:00–22:00, шаг 30 минут, максимальная длительность 8 часов.
+- Расширен `wsb_core/slots.py` функцией `calculate_available_slots_from_bookings()` для унифицированного расчёта слотов.
+- Адаптирован `wsb_bot/services/booking_service.py` для использования `wsb_core.slots.calculate_available_slots_from_bookings()` вместо локальной реализации.
+- Добавлен модуль `wsb_core/bookings_core.py` с общей бизнес‑логикой (создание/отмена, проверка конфликтов, синхронизация слотов, базовая поддержка продления).
+- `wsb_portal/app/services/bookings.py` переведён на использование `wsb_core.bookings_core` для создания и отмены бронирований.
+- Расширен `wsb_core/models.py`:
+  - Добавлен статус `PLANNED` в `BookingStatus`.
+  - Расширена модель `Booking` для соответствия структуре БД (добавлены поля: cancel, finish, time_interval, duration, data_booking, user_fio, equipment_name, date).
+  - Добавлена функция `determine_booking_status()` для определения статуса брони на основе полей БД.
+  - Добавлена функция `booking_from_db_row()` для создания объекта Booking из строки БД с поддержкой разных вариантов именования полей.
+- Обновлена документация: README.md, PROJECT_CONTEXT.md с описанием текущей структуры.

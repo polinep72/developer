@@ -262,3 +262,55 @@ def generate_booking_confirmation_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton("❌ Отмена", callback_data=const.CB_BOOK_CANCEL_PROCESS),
     )
     return markup
+
+
+def generate_extend_time_keyboard(
+    booking_id: int, max_duration: Optional[timedelta] = None
+) -> InlineKeyboardMarkup:
+    """Клавиатура выбора времени продления (аналог боевой реализации)."""
+    markup = InlineKeyboardMarkup(row_width=3)
+    buttons: List[InlineKeyboardButton] = []
+
+    current_delta = timedelta(minutes=const.BOOKING_TIME_STEP_MINUTES)
+    limit_duration = (
+        max_duration
+        if max_duration is not None
+        else timedelta(hours=const.MAX_BOOKING_DURATION_HOURS)
+    )
+    time_step = timedelta(minutes=const.BOOKING_TIME_STEP_MINUTES)
+
+    if limit_duration < timedelta(0):
+        limit_duration = timedelta(0)
+
+    while current_delta <= limit_duration and current_delta > timedelta(0):
+        h, rem = divmod(current_delta.total_seconds(), 3600)
+        m, _ = divmod(rem, 60)
+        ext_str = f"{int(h):d}:{int(m):02d}"
+        callback = f"{const.CB_EXTEND_SELECT_TIME}{booking_id}_{ext_str}"
+        buttons.append(
+            InlineKeyboardButton(text=f"+ {ext_str}", callback_data=callback)
+        )
+        current_delta += time_step
+
+    if not buttons:
+        markup.add(
+            InlineKeyboardButton("Продление не доступно", callback_data=const.CB_IGNORE)
+        )
+        return markup
+
+    row: List[InlineKeyboardButton] = []
+    for btn in buttons:
+        row.append(btn)
+        if len(row) == markup.row_width:
+            markup.row(*row)
+            row = []
+    if row:
+        markup.row(*row)
+
+    cancel_context = const.CB_EXTEND_SELECT_BOOKING.replace("cb_", "", 1)
+    markup.add(
+        InlineKeyboardButton(
+            "❌ Отмена", callback_data=f"{const.CB_ACTION_CANCEL}{cancel_context}"
+        )
+    )
+    return markup

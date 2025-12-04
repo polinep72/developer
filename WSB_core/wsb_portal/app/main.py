@@ -63,6 +63,7 @@ from .services.bookings import (
     get_all_bookings,
     cancel_booking,
     extend_booking,
+    finish_booking,
     export_bookings_csv,
     get_calendar_overview,
 )
@@ -519,6 +520,26 @@ async def api_extend_booking(
     )
     if result.get("error"):
         status_code = 403 if "прав" in result["error"] or "найден" in result["error"] else 400
+        raise HTTPException(status_code=status_code, detail=result["error"])
+    return JSONResponse(result.get("data", {}))
+
+
+@app.post("/api/bookings/{booking_id}/finish", response_class=JSONResponse)
+async def api_finish_booking(
+    booking_id: int,
+    current_user=Depends(get_current_user),
+) -> JSONResponse:
+    """
+    Завершение активного бронирования.
+    """
+    result = finish_booking(
+        booking_id,
+        current_user["id"],
+        current_user.get("is_admin", False),
+    )
+    if result.get("error"):
+        # ошибки прав/чужой брони считаем 403
+        status_code = 403 if "прав" in result["error"] or "чуж" in result["error"] else 400
         raise HTTPException(status_code=status_code, detail=result["error"])
     return JSONResponse(result.get("data", {}))
 

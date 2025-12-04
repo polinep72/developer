@@ -885,6 +885,23 @@ body {
     background: #0369a1;
 }
 
+.btn-finish-booking {
+    background: #15803d; /* более тёмный зелёный, чем фон статус‑бэйджа Активное */
+    color: #ffffff;
+    border: 1px solid #166534;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-right: 8px;
+}
+
+.btn-finish-booking:hover {
+    background: #166534;
+}
+
 @media (max-width: 768px) {
     .booking-controls {
         flex-direction: column;
@@ -1601,6 +1618,12 @@ body {
     border-bottom: 2px solid var(--border);
     flex-wrap: nowrap;
     overflow-x: auto;
+    position: sticky;
+    /* Высота фиксированных шапки + основных вкладок (см. margin-top у .tab-content) */
+    top: 140px;
+    z-index: 20;
+    background: #ffffff;
+    padding-top: 4px;
 }
 
 .history-subtab-button {

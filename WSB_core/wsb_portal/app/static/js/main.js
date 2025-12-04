@@ -2953,16 +2953,17 @@ async function loadBookingsList() {
                     <td><span class="status-badge ${statusClass}">${booking.status || ""}</span></td>
                     ${isAdmin ? `<td>${booking.user_name || ""}</td>` : ""}
                     <td>
-                        ${booking.can_cancel ? `
-                            <button class="btn-extend-booking" data-booking-id="${booking.id}">Продлить</button>
-                            <button class="btn-cancel-booking" data-booking-id="${booking.id}">Отменить</button>
+                        ${(booking.can_cancel || booking.can_finish) ? `
+                            ${booking.can_cancel ? `<button class="btn-extend-booking" data-booking-id="${booking.id}">Продлить</button>` : ""}
+                            ${booking.can_finish ? `<button class="btn-finish-booking" data-booking-id="${booking.id}">Завершить</button>` : ""}
+                            ${booking.can_cancel ? `<button class="btn-cancel-booking" data-booking-id="${booking.id}">Отменить</button>` : ""}
                         ` : ""}
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
 
-            // Обработчики кнопок продления и отмены
+            // Обработчики кнопок продления, завершения и отмены
             tableBody.querySelectorAll(".btn-extend-booking").forEach((btn) => {
                 btn.addEventListener("click", async (e) => {
                     const bookingId = parseInt(e.target.dataset.bookingId);
@@ -2994,6 +2995,15 @@ async function loadBookingsList() {
                     const bookingId = parseInt(e.target.dataset.bookingId);
                     if (confirm("Вы уверены, что хотите отменить это бронирование?")) {
                         await cancelBooking(bookingId);
+                    }
+                });
+            });
+
+            tableBody.querySelectorAll(".btn-finish-booking").forEach((btn) => {
+                btn.addEventListener("click", async (e) => {
+                    const bookingId = parseInt(e.target.dataset.bookingId);
+                    if (confirm("Завершить текущее бронирование?")) {
+                        await finishBooking(bookingId);
                     }
                 });
             });
@@ -3373,6 +3383,41 @@ async function extendBooking(bookingId, extensionMinutes) {
         console.error("Ошибка продления бронирования:", error);
         errorEl.textContent = error.message || "Не удалось продлить бронирование";
         errorEl.style.display = "block";
+    }
+}
+
+async function finishBooking(bookingId) {
+    const errorEl = document.getElementById("bookings-error");
+    if (errorEl) {
+        errorEl.style.display = "none";
+        errorEl.textContent = "";
+    }
+    try {
+        const response = await fetch(`/api/bookings/${bookingId}/finish`, {
+            method: "POST",
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            const message = data.detail || data.error || "Не удалось завершить бронирование";
+            throw new Error(message);
+        }
+
+        const result = await response.json();
+        const message = result.message || "Бронирование завершено";
+        alert(message);
+
+        // Перезагружаем список после завершения
+        await loadBookingsList();
+    } catch (error) {
+        console.error("Ошибка завершения бронирования:", error);
+        if (errorEl) {
+            errorEl.textContent = error.message || "Не удалось завершить бронирование";
+            errorEl.style.display = "block";
+        } else {
+            alert(error.message || "Не удалось завершить бронирование");
+        }
     }
 }
 

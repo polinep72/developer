@@ -660,6 +660,104 @@ def cancel_booking(booking_id: int, user_id: int, is_admin: bool = False) -> Dic
         return {"error": f"Не удалось отменить бронирование: {exc}"}
 
 
+def finish_booking(
+    booking_id: int,
+    user_id: int,
+    is_admin: bool = False,  # админ может завершать любые брони
+) -> Dict[str, Any]:
+    """
+    Завершить бронирование — только владелец активной брони.
+    Логика синхронизирована с finish_booking в Telegram‑боте.
+    """
+    try:
+        with _connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT 
+                    b.*,
+                    e.name_equip,
+                    u.fi as user_name
+                FROM bookings b
+                JOIN equipment e ON b.equip_id = e.id
+                JOIN users u ON b.user_id = u.users_id
+                WHERE b.id = %s
+                """,
+                (booking_id,),
+            )
+            row = cast(Optional[Dict[str, Any]], cur.fetchone())
+
+            if not row:
+                return {"error": "Бронирование не найдено"}
+
+            owner_id = row.get("user_id")
+            is_cancelled = bool(row.get("cancel"))
+            finish_dt = row.get("finish")
+            equip_name = row.get("name_equip", "Оборудование")
+            time_start = row.get("time_start")
+
+            if not is_admin and owner_id != user_id:
+                return {"error": "Это не ваше бронирование"}
+            if is_cancelled:
+                return {"error": "Бронь отменена"}
+            if finish_dt is not None:
+                return {"error": "Бронь уже завершена"}
+
+            now_dt = datetime.now().replace(tzinfo=None)
+            if not isinstance(time_start, datetime):
+                return {"error": "Ошибка данных бронирования"}
+
+            time_start_naive = time_start.replace(tzinfo=None)
+            if time_start_naive > now_dt + timedelta(minutes=1):
+                return {"error": "Бронь ещё не активна"}
+
+            finish_time_ts = datetime.now()
+            cur.execute(
+                """
+                UPDATE bookings
+                SET finish = %s
+                WHERE id = %s AND cancel = FALSE AND finish IS NULL
+                """,
+                (finish_time_ts, booking_id),
+            )
+            conn.commit()
+
+            # Инвалидация кэша тепловой карты и дашборда
+            try:
+                from .cache import invalidate_heatmap, invalidate_dashboard
+
+                booking_date = row.get("date")
+                if isinstance(booking_date, datetime):
+                    booking_date_value: Optional[date] = booking_date.date()
+                elif isinstance(booking_date, date):
+                    booking_date_value = booking_date
+                else:
+                    booking_date_value = None
+
+                if booking_date_value:
+                    date_str = booking_date_value.strftime("%Y-%m-%d")
+                elif isinstance(booking_date, datetime):
+                    date_str = booking_date.date().strftime("%Y-%m-%d")
+                else:
+                    date_str = str(booking_date)
+
+                invalidate_heatmap(date_str)
+                invalidate_dashboard()
+            except Exception as exc:
+                logger.warning(f"Ошибка при инвалидации кэша после завершения: {exc}")
+
+            time_str = finish_time_ts.strftime("%H:%M:%S")
+            message = f"Использование '{equip_name}' завершено в {time_str}"
+
+            return {
+                "data": {
+                    "message": message,
+                    "booking_id": booking_id,
+                }
+            }
+    except Exception as exc:
+        return {"error": f"Не удалось завершить бронирование: {exc}"}
+
+
 def extend_booking(
     booking_id: int,
     user_id: int,
@@ -872,13 +970,16 @@ def _format_booking_row(row: Dict[str, Any]) -> Dict[str, Any]:
             status = "Запланировано"
         elif now >= end_dt:
             status = "Завершено"
-    
+
     can_cancel = (
         bool(booking_date)
         and booking_date >= today
         and not row.get("cancel")
         and not finish_dt
     )
+
+    # Кнопка «Завершить» доступна только для активных броней пользователя
+    can_finish = status == "Активное"
 
     return {
         "id": row["id"],
@@ -891,6 +992,7 @@ def _format_booking_row(row: Dict[str, Any]) -> Dict[str, Any]:
         "category": row.get("name_cat", ""),
         "status": status,
         "can_cancel": can_cancel,
+        "can_finish": can_finish,
     }
 
 

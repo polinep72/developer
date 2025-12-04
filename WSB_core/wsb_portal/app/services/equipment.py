@@ -6,30 +6,28 @@ from datetime import date
 import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Загружаем .env - автоматически ищет в текущей директории и родительских
-# Пробуем несколько путей для надежности
-import pathlib
+# Загружаем .env в следующем порядке:
+# 1) Корень монорепозитория WSB_core/.env
+# 2) Локальный WSB_portal/.env (может переопределять при разработке)
+base_dir = Path(__file__).resolve().parent.parent.parent  # WSB_core/WSB_portal
 possible_paths = [
-    pathlib.Path(__file__).parent.parent.parent / ".env",  # WSB_portal/.env
-    pathlib.Path.cwd() / ".env",  # Текущая рабочая директория
-    pathlib.Path(".env"),  # Относительный путь
+    base_dir.parent / ".env",  # WSB_core/.env
+    base_dir / ".env",         # WSB_core/WSB_portal/.env
 ]
 
 env_loaded = False
 for env_path in possible_paths:
     if env_path.exists():
-        load_dotenv(env_path, override=True)
+        load_dotenv(env_path, override=env_loaded is False)
         logger.info("Загружен .env из: %s", env_path)
         env_loaded = True
-        break
 
 if not env_loaded:
-    # Пробуем загрузить без указания пути (dotenv сам найдет)
-    load_dotenv()
-    logger.info("Попытка загрузки .env без указания пути")
+    logger.info("Файлы .env рядом с WSB_portal не найдены, используются только переменные окружения.")
 
 
 def _get_env(primary_key: str, fallback_key: Optional[str] = None, default: Optional[str] = None) -> Optional[str]:
