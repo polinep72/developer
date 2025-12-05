@@ -83,12 +83,12 @@ def process_email_notifications(
                 for task in tasks:
                     # psycopg с dict_row возвращает объекты, которые можно использовать как словари
                     try:
-                        # Используем доступ по ключу (dict_row возвращает объекты с доступом по ключу)
-                        task_id = task["id"]
-                        booking_id = task["booking_id"]
-                        event_type_str = task["event_type"]
-                        run_at = task["run_at"]
-                        payload_json = task.get("payload") if hasattr(task, 'get') else (task["payload"] if "payload" in task else None)
+                        # Используем доступ по ключу (dict_row возвращает объекты Row с доступом по ключу)
+                        task_id = task["id"]  # type: ignore[index]
+                        booking_id = task["booking_id"]  # type: ignore[index]
+                        event_type_str = task["event_type"]  # type: ignore[index]
+                        run_at = task["run_at"]  # type: ignore[index]
+                        payload_json = task.get("payload") if hasattr(task, 'get') else (task["payload"] if "payload" in task else None)  # type: ignore[index]
                     except (KeyError, TypeError, AttributeError) as e:
                         logger.error(f"Ошибка при разборе задачи из БД: {e}, тип: {type(task)}, значение: {task}")
                         continue
@@ -124,16 +124,21 @@ def process_email_notifications(
                         if not booking_row:
                             raise ValueError(f"Бронирование {booking_id} не найдено")
 
-                        # Извлекаем данные из booking_row (dict_row возвращает словари)
-                        user_id = booking_row["user_id"]
-                        time_start = booking_row["time_start"]
-                        time_end = booking_row["time_end"]
-                        is_cancelled = booking_row.get("cancel", False) if isinstance(booking_row, dict) else booking_row[3]
-                        is_finished = booking_row.get("finish") is not None if isinstance(booking_row, dict) else (booking_row[4] is not None)
-                        equip_name = booking_row["name_equip"]
-                        user_email = booking_row["email"]
-                        user_first_name = booking_row.get("first_name") or "" if isinstance(booking_row, dict) else (booking_row[7] or "")
-                        user_last_name = booking_row.get("last_name") or "" if isinstance(booking_row, dict) else (booking_row[8] or "")
+                        # Извлекаем данные из booking_row (dict_row возвращает объекты с доступом по ключу)
+                        # psycopg с dict_row возвращает объекты Row, которые поддерживают доступ по ключу
+                        try:
+                            user_id = booking_row["user_id"]  # type: ignore[index]
+                            time_start = booking_row["time_start"]  # type: ignore[index]
+                            time_end = booking_row["time_end"]  # type: ignore[index]
+                            is_cancelled = bool(booking_row.get("cancel") if hasattr(booking_row, 'get') else booking_row["cancel"])  # type: ignore[index]
+                            is_finished = booking_row.get("finish") is not None if hasattr(booking_row, 'get') else (booking_row["finish"] is not None)  # type: ignore[index]
+                            equip_name = booking_row["name_equip"]  # type: ignore[index]
+                            user_email = booking_row["email"]  # type: ignore[index]
+                            user_first_name = (booking_row.get("first_name") if hasattr(booking_row, 'get') else booking_row["first_name"]) or ""  # type: ignore[index]
+                            user_last_name = (booking_row.get("last_name") if hasattr(booking_row, 'get') else booking_row["last_name"]) or ""  # type: ignore[index]
+                        except (KeyError, TypeError, AttributeError) as e:
+                            logger.error(f"Ошибка при извлечении данных из booking_row: {e}, тип: {type(booking_row)}")
+                            raise
 
                         # Проверяем, что бронь еще актуальна
                         if is_cancelled or is_finished:
