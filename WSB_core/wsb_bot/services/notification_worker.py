@@ -125,8 +125,25 @@ def process_telegram_notifications(
                         if not booking_row:
                             raise ValueError(f"Бронирование {booking_id} не найдено")
 
+                        # Извлекаем данные из booking_row (может быть кортеж или словарь)
+                        if isinstance(booking_row, dict):
+                            user_id = booking_row["user_id"]
+                            time_start = booking_row["time_start"]
+                            time_end = booking_row["time_end"]
+                            is_cancelled = booking_row.get("cancel", False)
+                            is_finished = booking_row.get("finish") is not None
+                            equip_name = booking_row["name_equip"]
+                        else:
+                            # Если кортеж
+                            user_id = booking_row[0]
+                            time_start = booking_row[1]
+                            time_end = booking_row[2]
+                            is_cancelled = booking_row[3]
+                            is_finished = booking_row[4] is not None
+                            equip_name = booking_row[5]
+
                         # Проверяем, что бронь еще актуальна
-                        if booking_row[3] or booking_row[4]:  # cancel или finish
+                        if is_cancelled or is_finished:
                             logger.info(
                                 f"Бронирование {booking_id} отменено или завершено, пропускаем уведомление"
                             )
@@ -140,13 +157,10 @@ def process_telegram_notifications(
                             )
                             continue
 
-                        user_id = booking_row[0]
-                        equip_name = booking_row[5]
-
                         # Формируем сообщение в зависимости от типа события
                         event_type = NotificationEventType(event_type_str)
                         message_text = _format_notification_message(
-                            event_type, equip_name, booking_row[1], booking_row[2]
+                            event_type, equip_name, time_start, time_end
                         )
 
                         # Отправляем уведомление

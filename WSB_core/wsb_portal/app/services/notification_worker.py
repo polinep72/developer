@@ -124,8 +124,19 @@ def process_email_notifications(
                         if not booking_row:
                             raise ValueError(f"Бронирование {booking_id} не найдено")
 
+                        # Извлекаем данные из booking_row (dict_row возвращает словари)
+                        user_id = booking_row["user_id"]
+                        time_start = booking_row["time_start"]
+                        time_end = booking_row["time_end"]
+                        is_cancelled = booking_row.get("cancel", False) if isinstance(booking_row, dict) else booking_row[3]
+                        is_finished = booking_row.get("finish") is not None if isinstance(booking_row, dict) else (booking_row[4] is not None)
+                        equip_name = booking_row["name_equip"]
+                        user_email = booking_row["email"]
+                        user_first_name = booking_row.get("first_name") or "" if isinstance(booking_row, dict) else (booking_row[7] or "")
+                        user_last_name = booking_row.get("last_name") or "" if isinstance(booking_row, dict) else (booking_row[8] or "")
+
                         # Проверяем, что бронь еще актуальна
-                        if booking_row[3] or booking_row[4]:  # cancel или finish
+                        if is_cancelled or is_finished:
                             logger.info(
                                 f"Бронирование {booking_id} отменено или завершено, пропускаем уведомление"
                             )
