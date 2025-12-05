@@ -81,11 +81,20 @@ def process_telegram_notifications(
                 logger.debug(f"Найдено {len(tasks)} задач для обработки Telegram уведомлений")
 
                 for task in tasks:
-                    task_id = task[0]
-                    booking_id = task[1]
-                    event_type_str = task[2]
-                    run_at = task[3]
-                    payload_json = task[4]
+                    # Проверяем формат результата (кортеж или словарь)
+                    if isinstance(task, dict):
+                        task_id = task.get("id")
+                        booking_id = task.get("booking_id")
+                        event_type_str = task.get("event_type")
+                        run_at = task.get("run_at")
+                        payload_json = task.get("payload")
+                    else:
+                        # Если кортеж
+                        task_id = task[0]
+                        booking_id = task[1]
+                        event_type_str = task[2]
+                        run_at = task[3]
+                        payload_json = task[4] if len(task) > 4 else None
 
                     stats["processed"] += 1
 

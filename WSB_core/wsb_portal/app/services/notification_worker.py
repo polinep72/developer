@@ -81,11 +81,20 @@ def process_email_notifications(
                 logger.debug(f"Найдено {len(tasks)} задач для обработки Email уведомлений")
 
                 for task in tasks:
-                    task_id = task[0]
-                    booking_id = task[1]
-                    event_type_str = task[2]
-                    run_at = task[3]
-                    payload_json = task[4]
+                    # Проверяем формат результата (кортеж или словарь)
+                    if isinstance(task, dict):
+                        task_id = task.get("id")
+                        booking_id = task.get("booking_id")
+                        event_type_str = task.get("event_type")
+                        run_at = task.get("run_at")
+                        payload_json = task.get("payload")
+                    else:
+                        # Если кортеж
+                        task_id = task[0]
+                        booking_id = task[1]
+                        event_type_str = task[2]
+                        run_at = task[3]
+                        payload_json = task[4] if len(task) > 4 else None
 
                     stats["processed"] += 1
 
@@ -133,11 +142,6 @@ def process_email_notifications(
                             )
                             continue
 
-                        user_id = booking_row[0]
-                        equip_name = booking_row[5]
-                        user_email = booking_row[6]
-                        user_first_name = booking_row[7] or ""
-                        user_last_name = booking_row[8] or ""
                         user_name = f"{user_first_name} {user_last_name}".strip() or "Пользователь"
 
                         # Проверяем настройки уведомлений пользователя
@@ -173,9 +177,6 @@ def process_email_notifications(
                             )
                             stats["failed"] += 1
                             continue
-
-                        time_start = booking_row[1]
-                        time_end = booking_row[2]
 
                         # Отправляем уведомление в зависимости от типа события
                         event_type = NotificationEventType(event_type_str)
