@@ -141,6 +141,23 @@ def main():
                         "В services.notification_service отсутствует schedule_all_notifications; "
                         "планирование уведомлений пропущено в тестовом боте WSB_core."
                     )
+
+                # Добавляем воркер для обработки уведомлений из единого расписания
+                try:
+                    from services.notification_worker import process_telegram_notifications
+                    from apscheduler.triggers.interval import IntervalTrigger
+
+                    scheduler.add_job(
+                        process_telegram_notifications,
+                        trigger=IntervalTrigger(minutes=2),  # Проверяем каждые 2 минуты
+                        args=[db_connection, bot],
+                        id="notification_worker_telegram",
+                        name="Обработка Telegram уведомлений из единого расписания",
+                        replace_existing=True,
+                    )
+                    logger.info("Воркер обработки Telegram уведомлений добавлен в планировщик.")
+                except Exception as e_worker:
+                    logger.warning(f"Не удалось добавить воркер Telegram уведомлений: {e_worker}")
             except Exception as e_sch_start:
                 logger.error(f"Ошибка запуска планировщика: {e_sch_start}", exc_info=True)
                 # В тестовой копии WSB_core не падаем, если планировщик не смог стартовать полностью

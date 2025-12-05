@@ -130,6 +130,24 @@ scheduler.add_job(
     replace_existing=True
 )
 
+def process_email_notifications_job():
+    """Задача для обработки email-уведомлений из единого расписания"""
+    try:
+        from .services.notification_worker import process_email_notifications
+        result = process_email_notifications(batch_size=10)
+        logger.info(f"Задача обработки Email уведомлений выполнена: {result}")
+    except Exception as exc:
+        logger.error(f"Ошибка в задаче обработки Email уведомлений: {exc}")
+
+# Запускаем воркер каждые 2 минуты
+scheduler.add_job(
+    process_email_notifications_job,
+    trigger=IntervalTrigger(minutes=2),
+    id='process_email_notifications',
+    name='Обработка Email уведомлений из единого расписания',
+    replace_existing=True
+)
+
 def stop_previous_instances(port: int = 8090):
     """Остановить все предыдущие экземпляры сервера на указанном порту"""
     try:

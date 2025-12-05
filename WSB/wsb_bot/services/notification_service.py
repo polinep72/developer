@@ -41,6 +41,7 @@ def schedule_one_notification(
         # Убедимся, что scheduler.timezone является объектом timezone
         # (APScheduler может хранить его как строку, например, 'Europe/Moscow')
         scheduler_tz = scheduler.timezone
+        pytz_available = False
         if isinstance(scheduler_tz, str):
             # Если ваш pytz установлен и используется APScheduler-ом, это сработает.
             # Если нет, вам может потребоваться другая библиотека для работы с tz из строк,
@@ -48,17 +49,29 @@ def schedule_one_notification(
             try:
                 import pytz
                 scheduler_tz = pytz.timezone(str(scheduler.timezone))
+                pytz_available = True
             except ImportError:
                 logger.warning("Библиотека pytz не найдена, предполагается UTC для строкового scheduler.timezone. "
                             "Рекомендуется инициализировать scheduler с объектом datetime.timezone.")
                 scheduler_tz = timezone.utc # Запасной вариант
-            except pytz.UnknownTimeZoneError:
-                logger.warning(f"Неизвестный часовой пояс в планировщике: {scheduler.timezone}. Предполагается UTC.")
+            except Exception as tz_error:
+                logger.warning(f"Ошибка при обработке часового пояса {scheduler.timezone}: {tz_error}. Предполагается UTC.")
                 scheduler_tz = timezone.utc # Запасной вариант
 
         # Приводим run_time к aware datetime в часовом поясе планировщика
         if run_time.tzinfo is None:
-            run_time_aware = scheduler_tz.localize(run_time) if hasattr(scheduler_tz, 'localize') else run_time.replace(tzinfo=scheduler_tz)
+            # pytz.timezone имеет метод localize, стандартные timezone/ZoneInfo - нет
+            if pytz_available:
+                try:
+                    import pytz
+                    if isinstance(scheduler_tz, pytz.BaseTzInfo):
+                        run_time_aware = scheduler_tz.localize(run_time)  # type: ignore[attr-defined]
+                    else:
+                        run_time_aware = run_time.replace(tzinfo=scheduler_tz)
+                except (ImportError, AttributeError):
+                    run_time_aware = run_time.replace(tzinfo=scheduler_tz)
+            else:
+                run_time_aware = run_time.replace(tzinfo=scheduler_tz)
         else:
             run_time_aware = run_time.astimezone(scheduler_tz)
 
@@ -100,15 +113,18 @@ def schedule_one_notification(
                 current_job_trigger = existing_job_in_scheduler.trigger
                 if isinstance(current_job_trigger, DateTrigger):
                     existing_job_run_time_aware = current_job_trigger.run_date
-                    # Сравниваем время с допуском в 1 секунду (для учета микросекунд и небольших расхождений)
-                    time_diff = abs((existing_job_run_time_aware - run_time_aware).total_seconds())
-                    if time_diff < 1.0:  # Задачи считаются одинаковыми, если разница менее 1 секунды
-                        logger.debug(f"Задача {job_id_aps} уже актуальна в реестре и планировщике. Время: {run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}. Пропуск.")
-                        return # Задача актуальна, ничего не делаем
+                    if existing_job_run_time_aware is not None:
+                        # Сравниваем время с допуском в 1 секунду (для учета микросекунд и небольших расхождений)
+                        time_diff = abs((existing_job_run_time_aware - run_time_aware).total_seconds())
+                        if time_diff < 1.0:  # Задачи считаются одинаковыми, если разница менее 1 секунды
+                            logger.debug(f"Задача {job_id_aps} уже актуальна в реестре и планировщике. Время: {run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}. Пропуск.")
+                            return # Задача актуальна, ничего не делаем
+                        else:
+                            logger.info(
+                                f"Задача {job_id_aps} в реестре, но время в планировщике ({existing_job_run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}) "
+                                f"отличается от нового ({run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}). Перепланируем.")
                     else:
-                        logger.info(
-                            f"Задача {job_id_aps} в реестре, но время в планировщике ({existing_job_run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}) "
-                            f"отличается от нового ({run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}). Перепланируем.")
+                        logger.warning(f"Задача {job_id_aps} имеет DateTrigger с run_date=None. Перепланируем.")
                         # Задача будет перепланирована ниже (через remove и add)
                 else:
                     logger.warning(
@@ -124,11 +140,12 @@ def schedule_one_notification(
                 current_job_trigger = existing_job_in_scheduler.trigger
                 if isinstance(current_job_trigger, DateTrigger):
                     existing_job_run_time_aware = current_job_trigger.run_date
-                    time_diff = abs((existing_job_run_time_aware - run_time_aware).total_seconds())
-                    if time_diff < 1.0:  # Та же задача с тем же временем - это дубликат
-                        logger.warning(f"Обнаружен дубликат задачи {job_id_aps} в планировщике (нет в реестре, но время совпадает). Добавляем в реестр без перепланирования.")
-                        scheduled_jobs_registry.add(job_key)
-                        return  # Не перепланируем, просто добавляем в реестр
+                    if existing_job_run_time_aware is not None:
+                        time_diff = abs((existing_job_run_time_aware - run_time_aware).total_seconds())
+                        if time_diff < 1.0:  # Та же задача с тем же временем - это дубликат
+                            logger.warning(f"Обнаружен дубликат задачи {job_id_aps} в планировщике (нет в реестре, но время совпадает). Добавляем в реестр без перепланирования.")
+                            scheduled_jobs_registry.add(job_key)
+                            return  # Не перепланируем, просто добавляем в реестр
                 logger.info(f"Задача {job_id_aps} отсутствует в реестре, но есть в планировщике. Перепланируем (обновим).")
                 # Задача будет обновлена через add_job с replace_existing=True ниже
             # else:
@@ -386,11 +403,14 @@ def send_end_booking_notification_wrapper(
         if current_end_time.tzinfo:
             current_end_time_aware = current_end_time.astimezone(scheduler.timezone)
         else:
-            # Проверяем, есть ли метод localize
-            if hasattr(scheduler.timezone, 'localize'):
-                current_end_time_aware = scheduler.timezone.localize(current_end_time)
-            else:
-                # Для zoneinfo используем replace()
+            # pytz.timezone имеет метод localize, стандартные timezone/ZoneInfo - нет
+            try:
+                import pytz
+                if isinstance(scheduler.timezone, pytz.BaseTzInfo):
+                    current_end_time_aware = scheduler.timezone.localize(current_end_time)  # type: ignore[attr-defined]
+                else:
+                    current_end_time_aware = current_end_time.replace(tzinfo=scheduler.timezone)
+            except (ImportError, AttributeError):
                 current_end_time_aware = current_end_time.replace(tzinfo=scheduler.timezone)
 
         # 2. Проверяем возможность продления
@@ -478,10 +498,14 @@ def notify_user_about_booking_start(
         markup = keyboards.generate_start_confirmation_keyboard(booking_id)  # Ваша функция генерации клавиатуры
         # ... (форматирование start_time_str, message_text как раньше) ...
         if start_time.tzinfo is None and hasattr(scheduler, 'timezone'):
-            # Универсальная обработка pytz/zoneinfo
-            if hasattr(scheduler.timezone, 'localize'):
-                start_time_aware = scheduler.timezone.localize(start_time)
-            else:
+            # pytz.timezone имеет метод localize, стандартные timezone/ZoneInfo - нет
+            try:
+                import pytz
+                if isinstance(scheduler.timezone, pytz.BaseTzInfo):
+                    start_time_aware = scheduler.timezone.localize(start_time)  # type: ignore[attr-defined]
+                else:
+                    start_time_aware = start_time.replace(tzinfo=scheduler.timezone)
+            except (ImportError, AttributeError):
                 start_time_aware = start_time.replace(tzinfo=scheduler.timezone)
         elif start_time.tzinfo is not None and hasattr(scheduler, 'timezone'):
             start_time_aware = start_time.astimezone(scheduler.timezone)

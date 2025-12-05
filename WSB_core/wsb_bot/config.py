@@ -18,7 +18,7 @@ env_loaded = False
 for env_path in possible_env_paths:
     if env_path.exists():
         load_dotenv(dotenv_path=env_path, override=env_loaded is False)
-        logger.debug(f".env файл найден и загружен из {env_path}")
+    logger.debug(f".env файл найден и загружен из {env_path}")
         env_loaded = True
 
 if not env_loaded:
