@@ -142,11 +142,15 @@ def get_all_active_bookings_text(db: Database) -> str:
     return response
 
 def get_bookings_by_date(db: Database, selected_date: date) -> List[BookingRow]:
-    """ Получает бронирования на указанную дату. """
+    """ Получает бронирования на указанную дату. 
+    
+    Включает завершенные бронирования (с finish), т.к. они блокируют время
+    до момента фактического завершения при расчете доступных слотов.
+    """
     query = """
         SELECT b.*, e.name_equip, u.fi as user_fi FROM bookings b
         JOIN users u ON b.user_id = u.users_id JOIN equipment e ON b.equip_id = e.id
-        WHERE b.date = %s AND b.cancel = FALSE AND b.finish IS NULL
+        WHERE b.date = %s AND b.cancel = FALSE
         ORDER BY e.id, b.time_start;"""
     try:
         result: QueryResult = db.execute_query(query, (selected_date,), fetch_results=True)
@@ -536,17 +540,12 @@ def cancel_booking(db: Database, booking_id: int, user_id: Optional[int] = None,
 
     query = "UPDATE bookings SET cancel = TRUE WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
     try:
-        rows_affected = db.execute_query(query, (booking_id,), commit=True, fetch_results=False)
-        if rows_affected is None or rows_affected > 0:
-            initiator = f"админом {user_id}" if is_admin_cancel and user_id else f"юзером {user_id}" if user_id else "системой"
-            logger.info(f"Бронь {booking_id} ({b_user_id}) отменена {initiator}.")
-            return True, const.MSG_BOOKING_CANCELLED_SUCCESS, b_user_id
-        else:
-            logger.warning(f"Попытка отмены {booking_id}, но не найдена/неактивна (rows={rows_affected}).")
-            current_info = find_booking_by_id(db, booking_id)
-            if current_info and current_info.get('cancel'): return False, "Бронь уже отменена.", b_user_id
-            if current_info and current_info.get('finish') is not None: return False, "Бронь уже завершена.", b_user_id
-            return False, const.MSG_CANCEL_FAIL_NOT_FOUND, b_user_id
+        # execute_query возвращает None при успешном UPDATE/DELETE с fetch_results=False
+        # Исключение будет выброшено, если запрос не выполнен
+        db.execute_query(query, (booking_id,), commit=True, fetch_results=False)
+        initiator = f"админом {user_id}" if is_admin_cancel and user_id else f"юзером {user_id}" if user_id else "системой"
+        logger.info(f"Бронь {booking_id} ({b_user_id}) отменена {initiator}.")
+        return True, const.MSG_BOOKING_CANCELLED_SUCCESS, b_user_id
     except Exception as e:
         logger.error(f"Ошибка UPDATE отмены {booking_id}: {e}", exc_info=True)
         return False, const.MSG_ERROR_GENERAL, b_user_id
@@ -570,18 +569,13 @@ def finish_booking(db: Database, booking_id: int, user_id: int) -> Tuple[bool, s
     query = "UPDATE bookings SET finish = %s WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
     params = (finish_time_ts, booking_id)
     try:
-        rows_affected = db.execute_query(query, params, commit=True, fetch_results=False)
-        if rows_affected is None or rows_affected > 0:
-            time_str = finish_time_ts.strftime('%H:%M:%S')
-            logger.info(f"{user_id} завершил {booking_id} ({equip_name}) в {finish_time_ts:%Y-%m-%d %H:%M}.")
-            msg = f"{const.MSG_BOOKING_FINISHED_WSB}\nОборудование: *{equip_name}*\nВремя завершения: {time_str}"
-            return True, msg
-        else:
-            logger.warning(f"Попытка завершить {booking_id}, но не найдена/неактивна (rows={rows_affected}).")
-            current_info = find_booking_by_id(db, booking_id)
-            if current_info and current_info.get('finish') is not None: return False, "Бронь уже завершена."
-            if current_info and current_info.get('cancel'): return False, "Бронь была отменена."
-            return False, const.MSG_FINISH_FAIL_NOT_ACTIVE
+        # execute_query возвращает None при успешном UPDATE/DELETE с fetch_results=False
+        # Исключение будет выброшено, если запрос не выполнен
+        db.execute_query(query, params, commit=True, fetch_results=False)
+        time_str = finish_time_ts.strftime('%H:%M:%S')
+        logger.info(f"{user_id} завершил {booking_id} ({equip_name}) в {finish_time_ts:%Y-%m-%d %H:%M}.")
+        msg = f"{const.MSG_BOOKING_FINISHED_WSB}\nОборудование: *{equip_name}*\nВремя завершения: {time_str}"
+        return True, msg
     except Exception as e:
         logger.error(f"Ошибка UPDATE завершения {booking_id}: {e}", exc_info=True)
         return False, const.MSG_ERROR_GENERAL
@@ -713,6 +707,10 @@ def extend_booking(db: Database, booking_id: int, user_id: int, extension_str: s
         logger.warning(f"{booking_id}: превышен лимит.")
         return False, const.MSG_BOOKING_FAIL_LIMIT_EXCEEDED
 
+    if not isinstance(equip_id, int):
+        logger.error(f"Некорректный equip_id для брони {booking_id}: {equip_id}")
+        return False, const.MSG_ERROR_GENERAL
+    
     try:
         conflicts = check_booking_conflict(db, equip_id, cur_end_naive, new_end_naive, exclude_booking_id=booking_id)
         if conflicts:
@@ -730,27 +728,25 @@ def extend_booking(db: Database, booking_id: int, user_id: int, extension_str: s
     new_time_interval = f"{time_start.strftime('%H:%M')}-{new_end_dt.strftime('%H:%M')}"
     new_total_duration_hours = total_duration.total_seconds() / 3600.0
     query = (
-        "UPDATE bookings SET time_end = %(new_end)s, time_interval = %(interval)s, duration = %(duration)s, "
-        "extension = COALESCE(extension, interval '0 hours') + %(ext_delta)s "
-        "WHERE id = %(b_id)s AND cancel = FALSE AND finish IS NULL;"
+        "UPDATE bookings SET time_end = %s, time_interval = %s, duration = %s, "
+        "extension = COALESCE(extension, interval '0 hours') + %s "
+        "WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
     )
-    params = {
-        "new_end": new_end_dt,
-        "interval": new_time_interval,
-        "duration": new_total_duration_hours,
-        "ext_delta": extend_delta,
-        "b_id": booking_id,
-    }
+    params = (
+        new_end_dt,
+        new_time_interval,
+        new_total_duration_hours,
+        extend_delta,
+        booking_id,
+    )
     try:
-        rows_affected = db.execute_query(query, params, commit=True, fetch_results=False)
-        if rows_affected is None or rows_affected > 0:
-            new_end_str = _format_time(new_end_dt)
-            logger.info(f"{user_id} продлил {booking_id} ({equip_name}) на {extension_str}. New end: {new_end_dt:%Y-%m-%d %H:%M}")
-            msg = f"{const.MSG_BOOKING_EXTENDED_WSB}\nОборудование: *{equip_name}*\nНовое время окончания: {new_end_str}"
-            return True, msg
-        else:
-            logger.warning(f"Продление {booking_id}, но неактивна (rows={rows_affected}).")
-            return False, const.MSG_EXTEND_FAIL_NOT_ACTIVE
+        # execute_query возвращает None при успешном UPDATE/DELETE с fetch_results=False
+        # Исключение будет выброшено, если запрос не выполнен
+        db.execute_query(query, params, commit=True, fetch_results=False)
+        new_end_str = _format_time(new_end_dt)
+        logger.info(f"{user_id} продлил {booking_id} ({equip_name}) на {extension_str}. New end: {new_end_dt:%Y-%m-%d %H:%M}")
+        msg = f"{const.MSG_BOOKING_EXTENDED_WSB}\nОборудование: *{equip_name}*\nНовое время окончания: {new_end_str}"
+        return True, msg
     except Exception as e:
         logger.error(f"Ошибка UPDATE продления {booking_id}: {e}", exc_info=True)
         return False, const.MSG_ERROR_GENERAL

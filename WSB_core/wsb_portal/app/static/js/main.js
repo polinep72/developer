@@ -2956,7 +2956,7 @@ async function loadBookingsList() {
                         ${(booking.can_cancel || booking.can_finish) ? `
                             ${booking.can_cancel ? `<button class="btn-extend-booking" data-booking-id="${booking.id}">Продлить</button>` : ""}
                             ${booking.can_finish ? `<button class="btn-finish-booking" data-booking-id="${booking.id}">Завершить</button>` : ""}
-                            ${booking.can_cancel ? `<button class="btn-cancel-booking" data-booking-id="${booking.id}">Отменить</button>` : ""}
+                        ${booking.can_cancel ? `<button class="btn-cancel-booking" data-booking-id="${booking.id}">Отменить</button>` : ""}
                         ` : ""}
                     </td>
                 `;
@@ -3378,7 +3378,7 @@ async function extendBooking(bookingId, extensionMinutes) {
         alert(message);
 
         // Перезагружаем список бронирований после успешного продления
-        await loadUserBookings();
+        await loadBookingsList();
     } catch (error) {
         console.error("Ошибка продления бронирования:", error);
         errorEl.textContent = error.message || "Не удалось продлить бронирование";

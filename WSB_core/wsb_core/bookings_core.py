@@ -490,3 +490,140 @@ def _fetch_booking_for_extend(
     )
     return cur.fetchone()
 
+
+def finish_booking_core(
+    cur: CursorProtocol,
+    *,
+    booking_id: int,
+    actor_user_id: Optional[int],
+    is_admin: bool = False,
+    sync_slots: bool = False,
+) -> BookingCoreResult:
+    """
+    Завершение активного бронирования.
+
+    Правила:
+    - может выполнять владелец брони или админ;
+    - бронирование должно быть активным (не отменено, не завершено);
+    - бронирование должно уже начаться (time_start <= now);
+    - устанавливается поле finish = текущее время;
+    - при sync_slots=True освобождаются слоты от finish до time_end.
+    """
+    try:
+        # Загружаем бронь и проверяем права
+        row = _fetch_booking_for_finish(cur, booking_id)
+        if not row:
+            return BookingCoreResult(
+                False, message="Бронирование не найдено", error_code="not_found"
+            )
+
+        booking_user_id = row.get("user_id")
+        if not is_admin:
+            if actor_user_id is None or booking_user_id != actor_user_id:
+                return BookingCoreResult(
+                    False,
+                    message="Нет прав на завершение этой брони",
+                    error_code="forbidden",
+                )
+
+        cancel_flag = row.get("cancel")
+        finish_dt = row.get("finish")
+        time_start = row.get("time_start")
+        time_end = row.get("time_end")
+
+        if cancel_flag:
+            return BookingCoreResult(
+                False, message="Бронирование отменено", error_code="cancelled"
+            )
+        if finish_dt is not None:
+            return BookingCoreResult(
+                False, message="Бронирование уже завершено", error_code="already_finished"
+            )
+        if not isinstance(time_start, datetime) or not isinstance(time_end, datetime):
+            return BookingCoreResult(
+                False, message="Некорректные данные бронирования", error_code="invalid_data"
+            )
+
+        now = datetime.now()
+        time_start_naive = time_start.replace(tzinfo=None)
+        # Разрешаем завершение за минуту до начала (для случаев, когда время немного не совпадает)
+        if time_start_naive > now + timedelta(minutes=1):
+            return BookingCoreResult(
+                False,
+                message="Бронирование ещё не началось",
+                error_code="not_started",
+            )
+
+        finish_time = datetime.now()
+
+        # Обновляем бронирование
+        cur.execute(
+            """
+            UPDATE bookings
+            SET finish = %s
+            WHERE id = %s AND cancel = FALSE AND finish IS NULL
+            """,
+            (finish_time, booking_id),
+        )
+
+        equipment_id_val = row.get("equip_id") or row.get("equipment_id")
+        booking_date = row.get("date")
+
+        # Освобождаем слоты от момента finish до исходного time_end
+        if (
+            sync_slots
+            and isinstance(booking_date, date)
+            and isinstance(equipment_id_val, int)
+            and finish_time < time_end
+        ):
+            _sync_slots(
+                cur,
+                equipment_id_val,
+                booking_date,
+                finish_time,
+                time_end,
+                booked=False,
+                booking_id=None,
+            )
+
+        # Обновляем представление брони
+        row["finish"] = finish_time
+        booking = booking_from_db_row(row)
+
+        return BookingCoreResult(
+            True,
+            booking=booking,
+            extra={
+                "finish_time": finish_time,
+                "original_time_end": time_end,
+                "booking_row": row,
+            },
+        )
+    except ValueError as exc:
+        return BookingCoreResult(False, message=str(exc), error_code="invalid_input")
+    except Exception as exc:
+        return BookingCoreResult(
+            False, message=f"Не удалось завершить бронирование: {exc}", error_code="internal_error"
+        )
+
+
+def _fetch_booking_for_finish(
+    cur: CursorProtocol,
+    booking_id: int,
+) -> Optional[Dict[str, Any]]:
+    """
+    Получение брони для операции завершения.
+
+    Возвращает все поля bookings + имя оборудования.
+    """
+    cur.execute(
+        """
+        SELECT b.*, e.name_equip
+        FROM bookings b
+        JOIN equipment e ON b.equip_id = e.id
+        WHERE b.id = %s
+        """,
+        (booking_id,),
+    )
+    return cur.fetchone()
+

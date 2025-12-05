@@ -44,7 +44,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 try:
     from wsb_core.constants import WORKING_HOURS_START, WORKING_HOURS_END, BOOKING_TIME_STEP_MINUTES, MAX_BOOKING_DURATION_HOURS
-    from wsb_core.bookings_core import create_booking_core, cancel_booking_core, extend_booking_core
+    from wsb_core.bookings_core import create_booking_core, cancel_booking_core, extend_booking_core, finish_booking_core
 except ImportError:
     WORKING_HOURS_START = time(7, 0)
     WORKING_HOURS_END = time(22, 0)
@@ -53,6 +53,7 @@ except ImportError:
     create_booking_core = None  # type: ignore
     cancel_booking_core = None  # type: ignore
     extend_booking_core = None  # type: ignore
+    finish_booking_core = None  # type: ignore
 
 SLOT_MINUTES = BOOKING_TIME_STEP_MINUTES
 BOOKING_STEP = timedelta(minutes=SLOT_MINUTES)
@@ -666,88 +667,70 @@ def finish_booking(
     is_admin: bool = False,  # админ может завершать любые брони
 ) -> Dict[str, Any]:
     """
-    Завершить бронирование — только владелец активной брони.
-    Логика синхронизирована с finish_booking в Telegram‑боте.
+    Завершить бронирование:
+    - владелец может завершить свою активную бронь;
+    - админ может завершить любую активную бронь.
+    Использует ядровую функцию finish_booking_core с синхронизацией слотов.
     """
+    if finish_booking_core is None:
+        return {"error": "Функция завершения бронирования недоступна"}
+    
     try:
         with _connect() as conn, conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT 
-                    b.*,
-                    e.name_equip,
-                    u.fi as user_name
-                FROM bookings b
-                JOIN equipment e ON b.equip_id = e.id
-                JOIN users u ON b.user_id = u.users_id
-                WHERE b.id = %s
-                """,
-                (booking_id,),
+            # Используем ядровую функцию с синхронизацией слотов
+            result = finish_booking_core(
+                cur,
+                booking_id=booking_id,
+                actor_user_id=user_id,
+                is_admin=is_admin,
+                sync_slots=True,  # Важно: синхронизируем слоты при завершении
             )
-            row = cast(Optional[Dict[str, Any]], cur.fetchone())
-
-            if not row:
-                return {"error": "Бронирование не найдено"}
-
-            owner_id = row.get("user_id")
-            is_cancelled = bool(row.get("cancel"))
-            finish_dt = row.get("finish")
-            equip_name = row.get("name_equip", "Оборудование")
-            time_start = row.get("time_start")
-
-            if not is_admin and owner_id != user_id:
-                return {"error": "Это не ваше бронирование"}
-            if is_cancelled:
-                return {"error": "Бронь отменена"}
-            if finish_dt is not None:
-                return {"error": "Бронь уже завершена"}
-
-            now_dt = datetime.now().replace(tzinfo=None)
-            if not isinstance(time_start, datetime):
-                return {"error": "Ошибка данных бронирования"}
-
-            time_start_naive = time_start.replace(tzinfo=None)
-            if time_start_naive > now_dt + timedelta(minutes=1):
-                return {"error": "Бронь ещё не активна"}
-
-            finish_time_ts = datetime.now()
-            cur.execute(
-                """
-                UPDATE bookings
-                SET finish = %s
-                WHERE id = %s AND cancel = FALSE AND finish IS NULL
-                """,
-                (finish_time_ts, booking_id),
-            )
+            
+            if not result.success:
+                return {"error": result.message or "Не удалось завершить бронирование"}
+            
             conn.commit()
-
+            
             # Инвалидация кэша тепловой карты и дашборда
             try:
                 from .cache import invalidate_heatmap, invalidate_dashboard
-
-                booking_date = row.get("date")
-                if isinstance(booking_date, datetime):
-                    booking_date_value: Optional[date] = booking_date.date()
-                elif isinstance(booking_date, date):
-                    booking_date_value = booking_date
-                else:
-                    booking_date_value = None
-
-                if booking_date_value:
-                    date_str = booking_date_value.strftime("%Y-%m-%d")
-                elif isinstance(booking_date, datetime):
-                    date_str = booking_date.date().strftime("%Y-%m-%d")
-                else:
-                    date_str = str(booking_date)
-
-                invalidate_heatmap(date_str)
-                invalidate_dashboard()
+                
+                booking = result.booking
+                if booking and booking.date:
+                    date_str = booking.date.strftime("%Y-%m-%d")
+                    invalidate_heatmap(date_str)
+                    invalidate_dashboard()
+                    
+                # Также используем данные из extra, если есть
+                if result.extra and "booking_row" in result.extra:
+                    booking_row = result.extra["booking_row"]
+                    booking_date = booking_row.get("date")
+                    if booking_date:
+                        if isinstance(booking_date, datetime):
+                            date_str = booking_date.date().strftime("%Y-%m-%d")
+                        elif isinstance(booking_date, date):
+                            date_str = booking_date.strftime("%Y-%m-%d")
+                        else:
+                            date_str = str(booking_date)
+                        invalidate_heatmap(date_str)
+                        invalidate_dashboard()
             except Exception as exc:
                 logger.warning(f"Ошибка при инвалидации кэша после завершения: {exc}")
-
-            time_str = finish_time_ts.strftime("%H:%M:%S")
-            message = f"Использование '{equip_name}' завершено в {time_str}"
-
+            
+            # Формируем сообщение об успехе
+            finish_time = result.extra.get("finish_time") if result.extra else None
+            equip_name = "Оборудование"
+            if result.extra and "booking_row" in result.extra:
+                equip_name = result.extra["booking_row"].get("name_equip", "Оборудование")
+            elif result.booking and result.booking.equipment_name:
+                equip_name = result.booking.equipment_name
+            
+            if finish_time:
+                time_str = finish_time.strftime("%H:%M:%S")
+                message = f"Использование '{equip_name}' завершено в {time_str}"
+            else:
+                message = f"Использование '{equip_name}' завершено"
+            
             return {
                 "data": {
                     "message": message,
@@ -755,6 +738,7 @@ def finish_booking(
                 }
             }
     except Exception as exc:
+        logger.error(f"Ошибка при завершении бронирования {booking_id}: {exc}", exc_info=True)
         return {"error": f"Не удалось завершить бронирование: {exc}"}
 
 

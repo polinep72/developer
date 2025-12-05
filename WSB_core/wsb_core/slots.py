@@ -165,7 +165,12 @@ def calculate_available_slots_from_bookings(
     # Обрабатываем бронирования и находим свободные слоты
     for booking in sorted_bookings:
         booking_start_dt = booking['time_start'].replace(tzinfo=None)
-        booking_end_dt = booking['time_end'].replace(tzinfo=None)
+        # Используем фактическое время окончания: finish, если есть, иначе time_end
+        finish_dt = booking.get('finish')
+        if isinstance(finish_dt, datetime):
+            booking_end_dt = finish_dt.replace(tzinfo=None)
+        else:
+            booking_end_dt = booking['time_end'].replace(tzinfo=None)
         
         # Пропускаем бронирования вне выбранной даты
         if booking_end_dt.date() < selected_date or booking_start_dt.date() > selected_date:

@@ -264,6 +264,21 @@ def generate_booking_confirmation_keyboard() -> InlineKeyboardMarkup:
     return markup
 
 
+def generate_start_confirmation_keyboard(booking_id: int) -> InlineKeyboardMarkup:
+    """
+    Кнопка подтверждения начала брони из уведомления.
+    Совместима с боевой реализацией notification_service.
+    """
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        InlineKeyboardButton(
+            "✅ Подтвердить начало",
+            callback_data=f"{const.CB_BOOK_CONFIRM_START}{booking_id}",
+        )
+    )
+    return markup
+
+
 def generate_extend_time_keyboard(
     booking_id: int, max_duration: Optional[timedelta] = None
 ) -> InlineKeyboardMarkup:
@@ -312,5 +327,21 @@ def generate_extend_time_keyboard(
         InlineKeyboardButton(
             "❌ Отмена", callback_data=f"{const.CB_ACTION_CANCEL}{cancel_context}"
         )
+    )
+    return markup
+
+
+def generate_extend_prompt_keyboard(booking_id: int) -> InlineKeyboardMarkup:
+    """Клавиатура для уведомления: Продлить / Нет."""
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        InlineKeyboardButton(
+            "➕ Продлить",
+            callback_data=f"{const.CB_NOTIFY_EXTEND_PROMPT}{booking_id}",
+        ),
+        InlineKeyboardButton(
+            "🚫 Нет, спасибо",
+            callback_data=f"{const.CB_NOTIFY_DECLINE_EXT}{booking_id}",
+        ),
     )
     return markup
