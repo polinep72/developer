@@ -100,7 +100,9 @@ def schedule_one_notification(
                 current_job_trigger = existing_job_in_scheduler.trigger
                 if isinstance(current_job_trigger, DateTrigger):
                     existing_job_run_time_aware = current_job_trigger.run_date
-                    if existing_job_run_time_aware == run_time_aware:
+                    # Сравниваем время с допуском в 1 секунду (для учета микросекунд и небольших расхождений)
+                    time_diff = abs((existing_job_run_time_aware - run_time_aware).total_seconds())
+                    if time_diff < 1.0:  # Задачи считаются одинаковыми, если разница менее 1 секунды
                         logger.debug(f"Задача {job_id_aps} уже актуальна в реестре и планировщике. Время: {run_time_aware.strftime('%Y-%m-%d %H:%M:%S %Z')}. Пропуск.")
                         return # Задача актуальна, ничего не делаем
                     else:
@@ -118,6 +120,15 @@ def schedule_one_notification(
                 # Задача будет добавлена/перепланирована ниже
         else: # Задачи нет в реестре
             if existing_job_in_scheduler:
+                # Проверяем, не является ли это дубликатом с тем же временем
+                current_job_trigger = existing_job_in_scheduler.trigger
+                if isinstance(current_job_trigger, DateTrigger):
+                    existing_job_run_time_aware = current_job_trigger.run_date
+                    time_diff = abs((existing_job_run_time_aware - run_time_aware).total_seconds())
+                    if time_diff < 1.0:  # Та же задача с тем же временем - это дубликат
+                        logger.warning(f"Обнаружен дубликат задачи {job_id_aps} в планировщике (нет в реестре, но время совпадает). Добавляем в реестр без перепланирования.")
+                        scheduled_jobs_registry.add(job_key)
+                        return  # Не перепланируем, просто добавляем в реестр
                 logger.info(f"Задача {job_id_aps} отсутствует в реестре, но есть в планировщике. Перепланируем (обновим).")
                 # Задача будет обновлена через add_job с replace_existing=True ниже
             # else:
