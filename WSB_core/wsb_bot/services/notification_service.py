@@ -60,8 +60,16 @@ def schedule_one_notification(
 
         # Приводим run_time к aware datetime в часовом поясе планировщика
         if run_time.tzinfo is None:
-            if pytz_available and hasattr(scheduler_tz, 'localize'):
-                run_time_aware = scheduler_tz.localize(run_time)
+            # pytz.timezone имеет метод localize, стандартные timezone/ZoneInfo - нет
+            if pytz_available:
+                try:
+                    import pytz
+                    if isinstance(scheduler_tz, pytz.BaseTzInfo):
+                        run_time_aware = scheduler_tz.localize(run_time)  # type: ignore[attr-defined]
+                    else:
+                        run_time_aware = run_time.replace(tzinfo=scheduler_tz)
+                except (ImportError, AttributeError):
+                    run_time_aware = run_time.replace(tzinfo=scheduler_tz)
             else:
                 run_time_aware = run_time.replace(tzinfo=scheduler_tz)
         else:
@@ -395,11 +403,14 @@ def send_end_booking_notification_wrapper(
         if current_end_time.tzinfo:
             current_end_time_aware = current_end_time.astimezone(scheduler.timezone)
         else:
-            # Проверяем, есть ли метод localize
-            if hasattr(scheduler.timezone, 'localize'):
-                current_end_time_aware = scheduler.timezone.localize(current_end_time)
-            else:
-                # Для zoneinfo используем replace()
+            # pytz.timezone имеет метод localize, стандартные timezone/ZoneInfo - нет
+            try:
+                import pytz
+                if isinstance(scheduler.timezone, pytz.BaseTzInfo):
+                    current_end_time_aware = scheduler.timezone.localize(current_end_time)  # type: ignore[attr-defined]
+                else:
+                    current_end_time_aware = current_end_time.replace(tzinfo=scheduler.timezone)
+            except (ImportError, AttributeError):
                 current_end_time_aware = current_end_time.replace(tzinfo=scheduler.timezone)
 
         # 2. Проверяем возможность продления
@@ -487,10 +498,14 @@ def notify_user_about_booking_start(
         markup = keyboards.generate_start_confirmation_keyboard(booking_id)  # Ваша функция генерации клавиатуры
         # ... (форматирование start_time_str, message_text как раньше) ...
         if start_time.tzinfo is None and hasattr(scheduler, 'timezone'):
-            # Универсальная обработка pytz/zoneinfo
-            if hasattr(scheduler.timezone, 'localize'):
-                start_time_aware = scheduler.timezone.localize(start_time)
-            else:
+            # pytz.timezone имеет метод localize, стандартные timezone/ZoneInfo - нет
+            try:
+                import pytz
+                if isinstance(scheduler.timezone, pytz.BaseTzInfo):
+                    start_time_aware = scheduler.timezone.localize(start_time)  # type: ignore[attr-defined]
+                else:
+                    start_time_aware = start_time.replace(tzinfo=scheduler.timezone)
+            except (ImportError, AttributeError):
                 start_time_aware = start_time.replace(tzinfo=scheduler.timezone)
         elif start_time.tzinfo is not None and hasattr(scheduler, 'timezone'):
             start_time_aware = start_time.astimezone(scheduler.timezone)
