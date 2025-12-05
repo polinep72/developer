@@ -81,20 +81,17 @@ def process_email_notifications(
                 logger.debug(f"Найдено {len(tasks)} задач для обработки Email уведомлений")
 
                 for task in tasks:
-                    # Проверяем формат результата (кортеж или словарь)
-                    if isinstance(task, dict):
-                        task_id = task.get("id")
-                        booking_id = task.get("booking_id")
-                        event_type_str = task.get("event_type")
-                        run_at = task.get("run_at")
-                        payload_json = task.get("payload")
-                    else:
-                        # Если кортеж
-                        task_id = task[0]
-                        booking_id = task[1]
-                        event_type_str = task[2]
-                        run_at = task[3]
-                        payload_json = task[4] if len(task) > 4 else None
+                    # psycopg с dict_row возвращает объекты, которые можно использовать как словари
+                    try:
+                        # Используем доступ по ключу (dict_row возвращает объекты с доступом по ключу)
+                        task_id = task["id"]
+                        booking_id = task["booking_id"]
+                        event_type_str = task["event_type"]
+                        run_at = task["run_at"]
+                        payload_json = task.get("payload") if hasattr(task, 'get') else (task["payload"] if "payload" in task else None)
+                    except (KeyError, TypeError, AttributeError) as e:
+                        logger.error(f"Ошибка при разборе задачи из БД: {e}, тип: {type(task)}, значение: {task}")
+                        continue
 
                     stats["processed"] += 1
 
