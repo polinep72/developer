@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0 20px;
+            height: 100vh;
+            background-color: #f5f6f8;
+        }
+        .header {
+            width: calc(100% + 40px);
+            margin: 0 -20px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+        .header .logo img {
+            height: 50px;
+            max-width: 300px;
+            object-fit: contain;
+        }
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+        .tabs-container {
+            width: calc(100% + 40px);
+            margin: 0 -20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        .tabs {
+            display: flex;
+            align-items: flex-start;
+            list-style: none;
+            margin: 0;
+            padding: 0 10px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 14px 24px;
+            cursor: pointer;
+            background-color: #e9ecef;
+            border: none;
+            border-right: 1px solid #ddd;
+            font-size: 16px;
+            font-weight: 500;
+            color: #495057;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab:hover {
+            background-color: #dee2e6;
+        }
+        .tab.active {
+            background-color: #fff;
+            color: #007CBB;
+            border-bottom: 3px solid #007CBB;
+            margin-bottom: -2px;
+        }
+        .content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-content {
+            display: none;
+            flex-grow: 1;
+            padding: 32px 20px;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+        }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px auto;
+            padding: 14px 24px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, rgba(0, 124, 187, 0.9), rgba(0, 106, 163, 0.95));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            text-decoration: none;
+            width: 220px;
+            text-align: center;
+            position: relative;
+            box-shadow: 
+                0 8px 32px rgba(0, 124, 187, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.5),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        /* Стеклянный блик сверху */
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+            border-radius: 12px 12px 0 0;
+            pointer-events: none;
+        }
+        
+        /* Внутреннее свечение */
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(0, 124, 187, 0.5),
+                inset 0 1px 1px rgba(255, 255, 255, 0.6),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.3),
+                0 4px 8px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(135deg, rgba(0, 124, 187, 0.95), rgba(0, 106, 163, 1));
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0px);
+            box-shadow: 
+                0 4px 16px rgba(0, 124, 187, 0.4),
+                inset 0 2px 4px rgba(0, 0, 0, 0.3),
+                inset 0 -1px 1px rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            color: #007CBB;
+            font-size: 42px;
+            font-weight: bold;
+            text-shadow: 
+                1px 1px 0px #004d75,
+                2px 2px 0px #004d75,
+                3px 3px 0px #005a8b,
+                4px 4px 0px #005a8b,
+                5px 5px 0px #005a8b,
+                6px 6px 0px #005a8b,
+                7px 7px 0px #005a8b,
+                8px 8px 10px rgba(0, 124, 187, 0.5),
+                10px 10px 20px rgba(0, 0, 0, 0.4);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <span class="user-info">{{ session['username'] }}</span>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <ul class="tabs">
+            <li class="tab active" onclick="switchTab(0)">Склад кристаллов</li>
+            <li class="tab" onclick="switchTab(1)">Склад пластин</li>
+            <li class="tab" onclick="switchTab(2)">Дальний склад</li>
+        </ul>
+    </div>
+
+    <div class="content-wrapper">
+        <div id="tab-0" class="tab-content active">
+            <h1>Склад кристаллов</h1>
+            <a href="/search?warehouse=crystals" class="button">Поиск</a>
+            <a href="/inflow?warehouse=crystals" class="button">Поступление</a>
+            <a href="/outflow?warehouse=crystals" class="button">Расход</a>
+            <a href="/refund?warehouse=crystals" class="button">Возврат</a>
+            <a href="/inventory?warehouse=crystals" class="button">Инвентаризация</a>
+            <a href="/cart?warehouse=crystals" class="button">Корзина</a>
+        </div>
+
+        <div id="tab-1" class="tab-content">
+            <h1>Склад пластин</h1>
+            <a href="/search?warehouse=plates" class="button">Поиск</a>
+            <a href="/inflow?warehouse=plates" class="button">Поступление</a>
+            <a href="/outflow?warehouse=plates" class="button">Расход</a>
+            <a href="/cart?warehouse=plates" class="button">Корзина</a>
+        </div>
+
+        <div id="tab-2" class="tab-content">
+            <h1>Дальний склад</h1>
+            <a href="/search?warehouse=far" class="button">Поиск</a>
+            <a href="/inflow?warehouse=far" class="button">Поступление</a>
+            <a href="/outflow?warehouse=far" class="button">Расход</a>
+            <a href="/cart?warehouse=far" class="button">Корзина</a>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabIndex) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            tabs.forEach((tab, index) => tab.classList.toggle('active', index === tabIndex));
+            contents.forEach((content, index) => content.classList.toggle('active', index === tabIndex));
+            
+            // Обновляем URL с параметром warehouse
+            const warehouseTypes = ['crystals', 'plates', 'far'];
+            const warehouseType = warehouseTypes[tabIndex];
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('warehouse', warehouseType);
+            window.history.pushState({}, '', newUrl);
+        }
+    </script>
+</body>
+</html>

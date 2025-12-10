@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0 20px;
+            height: 100vh;
+        }
+
+        .header {
+            width: calc(100% + 40px);
+            margin: 0 -20px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            max-width: 300px;
+            object-fit: contain;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+
+        .container {
+            margin: 10px;
+            width: 100%;
+            max-width: 1850px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 0 20px;
+        }
+
+        /* Стили для формы, максимально приближенные к search.html */
+        form.inventory-form { /* Добавим класс для специфичности, если нужно */
+            display: flex;
+            flex-wrap: wrap; /* Позволит переноситься на новую строку */
+            align-items: flex-end; /* Выравниваем по нижнему краю, чтобы кнопки были на уровне input */
+            margin-bottom: 20px; /* Увеличим немного отступ снизу */
+            width: 100%; 
+            gap: 15px; /* Пространство между элементами формы */
+        }
+
+        /* Стили для элементов формы (label, select, input, button) как в search.html */
+        form.inventory-form .form-group { /* Обертка для label + input/select */
+             display: flex;
+             flex-direction: column; /* Метка над полем */
+        }
+
+        form.inventory-form label {
+            margin-bottom: 5px; /* Отступ между меткой и полем */
+            font-size: 14px; /* Размер шрифта метки */
+            font-weight: normal; /* Обычный шрифт для метки */
+        }
+
+        form.inventory-form select,
+        form.inventory-form input[type="text"] {
+            padding: 10px;
+            font-size: 16px; /* Как в search.html */
+            border: 1px solid #ddd; /* Рамка как у input в search.html */
+            border-radius: 5px; /* Скругление */
+            min-width: 250px; /* Минимальная ширина полей */
+            height: 42px; /* Фиксированная высота для точного выравнивания с кнопками */
+            box-sizing: border-box;
+        }
+        
+        form.inventory-form .form-button { /* Общий класс для кнопок формы */
+            padding: 10px 20px;
+            font-size: 16px; /* Как у кнопки "Найти" в search.html */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 0; /* Убираем отступ, так как используем gap */
+            height: 42px; /* Высота кнопки равна высоте input */
+            box-sizing: border-box;
+        }
+        
+        form.inventory-form .btn-search-inv {
+            background-color: #007CBB; /* Зеленый, как "Найти" в search.html (если такой цвет у кнопки был) */
+                                     /* или #007bff если она была синей */
+        }
+        form.inventory-form .btn-search-inv:hover {
+            background-color: #006AA3; /* Темно-зеленый */
+        }
+        form.inventory-form .btn-raw-data {
+            background-color: #007CBB; /* Зеленый */
+        }
+        form.inventory-form .btn-raw-data:hover {
+            background-color: #006AA3;
+        }
+
+        form.inventory-form .btn-export-inv {
+            background-color: #007CBB; /* Другой оттенок зеленого для экспорта */
+        }
+        form.inventory-form .btn-export-inv:hover {
+            background-color: #006AA3;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0; /* Убираем отступ, так как он теперь у wrapper */
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 13px; /* Можно оставить 13px или вернуть 14px как в search.html */
+        }
+
+        /* Обертка для таблицы с прокруткой */
+        .table-wrapper {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        table th {
+            background-color: #007CBB; /* Зеленая шапка как в search.html */
+            color: white;
+            position: sticky;
+            top: 0; /* Закрепляем относительно table-wrapper */
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+        }
+        
+        .table-wrapper table {
+            margin-top: 0; /* Убираем отступ сверху для таблицы внутри wrapper */
+        }
+        
+        /* Стили для сообщений, если нужны */
+        .alert {
+            padding: 10px 15px;
+            margin: 15px 0;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+		
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+		<a href="/" class="btn btn-secondary">Главное меню</a>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <span class="user-info">{{ session['username'] }}</span>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 style="font-size: 20px;">Инвентаризация Склада Кристаллов</h1>
+
+        <form method="POST" action="{{ url_for('inventory') }}" class="inventory-form">
+            <div class="form-group">
+                <label for="manufacturer">Производитель:</label>
+                <select name="manufacturer" id="manufacturer">
+                    <option value="">Все производители</option>
+                    {% for man in manufacturers %}
+                    <option value="{{ man }}" {{ 'selected' if man == selected_manufacturer }}>{{ man }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="lot_id">Партия (Lot ID):</label>
+                <select name="lot_id" id="lot_id">
+                    <option value="">Все партии</option>
+                    {% for lot in lots %}
+                    <option value="{{ lot }}" {{ 'selected' if lot == selected_lot_id }}>{{ lot }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="chip_code_filter">Шифр Кристалла:</label>
+                <input type="text" name="chip_code_filter" id="chip_code_filter" value="{{ selected_chip_code_filter or '' }}" placeholder="Часть шифра или пусто">
+            </div>
+            
+            <!-- Кнопки формы -->
+            <button type="submit" name="action" value="search" class="form-button btn-search-inv">Поиск</button>
+            {% if results %}
+            <button type="submit" name="action" value="export" class="form-button btn-export-inv">Выгрузить в Excel</button>
+            <button type="submit" name="action" value="export_raw" class="form-button btn-raw-data">Сырые данные</button>
+            {% endif %}
+        </form>
+
+        {% if results is defined %}
+            {% if results %}
+                <h2 style="font-size: 18px; margin-top: 20px;">Результаты инвентаризации</h2> <!-- Размер как у "Результаты поиска" -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <!-- Заголовки таблицы -->
+                                <th>Номер запуска</th>
+                                <th>Производитель</th>
+                                <th>Тех. процесс</th>
+                                <th>Партия (Lot ID)</th>
+                                <th>Пластина (Wafer)</th>
+                                <th>Quadrant</th>
+                                <th>Внутр. партия</th>
+                                <th>Шифр кристалла</th>
+                                <th>Приход Wafer</th>
+                                <th>Приход GelPak</th>
+                                <th>Приход Общий</th>
+                                <th>Расход Wafer</th>
+                                <th>Расход GelPak</th>
+                                <th>Расход Общий</th>
+                                <th>Возврат Wafer</th>
+                                <th>Возврат GelPak</th>
+                                <th>Возврат Общий</th>
+                                <th>Остаток, шт.</th>
+                                <th>Примечание</th>
+                                <th>Упаковка</th>
+                                <th>Место хран.</th>
+                                <th>Ячейка хран.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in results %}
+                            <tr>
+                                <td>{{ row[0] }}</td>
+                                <td>{{ row[1] }}</td>
+                                <td>{{ row[2] }}</td>
+                                <td>{{ row[3] }}</td>
+                                <td>{{ row[4] }}</td>
+                                <td>{{ row[5] }}</td>
+                                <td>{{ row[6] }}</td>
+                                <td>{{ row[7] }}</td>
+                                <td>{{ row[8] | int }}</td>
+                                <td>{{ row[9] | int }}</td>
+                                <td>{{ row[10] | int }}</td>
+                                <td>{{ row[11] | int }}</td>
+                                <td>{{ row[12] | int }}</td>
+                                <td>{{ row[13] | int }}</td>
+                                <td>{{ row[14] | int }}</td>
+                                <td>{{ row[15] | int }}</td>
+                                <td>{{ row[16] | int }}</td>
+                                <td>{{ row[17] | int }}</td>
+                                <td>{{ row[18] or '' }}</td>
+                                <td>{{ row[19] or '' }}</td>
+                                <td>{{ row[20] or '' }}</td>
+                                <td>{{ row[21] or '' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% elif request.method == 'POST' %}
+                <div class="alert alert-info" role="alert" style="margin-top: 20px;">
+                    По вашему запросу ничего не найдено.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
