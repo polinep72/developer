@@ -4,6 +4,7 @@
 Версия: 1.2.0
 """
 import logging  # <--- ДОБАВИТЬ
+import logging.handlers  # Для SMTPHandler
 import os
 from datetime import datetime
 from io import BytesIO
@@ -16,7 +17,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 
 # Импортируем WSGIMiddleware
 try:
@@ -24,21 +25,150 @@ try:
 except ImportError:
     from starlette.middleware.wsgi import WSGIMiddleware
 
-# Настраиваем корневой логгер, чтобы он выводил INFO и выше
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
-
 # Загружаем переменные окружения
 # Пробуем загрузить из текущей директории и родительской
 load_dotenv()
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
+# Настройка логирования с SMTP handler для критических ошибок
+def setup_logging():
+    """Настройка логирования с отправкой критических ошибок на email"""
+    # Формат логов
+    log_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+    
+    # Настраиваем корневой логгер
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    
+    # Получаем настройки SMTP из переменных окружения
+    # Поддерживаем оба варианта: SMTP_USERNAME и SMTP_USER для обратной совместимости
+    enable_email = os.getenv('ENABLE_EMAIL', 'true').lower().strip() == 'true'
+    if not enable_email:
+        root_logger.warning("SMTP логирование отключено (ENABLE_EMAIL=false)")
+        # Все равно настраиваем консольный handler
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(log_format)
+        root_logger.addHandler(console_handler)
+        return
+    
+    smtp_host = os.getenv('SMTP_HOST')
+    smtp_port = int(os.getenv('SMTP_PORT', '587'))
+    smtp_username = os.getenv('SMTP_USERNAME') or os.getenv('SMTP_USER')  # Поддержка обоих вариантов
+    smtp_password = os.getenv('SMTP_PASSWORD')
+    admin_email = os.getenv('ADMIN_EMAIL')
+    from_email = os.getenv('SMTP_FROM_EMAIL', smtp_username)
+    from_name = os.getenv('SMTP_FROM_NAME', 'Crystal Wafer Management System')
+    smtp_use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
+    
+    # Консольный handler (всегда активен)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(log_format)
+    root_logger.addHandler(console_handler)
+    
+    # SMTP handler для критических ошибок (только если настроен)
+    if smtp_host and smtp_username and smtp_password and admin_email:
+        try:
+            # Создаем кастомный SMTP handler для более гибкой настройки
+            class SecureSMTPHandler(logging.handlers.SMTPHandler):
+                def __init__(self, mailhost, fromaddr, toaddrs, subject, credentials, use_tls=True):
+                    super().__init__(mailhost, fromaddr, toaddrs, subject, credentials)
+                    self.use_tls = use_tls
+                    self._sending = False  # Флаг для предотвращения рекурсии
+                
+                def emit(self, record):
+                    """Переопределяем emit для поддержки TLS"""
+                    # Предотвращаем рекурсию: если уже отправляем email, не пытаемся снова
+                    if self._sending:
+                        return
+                    
+                    try:
+                        self._sending = True
+                        import smtplib
+                        from email.utils import formatdate
+                        port = self.mailport
+                        if not port:
+                            port = smtplib.SMTP_PORT
+                        smtp = smtplib.SMTP(self.mailhost, port)
+                        if self.use_tls:
+                            smtp.starttls()
+                        if self.username:
+                            smtp.login(self.username, self.password)
+                        msg = self.format(record)
+                        # Используем имя отправителя, если оно указано
+                        from_header = f"{self.fromname} <{self.fromaddr}>" if hasattr(self, 'fromname') and self.fromname else self.fromaddr
+                        msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
+                            from_header,
+                            ','.join(self.toaddrs),
+                            self.getSubject(record),
+                            formatdate(),
+                            msg
+                        )
+                        smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+                        smtp.quit()
+                    except smtplib.SMTPAuthenticationError as e:
+                        # Ошибка аутентификации - логируем в консоль, но не пытаемся отправить email
+                        import sys
+                        print(f"ОШИБКА SMTP аутентификации: {e}", file=sys.stderr)
+                        print("Проверьте настройки SMTP в .env файле. Для Gmail используйте 'Пароль приложения'.", file=sys.stderr)
+                    except Exception as e:
+                        # Другие ошибки - логируем в консоль без рекурсии
+                        import sys
+                        print(f"ОШИБКА отправки email: {e}", file=sys.stderr)
+                    finally:
+                        self._sending = False
+            
+            smtp_handler = SecureSMTPHandler(
+                mailhost=(smtp_host, smtp_port),
+                fromaddr=from_email,
+                toaddrs=[admin_email],
+                subject='[КРИТИЧЕСКАЯ ОШИБКА] Crystal Wafer Management System',
+                credentials=(smtp_username, smtp_password),
+                use_tls=smtp_use_tls
+            )
+            # Добавляем имя отправителя, если указано
+            smtp_handler.fromname = from_name
+            smtp_handler.setLevel(logging.ERROR)  # Только ERROR и CRITICAL
+            smtp_handler.setFormatter(log_format)
+            root_logger.addHandler(smtp_handler)
+            root_logger.info(f"SMTP логирование настроено: {admin_email}")
+        except Exception as e:
+            root_logger.warning(f"Не удалось настроить SMTP логирование: {e}")
+    else:
+        root_logger.warning("SMTP логирование не настроено (отсутствуют настройки в .env)")
+
+# Вызываем настройку логирования
+setup_logging()
+
 _flask_app = Flask(__name__)
 _flask_app.secret_key = os.getenv('SECRET_KEY', 'a_default_secret_key_change_it')  # Добавим дефолтный ключ
+
+# Настраиваем логирование Werkzeug, чтобы скрыть предупреждение о development server
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 if not _flask_app.debug:  # Обычно в debug режиме Flask более многословен
     # Устанавливаем уровень INFO для логгера приложения
     _flask_app.logger.setLevel(logging.INFO)
+
+# Обработчик необработанных исключений
+@_flask_app.errorhandler(Exception)
+def handle_exception(e):
+    """Глобальный обработчик исключений для отправки на email"""
+    # Игнорируем 404 ошибки (NotFound) - это не критичные ошибки
+    from werkzeug.exceptions import NotFound
+    if isinstance(e, NotFound):
+        # Для 404 просто возвращаем стандартный ответ Flask, не логируем как ошибку
+        return "Страница не найдена", 404
+    
+    # Логируем только критичные ошибки (не 404)
+    _flask_app.logger.error(
+        f"Необработанное исключение: {type(e).__name__}: {str(e)}",
+        exc_info=True
+    )
+    # Возвращаем стандартный ответ Flask для исключений
+    return f"Внутренняя ошибка сервера: {str(e)}", 500
 
 
 @_flask_app.context_processor
@@ -2083,7 +2213,30 @@ def inventory():
 # Создаем ASGI-совместимое приложение для Uvicorn.
 app = WSGIMiddleware(_flask_app)
 
-# Блок для запуска через Waitress (или встроенный сервер Flask) больше не нужен, если запускаем через Uvicorn
+# Блок для запуска приложения
 if __name__ == '__main__':
-    # serve(_flask_app, host="0.0.0.0", port=8087) # Используем _flask_app
-    _flask_app.run(debug=True, host="0.0.0.0", port=8089)  # Для локальной разработки (тест: 8089)
+    import sys
+    
+    # Проверяем режим запуска из переменных окружения
+    mode = os.getenv('MODE', 'development').lower()
+    is_production = mode == 'production'
+    
+    if is_production:
+        # Production режим: используем Waitress (кроссплатформенный WSGI сервер)
+        try:
+            from waitress import serve
+            print("=" * 60)
+            print("Запуск в PRODUCTION режиме через Waitress WSGI сервер")
+            print("=" * 60)
+            serve(_flask_app, host="0.0.0.0", port=8089, threads=4)
+        except ImportError:
+            print("ОШИБКА: Waitress не установлен. Установите: pip install waitress")
+            print("Запуск в режиме разработки...")
+            _flask_app.run(debug=False, host="0.0.0.0", port=8089)
+    else:
+        # Development режим: используем встроенный сервер Flask (только для разработки)
+        print("=" * 60)
+        print("ВНИМАНИЕ: Запуск в режиме РАЗРАБОТКИ")
+        print("Для production установите MODE=production в .env")
+        print("=" * 60)
+        _flask_app.run(debug=True, host="0.0.0.0", port=8089)
