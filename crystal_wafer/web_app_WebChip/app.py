@@ -16,7 +16,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 # Импортируем WSGIMiddleware
 try:
@@ -1056,6 +1056,7 @@ def add_to_cart():
                 SELECT
                     item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
                     id_stor AS latest_id_stor, id_cells AS latest_id_cells,
+                    MAX(note) FILTER (WHERE note IS NOT NULL AND note != '' AND LOWER(note) != 'nan') AS latest_note,
                     SUM(quan_w) as total_return_w, SUM(quan_gp) as total_return_gp
                 FROM {invoice_table}
                 WHERE item_id LIKE %s AND status = 3  -- Только возврат (status=3)
@@ -1066,6 +1067,7 @@ def add_to_cart():
                     item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
                     id_stor AS latest_id_stor,
                     id_cells AS latest_id_cells,
+                    MAX(note) FILTER (WHERE note IS NOT NULL AND note != '' AND LOWER(note) != 'nan') AS latest_note,
                     SUM(cons_w) as total_consumed_w, SUM(cons_gp) as total_consumed_gp
                 FROM {consumption_table}
                 WHERE item_id LIKE %s
@@ -1113,7 +1115,7 @@ def add_to_cart():
                 nc.n_chip,
                 (COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) AS ostatok_w,
                 (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) AS ostatok_gp,
-                COALESCE(inv.note, cons.note, '') AS display_note,
+                COALESCE(inv.note, cons.latest_note, '') AS display_note,
                 st.name_stor,
                 c.name_cells,
                 inv.latest_id_chip,

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0 20px;
+            height: 100vh;
+        }
+
+        .header {
+            width: calc(100% + 40px);
+            margin: 0 -20px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            max-width: 300px;
+            object-fit: contain;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+
+        .container {
+            margin: 10px;
+            width: 100%;
+            max-width: 1850px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        form {
+            display: flex;
+            align-items: center; /* Выравнивание по вертикали */
+            margin-bottom: 5px;
+            width: 100%; /* Установка ширины формы */
+        }
+
+        form label {
+            margin-right: 5px; /* Отступ между меткой и полем ввода */
+        }
+
+        form input, form button {
+            margin: 0 10px; /* Минимальные отступы между элементами */
+            padding: 10px;
+            font-size: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0; /* Убираем отступ, так как он теперь у wrapper */
+            margin-left: 0; /* Выравнивание по левому краю */
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Обертка для таблицы с прокруткой */
+        .table-wrapper {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        table th {
+            background-color: #007CBB;
+            color: white;
+            position: sticky;
+            top: 0; /* Закрепляем относительно table-wrapper */
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+        }
+        
+        .table-wrapper table {
+            margin-top: 0; /* Убираем отступ сверху для таблицы внутри wrapper */
+        }
+
+        .cart-button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .cart-button:hover {
+            background-color: #006AA3;
+        }
+        
+        /* Стиль для кнопки "Найти" - такой же как у "Перейти в корзину" */
+        button[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #006AA3;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .results-header h2 {
+            margin: 0;
+        }
+        
+        .results-header .cart-button {
+            margin-left: 1400px;
+        }
+		/* Уменьшение ширины столбцов */
+        .limited-width-column {
+            width: 90px; /* Ограничение ширины */
+            word-wrap: break-word; /* Перенос текста */
+            text-align: center;
+        }
+		.quantity-column {
+        width: 60px; /* Уменьшенная ширина столбцов */
+		}
+
+		.quantity-input-w,
+		.quantity-input-gp {
+			width: 60px; /* Уменьшенная ширина полей ввода */
+		}
+		
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+		<a href="/" class="btn btn-secondary">Главное меню</a>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <span class="user-info">{{ session['username'] }}</span>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 style="font-size: 20px;">Поиск кристаллов</h1>
+        <form method="POST" action="/search">
+			<div style="margin-bottom: 20px;">
+				<label for="manufacturer" style="margin-right: 10px;">Выберите производителя:</label>
+				<select id="manufacturer" name="manufacturer" style="width: 300px; padding: 10px; font-size: 16px;">
+					<option value="all">Все производители</option>
+					{% for manufacturer in manufacturers %}
+						<option value="{{ manufacturer }}" 
+							{% if request.form.get('manufacturer') == manufacturer %} selected {% endif %}>
+							{{ manufacturer }}
+						</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			{% if warehouse_type == 'crystals' %}
+			<div style="margin-bottom: 20px;">
+				<label for="lot_filter" style="margin-left: 20px; margin-right: 10px;">Выберите Партию:</label>
+				<select id="lot_filter" name="lot_filter" style="width: 300px; padding: 10px; font-size: 16px;">
+					<option value="all">Все партии</option>
+					{% for lot in lots %}
+						<option value="{{ lot }}" 
+							{% if request.form.get('lot_filter') == lot or lot_filter == lot %} selected {% endif %}>
+							{{ lot }}
+						</option>
+					{% endfor %}
+				</select>
+			</div>
+			{% endif %}
+
+			<div style="margin-bottom: 20px;">
+				<label for="chip_name" style="margin-left: 20px; margin-right: 1px;">Введите шифр кристалла (необязательно):</label>
+				<input 
+					type="text" 
+					id="chip_name" 
+					name="chip_name" 
+					value="{{ request.form.get('chip_name', '') or request.args.get('chip_name', '') }}" 
+					placeholder="Оставьте пустым для поиска всех"
+					style="width: 300px; padding: 10px; font-size: 16px;"
+				>
+			</div>
+
+			<button type="submit">Найти</button>
+		</form>
+		
+        {% if results %}
+		<div class="results-header">
+			<h2 style="font-size: 20px; margin: 0;">Результаты поиска</h2>
+			<a href="/cart?warehouse={{ warehouse_type|default('crystals') }}" class="cart-button">Перейти в корзину</a>
+		</div>
+		{% if warehouse_type == 'plates' or warehouse_type == 'far' %}
+		<div style="margin: 15px 0; display: flex; align-items: center; gap: 10px;">
+			<label for="wafer_filter" style="font-weight: bold;">Фильтр по Пластине:</label>
+			<select id="wafer_filter" name="wafer_filter" style="width: 300px; padding: 10px; font-size: 16px;">
+				<option value="all">Все пластины</option>
+			</select>
+		</div>
+		{% endif %}
+		<div class="table-wrapper">
+		<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Запуск</th>
+            <th>Производитель</th>
+            <th>Технология</th>
+            <th>Пластина</th>
+            <th>Квадрант</th>
+			<th>Партия</th>
+            <th>Внутренняя партия</th>
+            <th>Шифр кристалла</th>
+            <th class="limited-width-column">Количество на пластине</th>
+            <th class="limited-width-column">Количество в GelPak</th>
+			<th>Примечание</th>
+			<th>Место хранения</th>
+			<th>Ячейка хранения</th>
+            {% if warehouse_type != 'plates' and warehouse_type != 'far' %}
+            <th>Взять на пластине</th>
+            <th>Взять в GelPak</th>
+            {% endif %}
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+		{% for row in results %}
+		<tr 
+			data-launch="{{ row[2] }}" 
+			data-manufacturer="{{ row[3] }}" 
+			data-technology="{{ row[4] }}" 
+			data-lot="{{ row[7] }}" 
+			data-wafer="{{ row[5] }}" 
+			data-quadrant="{{ row[6] }}" 
+			data-internal-lot="{{ row[8] }}" 
+			data-chip-code="{{ row[9] }}"
+			data-note="{{ row[12] }}"
+			data-stor="{{ row[13] }}"
+			data-cells="{{ row[14] }}">
+			<td>{{ row[0] }}</td>
+			<td>{{ row[2] }}</td>
+			<td>{{ row[3] }}</td>
+			<td>{{ row[4] }}</td>
+			<td>{{ row[5] }}</td>
+			<td>{{ row[6] }}</td>
+			<td>{{ row[7] }}</td>
+			<td>{{ row[8] }}</td>
+			<td>{{ row[9] }}</td>
+			<td class="limited-width-column">{{ row[10] }}</td>
+			<td class="limited-width-column">{{ row[11] }}</td>
+			<td>{% if row[12] and row[12]|lower != 'nan' %}{{ row[12] }}{% endif %}</td>
+			<td>{{ row[13] }}</td>
+			<td>{{ row[14] }}</td>
+			{% if warehouse_type != 'plates' and warehouse_type != 'far' %}
+			<td class="quantity-column">
+                <input type="number" class="quantity-input-w" data-id="{{ row[0] }}" 
+                       max="{{ row[10] }}" placeholder="Макс: {{ row[10] }}">
+            </td>
+            <td class="quantity-column">
+                <input type="number" class="quantity-input-gp" data-id="{{ row[0] }}" 
+                       max="{{ row[11] }}" placeholder="Макс: {{ row[11] }}">
+            </td>
+			{% endif %}
+			<td>
+				<button class="add-to-cart" data-id="{{ row[0] }}">Добавить в корзину</button>
+			</td>
+		</tr>
+		{% endfor %}
+            </tbody>
+        </table>
+		</div>
+		{% endif %}
+    </div>
+	<script> 
+		document.addEventListener('DOMContentLoaded', function () {
+		const buttons = document.querySelectorAll('.add-to-cart');
+
+		buttons.forEach(button => {
+			button.addEventListener('click', function () {
+				const row = this.closest('tr'); // Находим строку таблицы
+				const itemId = this.dataset.id; // Извлекаем item_id из data-атрибута кнопки
+				
+				// Для складов plates и far не используем поля quantity-input
+				const warehouseType = '{{ warehouse_type|default("crystals") }}';
+				let quantityW = 0;
+				let quantityGP = 0;
+				
+				if (warehouseType !== 'plates' && warehouseType !== 'far') {
+					const quantityWInput = row.querySelector('.quantity-input-w');
+					const quantityGPInput = row.querySelector('.quantity-input-gp');
+					quantityW = quantityWInput ? quantityWInput.value : 0;
+					quantityGP = quantityGPInput ? quantityGPInput.value : 0;
+					
+					// Проверка на наличие введенных данных только для склада кристаллов
+					if (!quantityW && !quantityGP) {
+						alert('Введите количество для добавления в корзину');
+						return;
+					}
+				}
+
+				// Извлекаем остальные данные из data-* атрибутов строки
+				const launch = row.dataset.launch;
+				const manufacturer = row.dataset.manufacturer;
+				const technology = row.dataset.technology;
+				const lot = row.dataset.lot;
+				const wafer = row.dataset.wafer;
+				const quadrant = row.dataset.quadrant;
+				const internalLot = row.dataset.internalLot;
+				const chipCode = row.dataset.chipCode;
+				const note = row.dataset.note;
+				const stor = row.dataset.stor;
+				const cells = row.dataset.cells;
+
+				// Формируем данные для отправки
+				const payload = {
+					item_id: itemId,
+					launch: launch,
+					manufacturer: manufacturer,
+					technology: technology,
+					lot: lot,
+					wafer: wafer,
+					quadrant: quadrant,
+					internal_lot: internalLot,
+					chip_code: chipCode,
+					note: note,
+					stor: stor,
+					cells: cells,					
+					quantity_w: quantityW || 0,
+					quantity_gp: quantityGP || 0
+				};
+
+				console.log(payload); // Для проверки корректности отправляемых данных
+
+				// Отправка запроса на сервер
+				fetch('/add_to_cart', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(payload),
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						alert(data.message || 'Товар успешно добавлен в корзину');
+					} else {
+						alert('Ошибка добавления в корзину: ' + (data.message || 'Неизвестная ошибка'));
+					}
+				})
+				.catch(error => {
+					console.error('Ошибка:', error);
+					alert('Не удалось добавить товар в корзину.');
+				});
+			});
+		});
+	});
+
+	// Заполнение списка пластин для складов plates и far
+	const warehouseTypeForWafer = '{{ warehouse_type }}';
+	if (warehouseTypeForWafer === 'plates' || warehouseTypeForWafer === 'far') {
+		const waferFilter = document.getElementById('wafer_filter');
+		if (waferFilter) {
+			// Извлекаем уникальные пластины из результатов
+			const tableRows = document.querySelectorAll('tbody tr');
+			const wafers = new Set();
+			tableRows.forEach(row => {
+				const wafer = row.dataset.wafer;
+				if (wafer && wafer.trim()) {
+					wafers.add(wafer);
+				}
+			});
+			
+			// Сортируем и заполняем список
+			const sortedWafers = Array.from(wafers).sort();
+			sortedWafers.forEach(wafer => {
+				const option = document.createElement('option');
+				option.value = wafer;
+				option.textContent = wafer;
+				waferFilter.appendChild(option);
+			});
+			
+			// Обработчик изменения фильтра
+			waferFilter.addEventListener('change', function() {
+				const selectedWafer = this.value;
+				tableRows.forEach(row => {
+					if (selectedWafer === 'all') {
+						row.style.display = '';
+					} else {
+						const rowWafer = row.dataset.wafer;
+						row.style.display = (rowWafer === selectedWafer) ? '' : 'none';
+					}
+				});
+			});
+		}
+	}
+
+	// Динамическое обновление списка партий при изменении производителя
+	const warehouseTypeForLots = '{{ warehouse_type }}';
+	if (warehouseTypeForLots === 'crystals') {
+		const manufacturerSelect = document.getElementById('manufacturer');
+		const lotFilter = document.getElementById('lot_filter');
+		
+		if (manufacturerSelect && lotFilter) {
+			manufacturerSelect.addEventListener('change', function() {
+				const manufacturer = this.value;
+				const warehouseType = warehouseTypeForLots;
+				
+				// Сохраняем текущее выбранное значение партии
+				const currentLot = lotFilter.value;
+				
+				// Очищаем список партий и показываем загрузку
+				lotFilter.innerHTML = '<option value="all">Загрузка...</option>';
+				lotFilter.disabled = true;
+				
+				// Загружаем партии через AJAX
+				fetch(`/api/get_lots?warehouse=${warehouseType}&manufacturer=${encodeURIComponent(manufacturer)}`)
+					.then(response => response.json())
+					.then(data => {
+						lotFilter.innerHTML = '<option value="all">Все партии</option>';
+						
+						if (data.lots && data.lots.length > 0) {
+							data.lots.forEach(function(lot) {
+								const option = document.createElement('option');
+								option.value = lot;
+								option.textContent = lot;
+								// Восстанавливаем выбранное значение, если оно есть в новом списке
+								if (lot === currentLot) {
+									option.selected = true;
+								}
+								lotFilter.appendChild(option);
+							});
+						} else {
+							const option = document.createElement('option');
+							option.value = "all";
+							option.textContent = "Партии не найдены";
+							lotFilter.appendChild(option);
+						}
+						lotFilter.disabled = false;
+					})
+					.catch(error => {
+						console.error('Ошибка загрузки партий:', error);
+						lotFilter.innerHTML = '<option value="all">Ошибка загрузки</option>';
+						lotFilter.disabled = false;
+					});
+			});
+		}
+	}
+</script>
+</body>
+</html>
