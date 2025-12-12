@@ -17,7 +17,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 
 # Импортируем WSGIMiddleware
 try:
@@ -882,31 +882,30 @@ def search():
         if manufacturers_raw:
             manufacturers = [row[0] for row in manufacturers_raw]
         
-        # Загружаем список партий только для склада кристаллов
+        # Загружаем список партий для всех складов
         # Фильтруем партии по выбранному производителю, если он указан
-        if warehouse_type == 'crystals':
-            # Получаем значение производителя из формы или аргументов
-            selected_manufacturer_for_lots = request.form.get('manufacturer') or request.args.get('manufacturer', 'all')
-            
-            if selected_manufacturer_for_lots and selected_manufacturer_for_lots != 'all':
-                # Фильтруем партии по производителю через invoice таблицу
-                lots_query = f"""
-                    SELECT DISTINCT l.name_lot 
-                    FROM lot l
-                    INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
-                    INNER JOIN pr p ON inv.id_pr = p.id
-                    WHERE p.name_pr = %s
-                    ORDER BY l.name_lot
-                """
-                lots_raw = execute_query(lots_query, (selected_manufacturer_for_lots,))
-                if lots_raw:
-                    lots = [row[0] for row in lots_raw]
-            else:
-                # Если производитель не выбран, показываем все партии
-                lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
-                lots_raw = execute_query(lots_query)
-                if lots_raw:
-                    lots = [row[0] for row in lots_raw]
+        # Получаем значение производителя из формы или аргументов
+        selected_manufacturer_for_lots = request.form.get('manufacturer') or request.args.get('manufacturer', 'all')
+        
+        if selected_manufacturer_for_lots and selected_manufacturer_for_lots != 'all':
+            # Фильтруем партии по производителю через invoice таблицу
+            lots_query = f"""
+                SELECT DISTINCT l.name_lot 
+                FROM lot l
+                INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
+                INNER JOIN pr p ON inv.id_pr = p.id
+                WHERE p.name_pr = %s
+                ORDER BY l.name_lot
+            """
+            lots_raw = execute_query(lots_query, (selected_manufacturer_for_lots,))
+            if lots_raw:
+                lots = [row[0] for row in lots_raw]
+        else:
+            # Если производитель не выбран, показываем все партии
+            lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
+            lots_raw = execute_query(lots_query)
+            if lots_raw:
+                lots = [row[0] for row in lots_raw]
     except Exception as e:
         flash(f"Ошибка загрузки списка производителей: {e}", "danger")
         _flask_app.logger.error(f"Ошибка загрузки списка производителей: {e}")
@@ -1059,8 +1058,8 @@ def search():
         filter_conditions.append("p.name_pr = %s")
         params_search.append(manufacturer_filter_form)
     
-    # Добавляем фильтр по партии только для склада кристаллов
-    if warehouse_type == 'crystals' and lot_filter_form and lot_filter_form != "all":
+    # Добавляем фильтр по партии для всех складов
+    if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
@@ -1085,7 +1084,7 @@ def search():
     return render_template('search.html',
                            results=results,
                            manufacturers=manufacturers,
-                           lots=lots if warehouse_type == 'crystals' else [],
+                           lots=lots,
                            chip_name=chip_name_form,
                            manufacturer_filter=manufacturer_filter_form,
                            lot_filter=lot_filter_form,
@@ -1097,10 +1096,6 @@ def search():
 def get_lots():
     """API endpoint для получения списка партий по выбранному производителю"""
     warehouse_type = request.args.get('warehouse', 'crystals')
-    
-    if warehouse_type != 'crystals':
-        return jsonify({"lots": []})
-    
     manufacturer = request.args.get('manufacturer', 'all')
     
     tables = get_warehouse_tables(warehouse_type)

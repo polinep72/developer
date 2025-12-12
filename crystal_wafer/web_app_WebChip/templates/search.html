@@ -228,7 +228,6 @@
 				</select>
 			</div>
 
-			{% if warehouse_type == 'crystals' %}
 			<div style="margin-bottom: 20px;">
 				<label for="lot_filter" style="margin-left: 20px; margin-right: 10px;">Выберите Партию:</label>
 				<select id="lot_filter" name="lot_filter" style="width: 300px; padding: 10px; font-size: 16px;">
@@ -241,7 +240,6 @@
 					{% endfor %}
 				</select>
 			</div>
-			{% endif %}
 
 			<div style="margin-bottom: 20px;">
 				<label for="chip_name" style="margin-left: 20px; margin-right: 1px;">Введите шифр кристалла (необязательно):</label>
@@ -263,14 +261,6 @@
 			<h2 style="font-size: 20px; margin: 0;">Результаты поиска</h2>
 			<a href="/cart?warehouse={{ warehouse_type|default('crystals') }}" class="cart-button">Перейти в корзину</a>
 		</div>
-		{% if warehouse_type == 'plates' or warehouse_type == 'far' %}
-		<div style="margin: 15px 0; display: flex; align-items: center; gap: 10px;">
-			<label for="wafer_filter" style="font-weight: bold;">Фильтр по Пластине:</label>
-			<select id="wafer_filter" name="wafer_filter" style="width: 300px; padding: 10px; font-size: 16px;">
-				<option value="all">Все пластины</option>
-			</select>
-		</div>
-		{% endif %}
 		<div class="table-wrapper">
 		<table>
     <thead>
@@ -428,95 +418,55 @@
 		});
 	});
 
-	// Заполнение списка пластин для складов plates и far
-	const warehouseTypeForWafer = '{{ warehouse_type }}';
-	if (warehouseTypeForWafer === 'plates' || warehouseTypeForWafer === 'far') {
-		const waferFilter = document.getElementById('wafer_filter');
-		if (waferFilter) {
-			// Извлекаем уникальные пластины из результатов
-			const tableRows = document.querySelectorAll('tbody tr');
-			const wafers = new Set();
-			tableRows.forEach(row => {
-				const wafer = row.dataset.wafer;
-				if (wafer && wafer.trim()) {
-					wafers.add(wafer);
-				}
-			});
-			
-			// Сортируем и заполняем список
-			const sortedWafers = Array.from(wafers).sort();
-			sortedWafers.forEach(wafer => {
-				const option = document.createElement('option');
-				option.value = wafer;
-				option.textContent = wafer;
-				waferFilter.appendChild(option);
-			});
-			
-			// Обработчик изменения фильтра
-			waferFilter.addEventListener('change', function() {
-				const selectedWafer = this.value;
-				tableRows.forEach(row => {
-					if (selectedWafer === 'all') {
-						row.style.display = '';
-					} else {
-						const rowWafer = row.dataset.wafer;
-						row.style.display = (rowWafer === selectedWafer) ? '' : 'none';
-					}
-				});
-			});
-		}
-	}
 
-	// Динамическое обновление списка партий при изменении производителя
+	// Динамическое обновление списка партий при изменении производителя для всех складов
 	const warehouseTypeForLots = '{{ warehouse_type }}';
-	if (warehouseTypeForLots === 'crystals') {
-		const manufacturerSelect = document.getElementById('manufacturer');
-		const lotFilter = document.getElementById('lot_filter');
-		
-		if (manufacturerSelect && lotFilter) {
-			manufacturerSelect.addEventListener('change', function() {
-				const manufacturer = this.value;
-				const warehouseType = warehouseTypeForLots;
-				
-				// Сохраняем текущее выбранное значение партии
-				const currentLot = lotFilter.value;
-				
-				// Очищаем список партий и показываем загрузку
-				lotFilter.innerHTML = '<option value="all">Загрузка...</option>';
-				lotFilter.disabled = true;
-				
-				// Загружаем партии через AJAX
-				fetch(`/api/get_lots?warehouse=${warehouseType}&manufacturer=${encodeURIComponent(manufacturer)}`)
-					.then(response => response.json())
-					.then(data => {
-						lotFilter.innerHTML = '<option value="all">Все партии</option>';
-						
-						if (data.lots && data.lots.length > 0) {
-							data.lots.forEach(function(lot) {
-								const option = document.createElement('option');
-								option.value = lot;
-								option.textContent = lot;
-								// Восстанавливаем выбранное значение, если оно есть в новом списке
-								if (lot === currentLot) {
-									option.selected = true;
-								}
-								lotFilter.appendChild(option);
-							});
-						} else {
+	const manufacturerSelect = document.getElementById('manufacturer');
+	const lotFilter = document.getElementById('lot_filter');
+	
+	if (manufacturerSelect && lotFilter) {
+		manufacturerSelect.addEventListener('change', function() {
+			const manufacturer = this.value;
+			const warehouseType = warehouseTypeForLots;
+			
+			// Сохраняем текущее выбранное значение партии
+			const currentLot = lotFilter.value;
+			
+			// Очищаем список партий и показываем загрузку
+			lotFilter.innerHTML = '<option value="all">Загрузка...</option>';
+			lotFilter.disabled = true;
+			
+			// Загружаем партии через AJAX
+			fetch(`/api/get_lots?warehouse=${warehouseType}&manufacturer=${encodeURIComponent(manufacturer)}`)
+				.then(response => response.json())
+				.then(data => {
+					lotFilter.innerHTML = '<option value="all">Все партии</option>';
+					
+					if (data.lots && data.lots.length > 0) {
+						data.lots.forEach(function(lot) {
 							const option = document.createElement('option');
-							option.value = "all";
-							option.textContent = "Партии не найдены";
+							option.value = lot;
+							option.textContent = lot;
+							// Восстанавливаем выбранное значение, если оно есть в новом списке
+							if (lot === currentLot) {
+								option.selected = true;
+							}
 							lotFilter.appendChild(option);
-						}
-						lotFilter.disabled = false;
-					})
-					.catch(error => {
-						console.error('Ошибка загрузки партий:', error);
-						lotFilter.innerHTML = '<option value="all">Ошибка загрузки</option>';
-						lotFilter.disabled = false;
-					});
-			});
-		}
+						});
+					} else {
+						const option = document.createElement('option');
+						option.value = "all";
+						option.textContent = "Партии не найдены";
+						lotFilter.appendChild(option);
+					}
+					lotFilter.disabled = false;
+				})
+				.catch(error => {
+					console.error('Ошибка загрузки партий:', error);
+					lotFilter.innerHTML = '<option value="all">Ошибка загрузки</option>';
+					lotFilter.disabled = false;
+				});
+		});
 	}
 </script>
 </body>
