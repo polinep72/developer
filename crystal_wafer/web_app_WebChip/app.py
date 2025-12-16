@@ -313,15 +313,27 @@ def execute_query(query, params=None, fetch=True):
 
 
 def get_or_create_id(table_name, column_name, value):
-    # Простая реализация, нужно адаптировать под вашу БД (проверка на None, типы и т.д.)
-    # Экранирование имен таблиц/столбцов здесь не сделано для простоты,
-    # предполагается, что table_name и column_name приходят из кода, а не от пользователя.
-    select_query = f"SELECT id FROM {table_name} WHERE {column_name} = %s"
+    """
+    Получает или создает ID записи в справочной таблице
+    
+    Args:
+        table_name: Имя таблицы (валидируется против whitelist)
+        column_name: Имя столбца (валидируется против whitelist)
+        value: Значение для поиска или создания
+        
+    Returns:
+        int: ID записи
+    """
+    # Валидация имен таблицы и столбца
+    table_name_clean = validate_table_name(table_name)
+    column_name_clean = validate_column_name(column_name)
+    
+    select_query = f"SELECT id FROM {table_name_clean} WHERE {column_name_clean} = %s"
     existing = execute_query(select_query, (value,), fetch=True)
     if existing:
         return existing[0][0]
     else:
-        insert_query = f"INSERT INTO {table_name} ({column_name}) VALUES (%s) RETURNING id"
+        insert_query = f"INSERT INTO {table_name_clean} ({column_name_clean}) VALUES (%s) RETURNING id"
         new_id_result = execute_query(insert_query, (value,), fetch=True)  # fetch=True из-за RETURNING
         if new_id_result:
             return new_id_result[0][0]
@@ -332,13 +344,30 @@ def get_or_create_id(table_name, column_name, value):
 
 
 def get_reference_id(table_name, column_name, value):
-    # Простая реализация
-    select_query = f"SELECT id FROM {table_name} WHERE {column_name} = %s"
+    """
+    Получает ID записи из справочной таблицы (только существующая запись)
+    
+    Args:
+        table_name: Имя таблицы (валидируется против whitelist)
+        column_name: Имя столбца (валидируется против whitelist)
+        value: Значение для поиска
+        
+    Returns:
+        int: ID записи
+        
+    Raises:
+        ValueError: Если запись не найдена
+    """
+    # Валидация имен таблицы и столбца
+    table_name_clean = validate_table_name(table_name)
+    column_name_clean = validate_column_name(column_name)
+    
+    select_query = f"SELECT id FROM {table_name_clean} WHERE {column_name_clean} = %s"
     existing = execute_query(select_query, (value,), fetch=True)
     if existing:
         return existing[0][0]
     else:
-        raise ValueError(f"Справочная запись не найдена: {table_name}.{column_name} = {value}")
+        raise ValueError(f"Справочная запись не найдена: {table_name_clean}.{column_name_clean} = {value}")
 
 
 def log_user_action(action_type, user_id=None, table_name=None, record_id=None, details=None, file_name=None, target_table=None):
@@ -517,6 +546,75 @@ def sanitize_text(text, max_length=None):
 
 # --- КОНЕЦ ФУНКЦИЙ ВАЛИДАЦИИ ---
 
+# --- ВАЛИДАЦИЯ ИМЕН ТАБЛИЦ И СТОЛБЦОВ ---
+
+# Whitelist разрешенных таблиц для защиты от SQL injection через динамические имена таблиц
+ALLOWED_TABLES = {
+    'users', 'invoice', 'invoice_p', 'invoice_f',
+    'consumption', 'consumption_p', 'consumption_f',
+    'cart', 'pr', 'tech', 'lot', 'wafer', 'quad', 'in_lot', 'n_chip',
+    'stor', 'cells', 'start_p', 'chip', 'pack', 'status', 'size_c',
+    'audit_log', 'user_logs'
+}
+
+# Whitelist разрешенных столбцов для защиты от SQL injection через динамические имена столбцов
+ALLOWED_COLUMNS = {
+    'username', 'email', 'name_pr', 'name_tech', 'name_lot', 
+    'name_wafer', 'name_quad', 'in_lot', 'n_chip', 'name_stor', 
+    'name_cells', 'name_start', 'name_chip', 'name_pack', 'size'
+}
+
+def validate_table_name(table_name):
+    """
+    Валидация имени таблицы против whitelist
+    
+    Args:
+        table_name: Имя таблицы для проверки
+        
+    Returns:
+        str: Валидное имя таблицы
+        
+    Raises:
+        ValueError: Если имя таблицы не в whitelist
+    """
+    if not table_name or not isinstance(table_name, str):
+        raise ValueError(f"Имя таблицы должно быть непустой строкой")
+    
+    # Убираем схему, если она указана (например, 'public.users' -> 'users')
+    table_name_clean = table_name.split('.')[-1].strip()
+    
+    if table_name_clean not in ALLOWED_TABLES:
+        _flask_app.logger.error(f"Попытка использования недопустимой таблицы: {table_name_clean}")
+        raise ValueError(f"Недопустимое имя таблицы: {table_name_clean}")
+    
+    return table_name_clean
+
+def validate_column_name(column_name):
+    """
+    Валидация имени столбца против whitelist
+    
+    Args:
+        column_name: Имя столбца для проверки
+        
+    Returns:
+        str: Валидное имя столбца
+        
+    Raises:
+        ValueError: Если имя столбца не в whitelist
+    """
+    if not column_name or not isinstance(column_name, str):
+        raise ValueError(f"Имя столбца должно быть непустой строкой")
+    
+    column_name_clean = column_name.strip()
+    
+    if column_name_clean not in ALLOWED_COLUMNS:
+        _flask_app.logger.error(f"Попытка использования недопустимого столбца: {column_name_clean}")
+        raise ValueError(f"Недопустимое имя столбца: {column_name_clean}")
+    
+    return column_name_clean
+
+# --- КОНЕЦ ВАЛИДАЦИИ ИМЕН ТАБЛИЦ И СТОЛБЦОВ ---
+
 # --- КОНЕЦ ОПРЕДЕЛЕНИЙ ВСПОМОГАТЕЛЬНЫХ ФУНКЦИЙ ---
 
 # Функции для работы с разными складами
@@ -617,19 +715,23 @@ def inflow():
         
         # Вспомогательная функция для get_or_create_id с использованием существующего cursor
         def get_or_create_id_with_cursor(table_name, column_name, value):
-            select_query = f"SELECT id FROM {table_name} WHERE {column_name} = %s"
+            # Валидация имен таблицы и столбца
+            table_name_clean = validate_table_name(table_name)
+            column_name_clean = validate_column_name(column_name)
+            
+            select_query = f"SELECT id FROM {table_name_clean} WHERE {column_name_clean} = %s"
             cur.execute(select_query, (value,))
             existing = cur.fetchone()
             if existing:
                 return existing[0]
             else:
-                insert_query = f"INSERT INTO {table_name} ({column_name}) VALUES (%s) RETURNING id"
+                insert_query = f"INSERT INTO {table_name_clean} ({column_name_clean}) VALUES (%s) RETURNING id"
                 cur.execute(insert_query, (value,))
                 new_id_result = cur.fetchone()
                 if new_id_result:
                     return new_id_result[0]
                 else:
-                    raise Exception(f"Не удалось создать или получить ID для {table_name}.{column_name} = {value}")
+                    raise Exception(f"Не удалось создать или получить ID для {table_name_clean}.{column_name_clean} = {value}")
 
         all_data_to_insert = []
         status_приход = 1
@@ -685,7 +787,7 @@ def inflow():
         # Добавлены поля: date_time_entry, user_entry_id, file_name_entry
         # Для date_time_entry используется функция SQL NOW()
         # Используем динамическое название таблицы в зависимости от склада
-        invoice_table = tables['invoice']
+        invoice_table = validate_table_name(tables['invoice'])
         insert_query = f"""
             INSERT INTO {invoice_table} (
                 id_start, id_tech, id_chip, id_lot, id_wafer, id_quad, id_in_lot, date, quan_w, 
@@ -812,13 +914,18 @@ def outflow():
         def get_reference_id_with_cursor(table_name, column_name, value):
             if not value or (isinstance(value, str) and not value.strip()):
                 return None
-            select_query = f"SELECT id FROM {table_name} WHERE {column_name} = %s"
+            
+            # Валидация имен таблицы и столбца
+            table_name_clean = validate_table_name(table_name)
+            column_name_clean = validate_column_name(column_name)
+            
+            select_query = f"SELECT id FROM {table_name_clean} WHERE {column_name_clean} = %s"
             cur.execute(select_query, (value,))
             existing = cur.fetchone()
             if existing:
                 return existing[0]
             else:
-                raise Exception(f"Не найдена запись в {table_name} с {column_name} = {value}")
+                raise Exception(f"Не найдена запись в {table_name_clean} с {column_name_clean} = {value}")
 
         all_data_to_insert = []
         status_расход = 2
@@ -899,7 +1006,7 @@ def outflow():
             return jsonify({"success": False, "message": "Нет корректных данных для импорта в файле."}), 400
 
         # SQL запрос согласно требованиям
-        consumption_table = tables['consumption']
+        consumption_table = validate_table_name(tables['consumption'])
         query_consumption = f"""
             INSERT INTO {consumption_table} (
                 id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
@@ -1055,7 +1162,7 @@ def refund():
             return jsonify({"success": False, "message": "Нет корректных данных для импорта в файле возврата."}), 400
 
         # --- ИЗМЕНЕНИЕ ЗДЕСЬ: в SQL запросе id_cells и динамическое название таблицы ---
-        invoice_table = tables['invoice']
+        invoice_table = validate_table_name(tables['invoice'])
         query_refund_insert = f"""
             INSERT INTO {invoice_table} (
                 id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
@@ -1109,8 +1216,8 @@ def search():
     warehouse_type = get_warehouse_type_from_request()
     session['warehouse_type'] = warehouse_type  # Сохраняем в сессию для использования в add_to_cart
     tables = get_warehouse_tables(warehouse_type)
-    invoice_table = tables['invoice']
-    consumption_table = tables['consumption']
+    invoice_table = validate_table_name(tables['invoice'])
+    consumption_table = validate_table_name(tables['consumption'])
     
     manufacturers = []
     lots = []
@@ -1343,7 +1450,7 @@ def get_lots():
     manufacturer = request.args.get('manufacturer', 'all')
     
     tables = get_warehouse_tables(warehouse_type)
-    invoice_table = tables['invoice']
+    invoice_table = validate_table_name(tables['invoice'])
     
     try:
         if manufacturer and manufacturer != 'all':
@@ -1384,8 +1491,8 @@ def add_to_cart():
     # Получаем тип склада из сессии или запроса
     warehouse_type = session.get('warehouse_type', 'crystals')
     tables = get_warehouse_tables(warehouse_type)
-    invoice_table = tables['invoice']
-    consumption_table = tables['consumption']
+    invoice_table = validate_table_name(tables['invoice'])
+    consumption_table = validate_table_name(tables['consumption'])
 
     try:
         date_added = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2625,8 +2732,8 @@ def inventory():
     # Получаем тип склада из запроса или сессии
     warehouse_type = get_warehouse_type_from_request()
     tables = get_warehouse_tables(warehouse_type)
-    invoice_table = tables['invoice']
-    consumption_table = tables['consumption']
+    invoice_table = validate_table_name(tables['invoice'])
+    consumption_table = validate_table_name(tables['consumption'])
     
     # --- НАЧАЛО ДИАГНОСТИЧЕСКОГО ЛОГИРОВАНИЯ ---
     _flask_app.logger.info(f"--- Entering /inventory route (warehouse: {warehouse_type}) ---")
