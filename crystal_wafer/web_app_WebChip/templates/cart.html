@@ -682,39 +682,39 @@
 			// Клавиатурные сокращения
 			document.addEventListener('keydown', function(e) {
 				// Ctrl+S или Cmd+S - сохранить изменения в корзине (если есть несохраненные)
-			if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-				e.preventDefault();
-				// Не сохраняем, если пользователь вводит текст в поле
-				if (document.activeElement.tagName !== 'INPUT' && 
-					document.activeElement.tagName !== 'TEXTAREA') {
-					// Находим первую кнопку "Сохранить" и нажимаем на неё
-					const firstSaveButton = document.querySelector('.save-item');
-					if (firstSaveButton && !firstSaveButton.disabled) {
-						firstSaveButton.click();
+				if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+					e.preventDefault();
+					// Не сохраняем, если пользователь вводит текст в поле
+					if (document.activeElement.tagName !== 'INPUT' && 
+						document.activeElement.tagName !== 'TEXTAREA') {
+						// Находим первую кнопку "Сохранить" и нажимаем на неё
+						const firstSaveButton = document.querySelector('.save-item');
+						if (firstSaveButton && !firstSaveButton.disabled) {
+							firstSaveButton.click();
+						}
 					}
 				}
-			}
-			
-			// Esc - закрыть flash-сообщения и toast-уведомления
-			if (e.key === 'Escape') {
-				const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
-				flashMessages.forEach(msg => msg.remove());
 				
-				const toasts = document.querySelectorAll('.toast');
-				toasts.forEach(toast => {
-					toast.style.opacity = '0';
-					setTimeout(() => toast.remove(), 300);
-				});
-			}
-			
-			// Enter в полях количества - сохранить
-			if (e.key === 'Enter' && (e.target.classList.contains('quantity-input-w') || e.target.classList.contains('quantity-input-gp'))) {
-				e.preventDefault();
-				const saveButton = e.target.closest('tr').querySelector('.save-item');
-				if (saveButton && !saveButton.disabled) {
-					saveButton.click();
+				// Esc - закрыть flash-сообщения и toast-уведомления
+				if (e.key === 'Escape') {
+					const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+					flashMessages.forEach(msg => msg.remove());
+					
+					const toasts = document.querySelectorAll('.toast');
+					toasts.forEach(toast => {
+						toast.style.opacity = '0';
+						setTimeout(() => toast.remove(), 300);
+					});
 				}
-			}
+				
+				// Enter в полях количества - сохранить
+				if (e.key === 'Enter' && (e.target.classList.contains('quantity-input-w') || e.target.classList.contains('quantity-input-gp'))) {
+					e.preventDefault();
+					const saveButton = e.target.closest('tr').querySelector('.save-item');
+					if (saveButton && !saveButton.disabled) {
+						saveButton.click();
+					}
+				}
 			});
 			
 			// Очистка корзины с подтверждением
