@@ -1445,7 +1445,7 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-            filter_conditions.append("nc.n_chip ILIKE %s")
+        filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
