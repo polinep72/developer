@@ -1848,12 +1848,12 @@ def remove_from_cart():
         user_id = get_temp_user_id(session)
         warehouse_type = session.get('warehouse_type', 'crystals')
         _flask_app.logger.info(f"REMOVE_FROM_CART: user_id={user_id}, warehouse_type={warehouse_type}")
-    data = request.get_json()
+        data = request.get_json()
         _flask_app.logger.info(f"REMOVE_FROM_CART: data={data}")
-    item_id = data.get('item_id')  # ID товара (row[0] из search.html)
+        item_id = data.get('item_id')  # ID товара (row[0] из search.html)
 
-    if not item_id:
-        return jsonify({'success': False, 'message': 'Неверный ID товара'}), 400
+        if not item_id:
+            return jsonify({'success': False, 'message': 'Неверный ID товара'}), 400
 
         query_delete_cart = "DELETE FROM cart WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
         rows_deleted = execute_query(query_delete_cart, (item_id, user_id, warehouse_type), fetch=False)
