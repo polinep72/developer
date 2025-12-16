@@ -453,7 +453,7 @@ def log_user_action(action_type, user_id=None, table_name=None, record_id=None, 
         execute_query(query, (user_id, action_type, table_name, record_id, details_str, ip_address, user_agent), fetch=False)
         
         # Также логируем в консоль для отладки
-    _flask_app.logger.info(
+        _flask_app.logger.info(
             f"AUDIT LOG: UserID={user_id}, Action={action_type}, Table={table_name}, "
             f"RecordID={record_id}, IP={ip_address}"
         )
