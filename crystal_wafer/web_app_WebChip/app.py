@@ -1493,6 +1493,47 @@ def search():
                            )
 
 
+@_flask_app.route('/api/get_chip_codes', methods=['GET'])
+def get_chip_codes():
+    """
+    API endpoint для получения списка уникальных шифров кристаллов для автодополнения.
+    Поддерживает фильтрацию по первым символам (query параметр 'q').
+    """
+    try:
+        query = request.args.get('q', '').strip()
+        
+        # Базовый запрос для получения уникальных шифров кристаллов
+        if query:
+            # Если есть query, фильтруем по началу строки
+            sql_query = """
+                SELECT DISTINCT n_chip 
+                FROM n_chip 
+                WHERE n_chip ILIKE %s
+                ORDER BY n_chip
+                LIMIT 50
+            """
+            params = (f"{query}%",)
+        else:
+            # Если query нет, возвращаем первые 100 самых популярных
+            sql_query = """
+                SELECT DISTINCT nc.n_chip 
+                FROM n_chip nc
+                INNER JOIN invoice i ON i.id_n_chip = nc.id
+                GROUP BY nc.n_chip
+                ORDER BY COUNT(*) DESC, nc.n_chip
+                LIMIT 100
+            """
+            params = ()
+        
+        results = execute_query(sql_query, params)
+        chip_codes = [row[0] for row in results if row[0]]
+        
+        return jsonify({'success': True, 'chip_codes': chip_codes})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка получения списка шифров кристаллов: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @_flask_app.route('/api/get_lots', methods=['GET'])
 def get_lots():
     """API endpoint для получения списка партий по выбранному производителю"""

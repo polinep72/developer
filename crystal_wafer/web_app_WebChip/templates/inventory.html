@@ -258,7 +258,11 @@
             </div>
             <div class="form-group">
                 <label for="lot_id">Партия (Lot ID):</label>
-                <select name="lot_id" id="lot_id">
+                <select 
+                    name="lot_id" 
+                    id="lot_id"
+                    title="Выберите партию для фильтрации инвентаризации"
+                >
                     <option value="">Все партии</option>
                     {% for lot in lots %}
                     <option value="{{ lot }}" {{ 'selected' if lot == selected_lot_id }}>{{ lot }}</option>
@@ -267,7 +271,19 @@
             </div>
             <div class="form-group">
                 <label for="chip_code_filter">Шифр Кристалла:</label>
-                <input type="text" name="chip_code_filter" id="chip_code_filter" value="{{ selected_chip_code_filter or '' }}" placeholder="Часть шифра или пусто">
+                <input 
+                    type="text" 
+                    name="chip_code_filter" 
+                    id="chip_code_filter" 
+                    value="{{ selected_chip_code_filter or '' }}" 
+                    placeholder="Часть шифра или пусто"
+                    title="Введите шифр кристалла для фильтрации. Можно использовать частичное совпадение. Начните вводить - появятся подсказки."
+                    list="chip-codes-inventory"
+                    autocomplete="off"
+                >
+                <datalist id="chip-codes-inventory">
+                    <!-- Заполняется через JavaScript -->
+                </datalist>
             </div>
             
             <!-- Кнопки формы -->
@@ -347,5 +363,56 @@
             {% endif %}
         {% endif %}
     </div>
+    
+    <script>
+        // Загрузка списка шифров кристаллов для автодополнения
+        document.addEventListener('DOMContentLoaded', function() {
+            const chipCodeFilterInput = document.getElementById('chip_code_filter');
+            const chipCodesDatalist = document.getElementById('chip-codes-inventory');
+            let loadTimeout;
+            
+            if (!chipCodeFilterInput || !chipCodesDatalist) {
+                return; // Элементы не найдены
+            }
+            
+            // Функция загрузки списка шифров
+            function loadChipCodes(query = '') {
+                fetch(`/api/get_chip_codes?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.chip_codes) {
+                            // Очищаем текущий список
+                            chipCodesDatalist.innerHTML = '';
+                            
+                            // Добавляем новые опции
+                            data.chip_codes.forEach(chipCode => {
+                                const option = document.createElement('option');
+                                option.value = chipCode;
+                                chipCodesDatalist.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки списка шифров кристаллов:', error);
+                    });
+            }
+            
+            // Загружаем начальный список при загрузке страницы
+            loadChipCodes();
+            
+            // Загружаем обновленный список при вводе (с задержкой для снижения нагрузки)
+            chipCodeFilterInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                // Очищаем предыдущий таймаут
+                clearTimeout(loadTimeout);
+                
+                // Загружаем новый список через 300ms после окончания ввода
+                loadTimeout = setTimeout(() => {
+                    loadChipCodes(query);
+                }, 300);
+            });
+        });
+    </script>
 </body>
 </html>
