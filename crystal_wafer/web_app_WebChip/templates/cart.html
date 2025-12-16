@@ -539,16 +539,16 @@
 		document.addEventListener('DOMContentLoaded', function() {
 			// Сохранение изменений количества
 			document.querySelectorAll('.save-item').forEach(button => {
-			button.addEventListener('click', function () {
-				const originalButton = this;
-				const row = this.closest('tr');
-				const itemId = row.dataset.id;
-				const consW = row.querySelector('.quantity-input-w').value;
-				const consGP = row.querySelector('.quantity-input-gp').value;
+				button.addEventListener('click', function () {
+					const originalButton = this;
+					const row = this.closest('tr');
+					const itemId = row.dataset.id;
+					const consW = row.querySelector('.quantity-input-w').value;
+					const consGP = row.querySelector('.quantity-input-gp').value;
 
-				setButtonLoading(originalButton, true);
+					setButtonLoading(originalButton, true);
 
-			const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+					const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 			fetch('/update_cart_item', {
 				method: 'POST',
 				headers: {
@@ -574,13 +574,13 @@
 					setButtonLoading(originalButton, false);
 					console.error('Ошибка:', error);
 					showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
+					});
 				});
-			});
 			});
 
 			// Удаление элемента из корзины
 			document.querySelectorAll('.remove-item').forEach(button => {
-			button.addEventListener('click', function () {
+				button.addEventListener('click', function () {
 				const originalButton = this;
 				const itemId = this.dataset.id;
 				
@@ -619,7 +619,7 @@
 						console.error('Ошибка:', error);
 						showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
 					});
-			});
+				});
 			});
 
 			// Экспорт корзины
