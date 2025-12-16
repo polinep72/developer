@@ -616,6 +616,18 @@
                 });
             }
         });
+        
+        // Автоматическое скрытие flash-сообщений через 5 секунд
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message-container');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.transition = 'opacity 0.3s';
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 300);
+                }, 5000);
+            });
+        });
     </script>
 </body>
 </html>
