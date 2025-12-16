@@ -23,7 +23,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.10"
+__version__ = "1.4.11"
 
 # Импортируем WSGIMiddleware
 try:
