@@ -282,6 +282,30 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        /* Индикаторы загрузки */
+        .button-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .button-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -369,13 +393,32 @@
         {% endif %}
     </div>
     <script>
+		// Универсальная функция для показа индикатора загрузки на кнопке
+		function setButtonLoading(button, loading) {
+			if (loading) {
+				button.classList.add('button-loading');
+				button.disabled = true;
+				button.dataset.originalText = button.textContent;
+				button.textContent = 'Загрузка...';
+			} else {
+				button.classList.remove('button-loading');
+				button.disabled = false;
+				if (button.dataset.originalText) {
+					button.textContent = button.dataset.originalText;
+				}
+			}
+		}
+		
 		// Сохранение изменений количества
 		document.querySelectorAll('.save-item').forEach(button => {
 			button.addEventListener('click', function () {
+				const originalButton = this;
 				const row = this.closest('tr');
 				const itemId = row.dataset.id;
 				const consW = row.querySelector('.quantity-input-w').value;
 				const consGP = row.querySelector('.quantity-input-gp').value;
+
+				setButtonLoading(originalButton, true);
 
 			const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 			fetch('/update_cart_item', {
@@ -392,6 +435,7 @@
 				})
 				.then(response => response.json())
 				.then(data => {
+					setButtonLoading(originalButton, false);
 					if (data.success) {
 						showToast('Количество обновлено', 'success');
 					} else {
@@ -399,6 +443,7 @@
 					}
 				})
 				.catch(error => {
+					setButtonLoading(originalButton, false);
 					console.error('Ошибка:', error);
 					showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
 				});
@@ -408,11 +453,14 @@
 		// Удаление элемента из корзины
 		document.querySelectorAll('.remove-item').forEach(button => {
 			button.addEventListener('click', function () {
+				const originalButton = this;
 				const itemId = this.dataset.id;
 				
 				if (!confirm('Вы уверены, что хотите удалить этот элемент из корзины?')) {
 					return;
 				}
+
+				setButtonLoading(originalButton, true);
 
 			const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 			fetch('/remove_from_cart', {
@@ -427,9 +475,10 @@
 				})
 				.then(response => response.json())
 				.then(data => {
+					setButtonLoading(originalButton, false);
 					if (data.success) {
 						// Удаляем строку из таблицы
-						const row = this.closest('tr');
+						const row = originalButton.closest('tr');
 						row.remove();
 						// Проверяем, остались ли еще элементы в корзине
 						const remainingRows = document.querySelectorAll('tbody tr');
@@ -441,6 +490,7 @@
 					}
 				})
 				.catch(error => {
+					setButtonLoading(originalButton, false);
 					console.error('Ошибка:', error);
 					showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
 				});
@@ -493,13 +543,15 @@
 				a.remove(); // Удаляем ссылку из DOM
 			})
 			.catch(error => {
+				setButtonLoading(exportButton, false);
 				console.error('Ошибка экспорта:', error);
 				showToast('Не удалось экспортировать корзину: ' + (error.message || 'Неизвестная ошибка'), 'error');
 			})
 			.finally(() => {
-				// Возвращаем кнопке исходное состояние
-				exportButton.textContent = originalText;
-				exportButton.disabled = false;
+				// Скрываем индикатор загрузки после скачивания файла
+				setTimeout(() => {
+					setButtonLoading(exportButton, false);
+				}, 500);
 			});
 		}
 	</script>

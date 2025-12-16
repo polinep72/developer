@@ -259,6 +259,74 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        /* Универсальные индикаторы загрузки */
+        .loader-wrapper {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loader-wrapper.active {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007CBB;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-text {
+            color: #007CBB;
+            font-size: 14px;
+        }
+        .button-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .button-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        .progress-bar-container {
+            display: none;
+            width: 100%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar-container.active {
+            display: block;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #007CBB;
+            width: 0%;
+            transition: width 0.3s ease;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -459,6 +527,22 @@
 			}
 		});
 		
+		// Универсальная функция для показа индикатора загрузки на кнопке
+		function setButtonLoading(button, loading) {
+			if (loading) {
+				button.classList.add('button-loading');
+				button.disabled = true;
+				button.dataset.originalText = button.textContent;
+				button.textContent = 'Загрузка...';
+			} else {
+				button.classList.remove('button-loading');
+				button.disabled = false;
+				if (button.dataset.originalText) {
+					button.textContent = button.dataset.originalText;
+				}
+			}
+		}
+		
 		// Остальные скрипты
 		document.addEventListener('DOMContentLoaded', function () {
 			const buttons = document.querySelectorAll('.add-to-cart');
@@ -519,6 +603,9 @@
 
 				console.log(payload); // Для проверки корректности отправляемых данных
 
+				// Показываем индикатор загрузки на кнопке
+				setButtonLoading(originalButton, true);
+				
 				// Отправка запроса на сервер
 				const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 				fetch('/add_to_cart', {
@@ -531,6 +618,7 @@
 				})
 				.then(response => response.json())
 				.then(data => {
+					setButtonLoading(originalButton, false);
 					if (data.success) {
 						showToast(data.message || 'Товар успешно добавлен в корзину', 'success');
 					} else {
@@ -538,6 +626,7 @@
 					}
 				})
 				.catch(error => {
+					setButtonLoading(originalButton, false);
 					console.error('Ошибка:', error);
 					showToast('Не удалось добавить товар в корзину. Проверьте подключение к интернету.', 'error');
 				});
@@ -587,11 +676,13 @@
 						lotFilter.appendChild(option);
 					}
 					lotFilter.disabled = false;
+					manufacturerSelect.disabled = false;
 				})
 				.catch(error => {
 					console.error('Ошибка загрузки партий:', error);
 					lotFilter.innerHTML = '<option value="all">Ошибка загрузки</option>';
 					lotFilter.disabled = false;
+					manufacturerSelect.disabled = false;
 					showToast('Не удалось загрузить список партий. Проверьте подключение к интернету.', 'error');
 				});
 		});
