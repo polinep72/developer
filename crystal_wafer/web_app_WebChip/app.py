@@ -1429,12 +1429,12 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-        params_search = []
-        filter_conditions = []
+    params_search = []
+    filter_conditions = []
     
-        # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
-        if warehouse_type in ('plates', 'far'):
-            filter_conditions.append(
+    # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
+    if warehouse_type in ('plates', 'far'):
+        filter_conditions.append(
             "NOT ((COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) = 0 "
             "AND (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) = 0)"
         )
@@ -1445,22 +1445,22 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-            filter_conditions.append("nc.n_chip ILIKE %s")
+        filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-        if manufacturer_filter_form and manufacturer_filter_form != "all":
-            filter_conditions.append("p.name_pr = %s")
-            params_search.append(manufacturer_filter_form)
+    if manufacturer_filter_form and manufacturer_filter_form != "all":
+        filter_conditions.append("p.name_pr = %s")
+        params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-        if filter_conditions:
-            query_search += " AND " + " AND ".join(filter_conditions)
+    if filter_conditions:
+        query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
 
