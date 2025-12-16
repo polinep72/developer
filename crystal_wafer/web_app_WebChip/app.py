@@ -1429,8 +1429,8 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-        params_search = []
-        filter_conditions = []
+    params_search = []
+    filter_conditions = []
     
     # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
     if warehouse_type in ('plates', 'far'):
@@ -1450,9 +1450,9 @@ def search():
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-        if manufacturer_filter_form and manufacturer_filter_form != "all":
-            filter_conditions.append("p.name_pr = %s")
-            params_search.append(manufacturer_filter_form)
+    if manufacturer_filter_form and manufacturer_filter_form != "all":
+        filter_conditions.append("p.name_pr = %s")
+        params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
