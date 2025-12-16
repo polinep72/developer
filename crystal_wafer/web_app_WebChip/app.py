@@ -1151,7 +1151,7 @@ def refund():
         df['Возврат Wafer, шт.'] = pd.to_numeric(df['Возврат Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Возврат GelPack, шт.' опциональна
         if 'Возврат GelPack, шт.' in df.columns:
-        df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+            df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Возврат GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
