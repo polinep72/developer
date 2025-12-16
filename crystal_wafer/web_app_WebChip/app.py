@@ -942,7 +942,7 @@ def outflow():
         df['Расход Wafer, шт.'] = pd.to_numeric(df['Расход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Расход GelPack, шт.' опциональна
         if 'Расход GelPack, шт.' in df.columns:
-        df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+            df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Расход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
