@@ -735,7 +735,7 @@ def inflow():
         df['Приход Wafer, шт.'] = pd.to_numeric(df['Приход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Приход GelPack, шт.' опциональна
         if 'Приход GelPack, шт.' in df.columns:
-            df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Приход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -835,9 +835,9 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-            # Вместо execute_values используем цикл
-            for record in all_data_to_insert:
-                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+                # Вместо execute_values используем цикл
+                for record in all_data_to_insert:
+                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
@@ -942,7 +942,7 @@ def outflow():
         df['Расход Wafer, шт.'] = pd.to_numeric(df['Расход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Расход GelPack, шт.' опциональна
         if 'Расход GelPack, шт.' in df.columns:
-            df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Расход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1151,7 +1151,7 @@ def refund():
         df['Возврат Wafer, шт.'] = pd.to_numeric(df['Возврат Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Возврат GelPack, шт.' опциональна
         if 'Возврат GelPack, шт.' in df.columns:
-            df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Возврат GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1429,8 +1429,8 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-    params_search = []
-    filter_conditions = []
+        params_search = []
+        filter_conditions = []
     
     # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
     if warehouse_type in ('plates', 'far'):
@@ -1445,22 +1445,22 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-        filter_conditions.append("nc.n_chip ILIKE %s")
+            filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-    if manufacturer_filter_form and manufacturer_filter_form != "all":
-        filter_conditions.append("p.name_pr = %s")
-        params_search.append(manufacturer_filter_form)
+        if manufacturer_filter_form and manufacturer_filter_form != "all":
+            filter_conditions.append("p.name_pr = %s")
+            params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-    if filter_conditions:
-        query_search += " AND " + " AND ".join(filter_conditions)
+        if filter_conditions:
+            query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
 
@@ -1763,17 +1763,17 @@ def add_to_cart():
         
         else:
             # Обычная логика для склада кристаллов
-            if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
-                return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
+    if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
+        return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
-            id_chip_val = None
-            id_pack_val = None
-            if item_id:
+        id_chip_val = None
+        id_pack_val = None
+        if item_id:
                 invoice_data = execute_query(f"SELECT id_chip, id_pack FROM {invoice_table} WHERE item_id = %s LIMIT 1", (item_id,), fetch=True)
-                if invoice_data:
-                    id_chip_val = invoice_data[0][0]
-                    id_pack_val = invoice_data[0][1]
+            if invoice_data:
+                id_chip_val = invoice_data[0][0]
+                id_pack_val = invoice_data[0][1]
 
         # Обновляем запрос на вставку в корзину
         query_insert_cart = """
@@ -2204,30 +2204,30 @@ def login():
             # Если пароль верный и пользователь не заблокирован - успешный вход
             if user_found and password_valid and not is_blocked:
                 user_data = user_data_list[0]
-                session['user_id'] = user_data[0]  # id
-                session['username'] = user_data[1]  # username
+                    session['user_id'] = user_data[0]  # id
+                    session['username'] = user_data[1]  # username
                 session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
                 _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}, is_admin={session.get('is_admin')}")
                 
                 # Логируем успешный вход
                 log_user_action('login', user_id=user_data[0], details={'username': username})
                 
-                flash(f"Добро пожаловать, {session['username']}!", "success")
+                    flash(f"Добро пожаловать, {session['username']}!", "success")
 
-                next_url = request.args.get('next')
-                if next_url and next_url.startswith('/'):  # Проверка безопасности next_url
+                    next_url = request.args.get('next')
+                    if next_url and next_url.startswith('/'):  # Проверка безопасности next_url
                     _flask_app.logger.info(f"Редирект на next_url: {next_url}")
-                    return redirect(next_url)
+                        return redirect(next_url)
                 _flask_app.logger.info("Редирект на главную страницу")
-                return redirect(url_for('home'))
-            else:
+                    return redirect(url_for('home'))
+                else:
                 # Защита от перечисления пользователей:
                 # Всегда показываем одинаковое сообщение и добавляем задержку
                 if user_found and is_blocked:
                     _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
                 elif user_found and not password_valid:
                     _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
-                else:
+            else:
                     _flask_app.logger.warning(f"Попытка входа несуществующего пользователя: {username}")
                     
                 # Задержка для замедления брутфорса (500ms)

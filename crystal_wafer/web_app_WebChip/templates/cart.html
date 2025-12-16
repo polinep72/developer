@@ -629,55 +629,55 @@
 				if (!exportButton) return;
 				setButtonLoading(exportButton, true);
 
-			fetch('/export_cart') // Делаем GET запрос на эндпоинт
-			.then(response => {
-				if (response.ok) {
-					// Получаем имя файла из заголовка Content-Disposition
-					const contentDisposition = response.headers.get('Content-Disposition');
-					let filename = "export.xlsx"; // Имя по умолчанию, если заголовок не найден
-					if (contentDisposition) {
-						// Пробуем извлечь имя файла из заголовка
-						const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]*)/);
-						if (filenameMatch && filenameMatch[1]) {
-							// Декодируем имя файла, если оно в кодировке URL
-							filename = decodeURIComponent(filenameMatch[1].replace(/"/g, ''));
+				fetch('/export_cart') // Делаем GET запрос на эндпоинт
+				.then(response => {
+					if (response.ok) {
+						// Получаем имя файла из заголовка Content-Disposition
+						const contentDisposition = response.headers.get('Content-Disposition');
+						let filename = "export.xlsx"; // Имя по умолчанию, если заголовок не найден
+						if (contentDisposition) {
+							// Пробуем извлечь имя файла из заголовка
+							const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]*)/);
+							if (filenameMatch && filenameMatch[1]) {
+								// Декодируем имя файла, если оно в кодировке URL
+								filename = decodeURIComponent(filenameMatch[1].replace(/"/g, ''));
+							}
 						}
+						// Возвращаем и blob, и имя файла для следующего .then()
+						return response.blob().then(blob => ({ blob, filename }));
+					} else {
+						// Если сервер вернул ошибку, пытаемся прочитать текст ошибки
+						return response.text().then(text => {
+							throw new Error(text || 'Ошибка сервера при экспорте корзины.');
+						});
 					}
-					// Возвращаем и blob, и имя файла для следующего .then()
-					return response.blob().then(blob => ({ blob, filename }));
-				} else {
-					// Если сервер вернул ошибку, пытаемся прочитать текст ошибки
-					return response.text().then(text => {
-						throw new Error(text || 'Ошибка сервера при экспорте корзины.');
-					});
-				}
-			})
-			.then(({ blob, filename }) => {
-				// Создаем временную ссылку для скачивания
-				const url = window.URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.style.display = 'none';
-				a.href = url;
-				a.download = filename; // <-- ИСПОЛЬЗУЕМ ИМЯ ФАЙЛА С СЕРВЕРА
-				
-				document.body.appendChild(a);
-				a.click(); // Инициируем скачивание
-				
-				window.URL.revokeObjectURL(url); // Очищаем память
-				a.remove(); // Удаляем ссылку из DOM
-			})
-			.catch(error => {
-				setButtonLoading(exportButton, false);
-				console.error('Ошибка экспорта:', error);
-				showToast('Не удалось экспортировать корзину: ' + (error.message || 'Неизвестная ошибка'), 'error');
-			})
-			.finally(() => {
-				// Скрываем индикатор загрузки после скачивания файла
-				setTimeout(() => {
+				})
+				.then(({ blob, filename }) => {
+					// Создаем временную ссылку для скачивания
+					const url = window.URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					a.style.display = 'none';
+					a.href = url;
+					a.download = filename; // <-- ИСПОЛЬЗУЕМ ИМЯ ФАЙЛА С СЕРВЕРА
+					
+					document.body.appendChild(a);
+					a.click(); // Инициируем скачивание
+					
+					window.URL.revokeObjectURL(url); // Очищаем память
+					a.remove(); // Удаляем ссылку из DOM
+				})
+				.catch(error => {
 					setButtonLoading(exportButton, false);
-				}, 500);
-			});
-		}
+					console.error('Ошибка экспорта:', error);
+					showToast('Не удалось экспортировать корзину: ' + (error.message || 'Неизвестная ошибка'), 'error');
+				})
+				.finally(() => {
+					// Скрываем индикатор загрузки после скачивания файла
+					setTimeout(() => {
+						setButtonLoading(exportButton, false);
+					}, 500);
+				});
+			}
 		
 		// Клавиатурные сокращения
 		document.addEventListener('keydown', function(e) {
