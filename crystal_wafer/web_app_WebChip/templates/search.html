@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="csrf-token" content="{{ csrf_token() }}">
+		<title>ИПК ЭЛЕКТРОН-МАШ</title>
     <style>
         * {
             box-sizing: border-box;
@@ -225,6 +226,7 @@
     <div class="container">
         <h1 style="font-size: 20px;">Поиск кристаллов</h1>
         <form method="POST" action="/search">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<div style="margin-bottom: 20px;">
 				<label for="manufacturer" style="margin-right: 10px;">Выберите производителя:</label>
 				<select id="manufacturer" name="manufacturer" style="width: 300px; padding: 10px; font-size: 16px;">
@@ -405,10 +407,12 @@
 				console.log(payload); // Для проверки корректности отправляемых данных
 
 				// Отправка запроса на сервер
+				const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 				fetch('/add_to_cart', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
+						'X-CSRFToken': csrfToken,
 					},
 					body: JSON.stringify(payload),
 				})

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <title>Личный кабинет</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -241,10 +242,12 @@
                 secret_answer: secret_answer || null
             };
 
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             fetch('/update_profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
                 body: JSON.stringify(data)
             })

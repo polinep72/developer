@@ -6,12 +6,15 @@
 import logging  # <--- ДОБАВИТЬ
 import logging.handlers  # Для SMTPHandler
 import os
+import re
 from datetime import datetime
 from io import BytesIO
 import pandas as pd
 import psycopg2  # Убедитесь, что psycopg2 или psycopg2-binary есть в requirements.txt
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, send_file, jsonify, session, redirect, url_for, make_response, flash
+from werkzeug.utils import escape
+from flask_wtf.csrf import CSRFProtect
 from psycopg2.extras import execute_values
 # from waitress import serve
 from openpyxl.styles import NamedStyle
@@ -159,6 +162,9 @@ if not SECRET_KEY:
     SECRET_KEY = secrets.token_hex(32)
     _flask_app.logger.warning("⚠️ SECRET_KEY не установлен в переменных окружения. Сгенерирован временный ключ. Установите SECRET_KEY в .env файле для production!")
 _flask_app.secret_key = SECRET_KEY
+
+# Инициализация CSRF защиты
+csrf = CSRFProtect(_flask_app)
 
 # Настраиваем логирование Werkzeug, чтобы скрыть предупреждение о development server
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
@@ -318,6 +324,110 @@ def log_user_action(user_id, action_type, file_name=None, target_table=None, det
     #     print(f"Ошибка логирования: {e}")
     pass
 
+
+# --- ФУНКЦИИ ВАЛИДАЦИИ ВХОДНЫХ ДАННЫХ ---
+
+def validate_username(username):
+    """Валидация имени пользователя"""
+    if not username:
+        raise ValueError("Имя пользователя обязательно")
+    
+    username = username.strip()
+    
+    if len(username) < 3:
+        raise ValueError("Имя пользователя должно содержать минимум 3 символа")
+    
+    if len(username) > 50:
+        raise ValueError("Имя пользователя не должно превышать 50 символов")
+    
+    # Разрешаем только буквы (латиница и кириллица), цифры, дефис и подчеркивание
+    if not re.match(r'^[a-zA-Zа-яА-ЯёЁ0-9_-]+$', username):
+        raise ValueError("Имя пользователя может содержать только буквы, цифры, дефис и подчеркивание")
+    
+    # Не преобразуем в lowercase, чтобы сохранить оригинальный регистр (может быть важен)
+    return username
+
+def validate_email(email):
+    """Валидация email адреса (опциональное поле)"""
+    if not email or not email.strip():
+        return None
+    
+    email = email.strip().lower()
+    
+    # Базовый паттерн для email
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_pattern, email):
+        raise ValueError("Некорректный формат email адреса")
+    
+    if len(email) > 255:
+        raise ValueError("Email адрес не должен превышать 255 символов")
+    
+    return email
+
+def validate_password(password, min_length=4):
+    """Валидация пароля"""
+    if not password:
+        raise ValueError("Пароль обязателен")
+    
+    password = password.strip()
+    
+    if len(password) < min_length:
+        raise ValueError(f"Пароль должен содержать минимум {min_length} символов")
+    
+    if len(password) > 128:
+        raise ValueError("Пароль не должен превышать 128 символов")
+    
+    return password
+
+def validate_secret_question(question):
+    """Валидация секретного вопроса"""
+    if not question:
+        raise ValueError("Секретный вопрос обязателен")
+    
+    question = question.strip()
+    
+    if len(question) < 5:
+        raise ValueError("Секретный вопрос должен содержать минимум 5 символов")
+    
+    if len(question) > 255:
+        raise ValueError("Секретный вопрос не должен превышать 255 символов")
+    
+    # Экранируем HTML для защиты от XSS
+    question = escape(question)
+    
+    return question
+
+def validate_secret_answer(answer):
+    """Валидация ответа на секретный вопрос"""
+    if not answer:
+        raise ValueError("Ответ на секретный вопрос обязателен")
+    
+    answer = answer.strip()
+    
+    if len(answer) < 2:
+        raise ValueError("Ответ на секретный вопрос должен содержать минимум 2 символа")
+    
+    if len(answer) > 255:
+        raise ValueError("Ответ на секретный вопрос не должен превышать 255 символов")
+    
+    return answer
+
+def sanitize_text(text, max_length=None):
+    """Санитизация текстового поля (экранирование HTML)"""
+    if not text:
+        return None
+    
+    text = text.strip()
+    
+    if max_length and len(text) > max_length:
+        text = text[:max_length]
+    
+    # Экранируем HTML для защиты от XSS
+    text = escape(text)
+    
+    return text if text else None
+
+# --- КОНЕЦ ФУНКЦИЙ ВАЛИДАЦИИ ---
 
 # --- КОНЕЦ ОПРЕДЕЛЕНИЙ ВСПОМОГАТЕЛЬНЫХ ФУНКЦИЙ ---
 
@@ -505,9 +615,9 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-            # Вместо execute_values используем цикл
-            for record in all_data_to_insert:
-                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+                # Вместо execute_values используем цикл
+                for record in all_data_to_insert:
+                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
@@ -602,7 +712,7 @@ def outflow():
         df['Расход Wafer, шт.'] = pd.to_numeric(df['Расход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Расход GelPack, шт.' опциональна
         if 'Расход GelPack, шт.' in df.columns:
-            df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Расход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -796,7 +906,7 @@ def refund():
         df['Возврат Wafer, шт.'] = pd.to_numeric(df['Возврат Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Возврат GelPack, шт.' опциональна
         if 'Возврат GelPack, шт.' in df.columns:
-            df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Возврат GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1074,8 +1184,8 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-    params_search = []
-    filter_conditions = []
+        params_search = []
+        filter_conditions = []
     
     # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
     if warehouse_type in ('plates', 'far'):
@@ -1090,28 +1200,33 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-        filter_conditions.append("nc.n_chip ILIKE %s")
+            filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-    if manufacturer_filter_form and manufacturer_filter_form != "all":
-        filter_conditions.append("p.name_pr = %s")
-        params_search.append(manufacturer_filter_form)
+        if manufacturer_filter_form and manufacturer_filter_form != "all":
+            filter_conditions.append("p.name_pr = %s")
+            params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-    if filter_conditions:
-        query_search += " AND " + " AND ".join(filter_conditions)
+        if filter_conditions:
+            query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
 
     # Выполняем поиск только если это POST запрос (при нажатии кнопки "Найти")
     if request.method == 'POST':
         try:
+            # Логируем для диагностики
+            _flask_app.logger.info(f"Поиск: chip_name_form='{chip_name_form}', применено фильтров: {len(filter_conditions)}")
+            _flask_app.logger.info(f"SQL запрос (последние 200 символов): {query_search[-200:]}")
+            _flask_app.logger.info(f"Параметры поиска: {params_search}")
+            
             results = execute_query(query_search, tuple(params_search))
             if not results:
                 flash("По вашему запросу ничего не найдено.", "info")
@@ -1362,17 +1477,17 @@ def add_to_cart():
         
         else:
             # Обычная логика для склада кристаллов
-            if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
-                return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
+    if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
+        return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
-            id_chip_val = None
-            id_pack_val = None
-            if item_id:
+        id_chip_val = None
+        id_pack_val = None
+        if item_id:
                 invoice_data = execute_query(f"SELECT id_chip, id_pack FROM {invoice_table} WHERE item_id = %s LIMIT 1", (item_id,), fetch=True)
-                if invoice_data:
-                    id_chip_val = invoice_data[0][0]
-                    id_pack_val = invoice_data[0][1]
+            if invoice_data:
+                id_chip_val = invoice_data[0][0]
+                id_pack_val = invoice_data[0][1]
 
         # Обновляем запрос на вставку в корзину
         query_insert_cart = """
@@ -1607,7 +1722,7 @@ def export_cart():
     FROM cart c
     LEFT JOIN chip ON c.id_chip = chip.id
     LEFT JOIN pack ON c.id_pack = pack.id
-        WHERE c.user_id = %s AND c.warehouse_type = %s
+    WHERE c.user_id = %s AND c.warehouse_type = %s
     ORDER BY c.date_added DESC
     """
     try:
@@ -1680,37 +1795,37 @@ def export_cart():
 @_flask_app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        u_password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        secret_question = request.form.get('secret_question', '').strip()
-        secret_answer = request.form.get('secret_answer', '').strip()
-
-        # Валидация
-        if not username or len(username) < 3:
-            flash("Имя пользователя должно содержать минимум 3 символа.", "danger")
+        try:
+            # Получаем и валидируем данные
+            username_raw = request.form.get('username', '').strip()
+            u_password = request.form.get('password', '').strip()
+            confirm_password = request.form.get('confirm_password', '').strip()
+            secret_question_raw = request.form.get('secret_question', '').strip()
+            secret_answer_raw = request.form.get('secret_answer', '').strip()
+            
+            # Валидация входных данных
+            username = validate_username(username_raw)
+            u_password = validate_password(u_password)
+            secret_question = validate_secret_question(secret_question_raw)
+            secret_answer_raw = validate_secret_answer(secret_answer_raw)
+            
+            # Дополнительные проверки
+            if u_password != confirm_password:
+                flash("Пароли не совпадают.", "danger")
             return render_template('register.html')
 
-        if not u_password or len(u_password) < 4:
-            flash("Пароль должен содержать минимум 4 символа.", "danger")
+            # Хешируем пароль и секретный ответ для безопасности
+            from werkzeug.security import generate_password_hash
+            hashed_password = generate_password_hash(u_password)
+            hashed_secret_answer = generate_password_hash(secret_answer_raw.lower().strip())
+            
+        except ValueError as ve:
+            flash(str(ve), "danger")
             return render_template('register.html')
-        
-        if u_password != confirm_password:
-            flash("Пароли не совпадают.", "danger")
+        except Exception as e:
+            _flask_app.logger.error(f"Ошибка валидации при регистрации: {e}", exc_info=True)
+            flash("Ошибка валидации данных. Проверьте правильность введенных данных.", "danger")
             return render_template('register.html')
-        
-        if not secret_question or len(secret_question) < 5:
-            flash("Секретный вопрос должен содержать минимум 5 символов.", "danger")
-            return render_template('register.html')
-        
-        if not secret_answer or len(secret_answer) < 2:
-            flash("Ответ на секретный вопрос должен содержать минимум 2 символа.", "danger")
-            return render_template('register.html')
-
-        # Хешируем пароль и секретный ответ для безопасности
-        from werkzeug.security import generate_password_hash
-        hashed_password = generate_password_hash(u_password)
-        hashed_secret_answer = generate_password_hash(secret_answer.lower().strip())
 
         try:
             # Проверка, существует ли пользователь
@@ -2033,38 +2148,45 @@ def update_profile():
     user_id = session['user_id']
     data = request.get_json()
     
-    username = data.get('username', '').strip()
-    email = data.get('email', '').strip()
-    password = data.get('password', '').strip()
-    confirm_password = data.get('confirm_password', '').strip()
-    secret_question = data.get('secret_question', '').strip()
-    secret_answer = data.get('secret_answer', '').strip()
-    
-    if not username:
-        return jsonify({"success": False, "message": "Имя пользователя обязательно"}), 400
-    
-    if len(username) < 3:
-        return jsonify({"success": False, "message": "Имя пользователя должно содержать минимум 3 символа"}), 400
-    
-    # Проверка пароля, если указан
-    if password:
-        if len(password) < 4:
-            return jsonify({"success": False, "message": "Пароль должен содержать минимум 4 символа"}), 400
-        if password != confirm_password:
-            return jsonify({"success": False, "message": "Пароли не совпадают"}), 400
-    
-    # Проверка секретного вопроса и ответа
-    if secret_question and not secret_answer:
-        return jsonify({"success": False, "message": "Укажите ответ на секретный вопрос"}), 400
-    
-    if secret_answer and not secret_question:
-        return jsonify({"success": False, "message": "Укажите секретный вопрос"}), 400
-    
-    if secret_question and len(secret_question) < 5:
-        return jsonify({"success": False, "message": "Секретный вопрос должен содержать минимум 5 символов"}), 400
-    
-    if secret_answer and len(secret_answer) < 2:
-        return jsonify({"success": False, "message": "Ответ на секретный вопрос должен содержать минимум 2 символа"}), 400
+    try:
+        # Получаем и валидируем данные
+        username_raw = data.get('username', '').strip()
+        email_raw = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+        confirm_password = data.get('confirm_password', '').strip()
+        secret_question_raw = data.get('secret_question', '').strip()
+        secret_answer_raw = data.get('secret_answer', '').strip()
+        
+        # Валидация username (обязательное поле)
+        username = validate_username(username_raw)
+        
+        # Валидация email (опциональное поле)
+        email = None
+        if email_raw:
+            email = validate_email(email_raw)
+        
+        # Валидация пароля, если указан
+        if password:
+            validate_password(password)
+            if password != confirm_password:
+                return jsonify({"success": False, "message": "Пароли не совпадают"}), 400
+        
+        # Валидация секретного вопроса и ответа (оба должны быть указаны вместе, если меняются)
+        secret_question = None
+        secret_answer_validated = None
+        if secret_question_raw or secret_answer_raw:
+            if not secret_question_raw:
+                return jsonify({"success": False, "message": "Укажите секретный вопрос"}), 400
+            if not secret_answer_raw:
+                return jsonify({"success": False, "message": "Укажите ответ на секретный вопрос"}), 400
+            secret_question = validate_secret_question(secret_question_raw)
+            secret_answer_validated = validate_secret_answer(secret_answer_raw)
+        
+    except ValueError as ve:
+        return jsonify({"success": False, "message": str(ve)}), 400
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка валидации при обновлении профиля: {e}", exc_info=True)
+        return jsonify({"success": False, "message": "Ошибка валидации данных. Проверьте правильность введенных данных."}), 400
     
     try:
         from werkzeug.security import generate_password_hash
@@ -2085,8 +2207,8 @@ def update_profile():
             params.append(hashed_password)
         
         # Обновляем секретный вопрос и ответ только если они указаны
-        if secret_question and secret_answer:
-            hashed_secret_answer = generate_password_hash(secret_answer.lower().strip())
+        if secret_question and secret_answer_validated:
+            hashed_secret_answer = generate_password_hash(secret_answer_validated.lower().strip())
             update_fields.append("secret_question = %s")
             update_fields.append("secret_answer = %s")
             params.append(secret_question)
@@ -2216,16 +2338,26 @@ def update_user():
     
     data = request.get_json()
     user_id = data.get('user_id')
-    username = data.get('username')
-    password = data.get('password')
-    email = data.get('email')
+    username_raw = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    email_raw = data.get('email', '').strip()
     is_admin = data.get('is_admin', False)
     is_blocked = data.get('is_blocked', False)
     
-    if not user_id or not username:
-        return jsonify({"success": False, "message": "Недостаточно данных"}), 400
+    if not user_id:
+        return jsonify({"success": False, "message": "Не указан ID пользователя"}), 400
     
     try:
+        # Валидация входных данных
+        username = validate_username(username_raw)
+        email = None
+        if email_raw:
+            email = validate_email(email_raw)
+        
+        # Валидация пароля, если указан
+        if password:
+            validate_password(password)
+        
         # Проверка, что username уникален (если изменился)
         existing_user = execute_query("SELECT id, username FROM public.users WHERE username = %s AND id != %s", (username, user_id))
         if existing_user:
@@ -2233,13 +2365,13 @@ def update_user():
         
         # Формируем запрос на обновление
         update_fields = ["username = %s", "email = %s", "is_admin = %s", "is_blocked = %s"]
-        params = [username, email if email else None, is_admin, is_blocked]
+        params = [username, email, is_admin, is_blocked]
         
         # Обновляем пароль только если он указан
-        if password and password.strip():
+        if password:
             # Хешируем новый пароль
             from werkzeug.security import generate_password_hash
-            hashed_password = generate_password_hash(password.strip())
+            hashed_password = generate_password_hash(password)
             update_fields.append("password = %s")
             params.append(hashed_password)
         

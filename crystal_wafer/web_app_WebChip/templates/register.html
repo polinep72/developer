@@ -87,6 +87,7 @@
     <div class="register-container">
         <h1>Регистрация</h1>
         <form action="/register" method="post" id="registerForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="text" name="username" placeholder="Введите логин" required minlength="3" maxlength="50">
             
             <input type="password" name="password" placeholder="Введите пароль" required minlength="4" id="password">

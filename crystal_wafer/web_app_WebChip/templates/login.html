@@ -101,6 +101,7 @@
             {% endif %}
         {% endwith %}
         <form action="/login" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="text" name="username" placeholder="Введите логин" required autofocus>
             <input type="password" name="password" placeholder="Введите пароль" required>
             <button type="submit">Войти</button>

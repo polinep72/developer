@@ -304,6 +304,7 @@
             <a href="/search?warehouse={{ warehouse_type|default('crystals') }}" class="button">Назад к поиску</a>
         <button id="export-cart" onclick="exportCart()">Экспортировать корзину в Excel</button>
             <form action="/clear_cart" method="POST" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<button type="submit" class="btn btn-danger">Очистить корзину</button>
 		</form>
         </div>
@@ -321,11 +322,13 @@
 				const consW = row.querySelector('.quantity-input-w').value;
 				const consGP = row.querySelector('.quantity-input-gp').value;
 
-				fetch('/update_cart_item', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
+			const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+			fetch('/update_cart_item', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken,
+				},
 					body: JSON.stringify({
 						id: itemId,
 						cons_w: consW,
@@ -356,11 +359,13 @@
 					return;
 				}
 
-				fetch('/remove_from_cart', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
+			const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+			fetch('/remove_from_cart', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken,
+				},
 					body: JSON.stringify({
 						item_id: itemId
 					}),

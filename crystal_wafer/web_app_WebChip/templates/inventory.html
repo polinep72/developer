@@ -230,6 +230,7 @@
         <h1 style="font-size: 20px;">Инвентаризация Склада Кристаллов</h1>
 
         <form method="POST" action="{{ url_for('inventory') }}" class="inventory-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="form-group">
                 <label for="manufacturer">Производитель:</label>
                 <select name="manufacturer" id="manufacturer">

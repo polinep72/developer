@@ -7,6 +7,7 @@ import pandas as pd
 import psycopg2  # Убедитесь, что psycopg2 или psycopg2-binary есть в requirements.txt
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, send_file, jsonify, session, redirect, url_for, make_response, flash
+from werkzeug.security import check_password_hash, generate_password_hash
 from psycopg2.extras import execute_values
 # from waitress import serve
 from openpyxl.styles import NamedStyle
@@ -41,7 +42,8 @@ def inject_user():
 def get_db_connection():
     conn = psycopg2.connect(
         host=os.getenv('DB_HOST'),
-        database=os.getenv('DB_NAME2'),
+        # Основное имя базы — DB_NAME; DB_NAME2 оставляем как fallback для обратной совместимости
+        database=os.getenv('DB_NAME') or os.getenv('DB_NAME2'),
         user=os.getenv('DB_USER'),
         password=os.getenv('DB_PASSWORD'),
         port=os.getenv('DB_PORT', '5432')  # Используем порт из env или дефолтный
@@ -945,9 +947,8 @@ def register():
             flash("Имя пользователя и пароль не могут быть пустыми.", "danger")
             return render_template('register.html')
 
-        # ВАЖНО: Хешируйте пароли в реальном приложении!
-        # from werkzeug.security import generate_password_hash
-        # hashed_password = generate_password_hash(u_password)
+        # Хешируем пароль перед сохранением в БД
+        hashed_password = generate_password_hash(u_password)
 
         try:
             # Проверка, существует ли пользователь
@@ -956,12 +957,9 @@ def register():
                 flash("Пользователь с таким именем уже существует.", "warning")
                 return render_template('register.html')
 
-            # query_register = "INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id"
-            # params_register = (username, hashed_password) # Используйте hashed_password
-
-            # НЕБЕЗОПАСНО: сохранение пароля как есть
+            # Сохраняем хешированный пароль
             query_register = "INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id"
-            params_register = (username, u_password)
+            params_register = (username, hashed_password)
 
             new_user_id_tuple = execute_query(query_register, params_register, fetch=True)  # fetch=True из-за RETURNING
 
@@ -993,20 +991,15 @@ def login():
             flash("Введите имя пользователя и пароль.", "warning")
             return render_template('login.html')
 
-        # ВАЖНО: Сравнивайте хешированные пароли!
-        # from werkzeug.security import check_password_hash
-        # query_login = "SELECT id, username, password FROM users WHERE username = %s"
-
-        # НЕБЕЗОПАСНО: прямое сравнение паролей
+        # Проверяем хешированные пароли
         query_login = "SELECT id, username, password FROM users WHERE username = %s"
 
         try:
             user_data_list = execute_query(query_login, (username,))  # execute_query возвращает список
             if user_data_list:
                 user_data = user_data_list[0]  # Берем первый элемент списка (кортеж)
-                # user_db_password = user_data[2] # Это пароль из БД (в реальном приложении - хеш)
-                # if check_password_hash(user_db_password, u_password):
-                if user_data[2] == u_password:  # Прямое сравнение (НЕБЕЗОПАСНО)
+                user_db_password_hash = user_data[2]  # Это хеш пароля из БД
+                if check_password_hash(user_db_password_hash, u_password):
                     session['user_id'] = user_data[0]  # id
                     session['username'] = user_data[1]  # username
                     flash(f"Добро пожаловать, {session['username']}!", "success")
