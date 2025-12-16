@@ -561,9 +561,24 @@
 							cons_gp: consGP
 						}),
 					})
-					.then(response => response.json())
+					.then(response => {
+						console.log('Response status:', response.status);
+						console.log('Response headers:', response.headers);
+						if (!response.ok) {
+							throw new Error(`HTTP error! status: ${response.status}`);
+						}
+						const contentType = response.headers.get('content-type');
+						if (!contentType || !contentType.includes('application/json')) {
+							return response.text().then(text => {
+								console.error('Expected JSON but got:', contentType, text);
+								throw new Error('Сервер вернул не JSON ответ');
+							});
+						}
+						return response.json();
+					})
 					.then(data => {
 						setButtonLoading(originalButton, false);
+						console.log('Response data:', data);
 						if (data.success) {
 							showToast('Количество обновлено', 'success');
 						} else {
@@ -573,7 +588,7 @@
 					.catch(error => {
 						setButtonLoading(originalButton, false);
 						console.error('Ошибка:', error);
-						showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
+						showToast('Ошибка сохранения данных: ' + error.message, 'error');
 					});
 				});
 			});
