@@ -2220,10 +2220,10 @@ def login():
                     return redirect(next_url)
                 _flask_app.logger.info("Редирект на главную страницу")
                 return redirect(url_for('home'))
-                else:
-                # Защита от перечисления пользователей:
-                # Всегда показываем одинаковое сообщение и добавляем задержку
-                if user_found and is_blocked:
+            
+            # Защита от перечисления пользователей:
+            # Всегда показываем одинаковое сообщение и добавляем задержку
+            if user_found and is_blocked:
                     _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
                 elif user_found and not password_valid:
                     _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
