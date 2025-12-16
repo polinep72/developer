@@ -1459,8 +1459,8 @@ def search():
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-        if filter_conditions:
-            query_search += " AND " + " AND ".join(filter_conditions)
+    if filter_conditions:
+        query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
 
