@@ -62,8 +62,24 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+        .main-menu-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .main-menu-button:hover {
+            background-color: #006AA3;
+        }
+
         .logout-button {
-            background-color: #dc3545;
+            background-color: #007CBB;
             color: white;
             padding: 8px 16px;
             border: none;
@@ -71,7 +87,7 @@
             cursor: pointer;
         }
         .logout-button:hover {
-            background-color: #c82333;
+            background-color: #006AA3;
         }
         .container {
             max-width: 800px;
@@ -162,7 +178,7 @@
         <div class="logo" onclick="window.location.href='/'">
             <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
         </div>
-        <a href="/" class="btn btn-secondary">Главное меню</a>
+        <a href="/" class="main-menu-button">Главное меню</a>
         <div class="user-menu">
             <span class="user-info">{{ session.get('username') }}</span>
             <button onclick="location.href='/logout'" class="logout-button">Выйти</button>

@@ -83,6 +83,22 @@
             background-color: #006AA3;
         }
 
+        .main-menu-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .main-menu-button:hover {
+            background-color: #006AA3;
+        }
+
         .container {
             margin: 10px;
             width: 100%;
@@ -212,7 +228,7 @@
         <div class="logo" onclick="window.location.href='/'">
             <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
         </div>
-		<a href="/" class="btn btn-secondary">Главное меню</a>
+		<a href="/" class="main-menu-button">Главное меню</a>
         <div class="user-menu">
             {% if session.get('username') %}
                 <a href="/profile" class="user-info">{{ session['username'] }}</a>
