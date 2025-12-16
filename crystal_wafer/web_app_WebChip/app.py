@@ -1763,7 +1763,7 @@ def add_to_cart():
         
         else:
             # Обычная логика для склада кристаллов
-    if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
+            if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
         return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
