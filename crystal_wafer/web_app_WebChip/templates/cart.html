@@ -679,6 +679,14 @@
 				});
 			}
 
+			// Экспорт корзины - обработчик события
+			const exportCartBtn = document.getElementById('export-cart');
+			if (exportCartBtn) {
+				exportCartBtn.addEventListener('click', function() {
+					exportCart();
+				});
+			}
+
 			// Клавиатурные сокращения
 			document.addEventListener('keydown', function(e) {
 				// Ctrl+S или Cmd+S - сохранить изменения в корзине (если есть несохраненные)
