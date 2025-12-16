@@ -2566,9 +2566,8 @@ def logout():
     if user_id:
         log_user_action('logout', user_id=user_id)
     
-    session.pop('user_id', None)
-    session.pop('username', None)
-    session.pop('is_admin', None)
+    # Очищаем все данные сессии
+    session.clear()
     flash("Вы успешно вышли из системы.", "info")
     return redirect(url_for('home'))
 
