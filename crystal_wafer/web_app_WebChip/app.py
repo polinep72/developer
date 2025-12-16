@@ -166,10 +166,21 @@ if not SECRET_KEY:
 _flask_app.secret_key = SECRET_KEY
 
 # Настройки безопасности сессий
-_flask_app.config['SESSION_COOKIE_SECURE'] = True  # Только HTTPS (для production; в тестовой среде может быть проигнорировано)
+# SECURE-куки включаем только если явно указано в переменных окружения (для production за HTTPS),
+# чтобы не ломать работу сессий при доступе по обычному HTTP внутри сети.
+secure_cookies_env = os.getenv('SESSION_COOKIE_SECURE', '').lower()
+secure_cookies_enabled = secure_cookies_env in ('1', 'true', 'yes')
+
+_flask_app.config['SESSION_COOKIE_SECURE'] = secure_cookies_enabled  # Только HTTPS при включенном флаге
 _flask_app.config['SESSION_COOKIE_HTTPONLY'] = True  # Защита от XSS
 _flask_app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Базовая защита от CSRF
 _flask_app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)  # Время жизни сессии
+
+if not secure_cookies_enabled:
+    _flask_app.logger.warning(
+        "SESSION_COOKIE_SECURE выключен (доступ по HTTP). "
+        "Для production за HTTPS установите SESSION_COOKIE_SECURE=true в .env."
+    )
 
 # Инициализация CSRF защиты
 csrf = CSRFProtect(_flask_app)
