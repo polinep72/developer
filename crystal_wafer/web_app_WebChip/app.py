@@ -1764,48 +1764,48 @@ def add_to_cart():
         else:
             # Обычная логика для склада кристаллов
             if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
-        return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
+                return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
-        id_chip_val = None
-        id_pack_val = None
-        if item_id:
+            id_chip_val = None
+            id_pack_val = None
+            if item_id:
                 invoice_data = execute_query(f"SELECT id_chip, id_pack FROM {invoice_table} WHERE item_id = %s LIMIT 1", (item_id,), fetch=True)
-            if invoice_data:
-                id_chip_val = invoice_data[0][0]
-                id_pack_val = invoice_data[0][1]
+                if invoice_data:
+                    id_chip_val = invoice_data[0][0]
+                    id_pack_val = invoice_data[0][1]
 
-        # Обновляем запрос на вставку в корзину
-        query_insert_cart = """
-            INSERT INTO cart (
-                user_id, item_id, 
-                cons_w, cons_gp, 
-                start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
-                note, stor, cells, 
+            # Обновляем запрос на вставку в корзину
+            query_insert_cart = """
+                INSERT INTO cart (
+                    user_id, item_id, 
+                    cons_w, cons_gp, 
+                    start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
+                    note, stor, cells, 
                     id_chip, id_pack,
                     warehouse_type,
-                date_added
-            )
+                    date_added
+                )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id, item_id, warehouse_type) 
-            DO UPDATE SET 
-                cons_w = cart.cons_w + EXCLUDED.cons_w,
-                cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
-                date_added = EXCLUDED.date_added; 
-        """
-        params_cart = (
-            user_id, item_id,
-            quantity_w, quantity_gp,
-            data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
-            data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
-            data.get('note'), data.get('stor'), data.get('cells'),
+                DO UPDATE SET 
+                    cons_w = cart.cons_w + EXCLUDED.cons_w,
+                    cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
+                    date_added = EXCLUDED.date_added; 
+            """
+            params_cart = (
+                user_id, item_id,
+                quantity_w, quantity_gp,
+                data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
+                data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
+                data.get('note'), data.get('stor'), data.get('cells'),
                 id_chip_val, id_pack_val,
                 warehouse_type,  # Добавляем тип склада
-            date_added
-        )
+                date_added
+            )
 
-        execute_query(query_insert_cart, params_cart, fetch=False)
-        return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
+            execute_query(query_insert_cart, params_cart, fetch=False)
+            return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
             
     except Exception as e:
         _flask_app.logger.error(f"Ошибка добавления в корзину: {e}", exc_info=True)
