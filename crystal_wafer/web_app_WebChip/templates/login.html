@@ -86,6 +86,22 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        .flash-message-container {
+            position: relative;
+        }
+        .flash-message-close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            line-height: 1;
+            opacity: 0.7;
+        }
+        .flash-message-close:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -94,9 +110,13 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}">
+                    {# Показываем только релевантные сообщения для страницы логина #}
+                    {% if category in ['success', 'danger', 'warning', 'info'] %}
+                    <div class="flash-message flash-{{ category }} flash-message-container" data-auto-hide="true">
+                        <span class="flash-message-close" onclick="this.parentElement.remove()">&times;</span>
                         {{ message }}
                     </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -123,5 +143,28 @@
         <a href="/forgot_password">Забыли пароль?</a>
         <a href="/register">Нет аккаунта? Зарегистрируйтесь</a>
     </div>
+    
+    <script>
+        // Автоматическое скрытие flash-сообщений через 5 секунд
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message[data-auto-hide="true"]');
+            flashMessages.forEach(function(message) {
+                // Показываем сообщение с анимацией
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.3s ease';
+                setTimeout(function() {
+                    message.style.opacity = '1';
+                }, 10);
+                
+                // Скрываем через 5 секунд
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>
