@@ -1763,17 +1763,17 @@ def add_to_cart():
         
         else:
             # Обычная логика для склада кристаллов
-    if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
-        return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
+            if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
+                return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
-        id_chip_val = None
-        id_pack_val = None
-        if item_id:
+            id_chip_val = None
+            id_pack_val = None
+            if item_id:
                 invoice_data = execute_query(f"SELECT id_chip, id_pack FROM {invoice_table} WHERE item_id = %s LIMIT 1", (item_id,), fetch=True)
-            if invoice_data:
-                id_chip_val = invoice_data[0][0]
-                id_pack_val = invoice_data[0][1]
+                if invoice_data:
+                    id_chip_val = invoice_data[0][0]
+                    id_pack_val = invoice_data[0][1]
 
         # Обновляем запрос на вставку в корзину
         query_insert_cart = """
