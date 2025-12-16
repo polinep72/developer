@@ -7,7 +7,7 @@ import logging  # <--- ДОБАВИТЬ
 import logging.handlers  # Для SMTPHandler
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 import pandas as pd
 import psycopg2  # Убедитесь, что psycopg2 или psycopg2-binary есть в requirements.txt
@@ -165,6 +165,12 @@ if not SECRET_KEY:
     _flask_app.logger.warning("⚠️ SECRET_KEY не установлен в переменных окружения. Сгенерирован временный ключ. Установите SECRET_KEY в .env файле для production!")
 _flask_app.secret_key = SECRET_KEY
 
+# Настройки безопасности сессий
+_flask_app.config['SESSION_COOKIE_SECURE'] = True  # Только HTTPS (для production; в тестовой среде может быть проигнорировано)
+_flask_app.config['SESSION_COOKIE_HTTPONLY'] = True  # Защита от XSS
+_flask_app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Базовая защита от CSRF
+_flask_app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)  # Время жизни сессии
+
 # Инициализация CSRF защиты
 csrf = CSRFProtect(_flask_app)
 
@@ -224,7 +230,7 @@ def get_temp_user_id(session):
     if 'user_id' in session:
         return session['user_id']
     
-    # Для неавторизованных пользователей используем отрицательный ID на основе hash от уникального идентификатора сессии
+    # Для неавторизованных пользователей используем отрицательный ID на основе SHA-256 hash от уникального идентификатора сессии
     if 'temp_user_id' not in session:
         import hashlib
         import uuid
@@ -232,7 +238,8 @@ def get_temp_user_id(session):
         if 'session_unique_id' not in session:
             session['session_unique_id'] = str(uuid.uuid4())
         session_id = session['session_unique_id']
-        hash_obj = hashlib.md5(session_id.encode())
+        # Вместо MD5 используем SHA-256
+        hash_obj = hashlib.sha256(session_id.encode())
         # Преобразуем первые 8 символов хеша в отрицательное число
         hash_int = int(hash_obj.hexdigest()[:8], 16)
         # Делаем отрицательным и ограничиваем диапазоном (чтобы не было слишком больших чисел)

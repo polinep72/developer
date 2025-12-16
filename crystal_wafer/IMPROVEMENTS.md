@@ -163,24 +163,17 @@ log_user_action('update', table_name='users', record_id=user_id, details={'field
 
 ---
 
-#### 7. Улучшение безопасности сессий
-**Проблема:** Используется MD5 для временных ID (строка 197), слабые настройки cookie.  
+#### 7. ✅ Улучшение безопасности сессий - **ИСПРАВЛЕНО в v1.4.2**
+**Проблема:** Используется MD5 для временных ID, слабые настройки cookie.  
 **Риск:** Устаревший алгоритм, отсутствие защиты cookie.
 
-**Решение:**
-```python
-import hashlib
-
-# Вместо MD5 использовать SHA-256
-hash_obj = hashlib.sha256(session_id.encode())
-hash_int = int(hash_obj.hexdigest()[:8], 16)
-
-# Настройка безопасности сессий
-_flask_app.config['SESSION_COOKIE_SECURE'] = True  # Только HTTPS (в production)
-_flask_app.config['SESSION_COOKIE_HTTPONLY'] = True  # Защита от XSS
-_flask_app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Защита от CSRF
-_flask_app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)  # Время жизни сессии
-```
+**Реализация в проекте:**
+- В `get_temp_user_id()` MD5 заменён на SHA-256 для генерации временного `temp_user_id`
+- Добавлены безопасные настройки cookie в инициализации приложения:
+  - `SESSION_COOKIE_SECURE = True`
+  - `SESSION_COOKIE_HTTPONLY = True`
+  - `SESSION_COOKIE_SAMESITE = 'Lax'`
+  - `PERMANENT_SESSION_LIFETIME = timedelta(hours=8)`
 
 ---
 
