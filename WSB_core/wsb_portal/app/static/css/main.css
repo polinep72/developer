@@ -220,6 +220,11 @@ body {
     }
 }
 
+.dashboard-header {
+    position: relative;
+    overflow: visible; /* Разрешаем tooltip выходить за границы */
+}
+
 .dashboard-header h2 {
     margin: 0 0 8px;
 }
@@ -418,6 +423,7 @@ body {
     padding: 24px;
     margin-bottom: 24px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    overflow: visible; /* Разрешаем tooltip выходить за границы панели */
 }
 
 .dashboard-controls {
@@ -1652,7 +1658,8 @@ body {
 .history-subtab-content {
     display: none;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: visible; /* Разрешаем tooltip выходить за границы по горизонтали */
+    overflow-y: auto; /* Вертикальная прокрутка при необходимости */
 }
 
 .history-subtab-content.active {
@@ -1841,6 +1848,24 @@ body {
     pointer-events: none;
     opacity: 1;
     transition: opacity 0.2s;
+    /* Предотвращаем обрезание слева */
+    min-width: max-content;
+    max-width: 90vw;
+    word-break: keep-all;
+    /* Убеждаемся, что tooltip не обрезается родительским контейнером */
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Специальное правило для кнопки справа - tooltip выравнивается по левому краю кнопки */
+.dashboard-header [data-tooltip]:hover::after {
+    left: 0;
+    right: auto;
+    transform: translateY(6px);
+    /* Увеличиваем область отображения, чтобы текст не обрезался */
+    min-width: max-content;
+    max-width: calc(100vw - 40px); /* Оставляем отступы от краев экрана */
+    white-space: nowrap;
 }
 
 [data-tooltip]:hover::before {
@@ -1853,6 +1878,13 @@ body {
     border-top-color: #1e293b;
     z-index: 1001;
     pointer-events: none;
+}
+
+/* Стрелка для tooltip кнопки справа - выравнивается по левому краю */
+.dashboard-header [data-tooltip]:hover::before {
+    left: 20px;
+    right: auto;
+    transform: translateY(2px);
 }
 
 /* Настройка виджетов */

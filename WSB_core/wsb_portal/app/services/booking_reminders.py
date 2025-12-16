@@ -5,6 +5,12 @@ import logging
 from datetime import datetime, date, time, timedelta
 from typing import List, Dict, Any, Optional
 
+import pytz
+from wsb_core.notifications_logic import (
+    NOTIFICATION_BEFORE_START_MINUTES,
+    SCHEDULER_TIMEZONE,
+)
+
 logger = logging.getLogger(__name__)
 
 def _ensure_date_obj(value: Any) -> date:
@@ -30,8 +36,8 @@ def _ensure_time_obj(value: Any) -> time:
 
 
 def get_bookings_starting_soon(
-    minutes_before: int = 15,
-    max_minutes_before: int = 16
+    minutes_before: int = NOTIFICATION_BEFORE_START_MINUTES,
+    max_minutes_before: Optional[int] = None,
 ) -> List[Dict[str, Any]]:
     """
     Получить список бронирований, которые начинаются в ближайшее время.
@@ -47,9 +53,11 @@ def get_bookings_starting_soon(
         from .auth import _connect
         from typing import cast, Dict as DictType, Any
         
-        now = datetime.now()
+        tz = pytz.timezone(SCHEDULER_TIMEZONE)
+        now = datetime.now(tz)
+        end_window_delta = max_minutes_before if max_minutes_before is not None else minutes_before + 1
         start_window = now + timedelta(minutes=minutes_before)
-        end_window = now + timedelta(minutes=max_minutes_before)
+        end_window = now + timedelta(minutes=end_window_delta)
         
         conn = _connect()
         try:
@@ -153,7 +161,9 @@ def get_bookings_starting_soon(
         return []
 
 
-def send_booking_start_reminders(minutes_before: int = 15) -> Dict[str, Any]:
+def send_booking_start_reminders(
+    minutes_before: int = NOTIFICATION_BEFORE_START_MINUTES,
+) -> Dict[str, Any]:
     """
     Отправить напоминания о начале работы для всех бронирований, которые начинаются в ближайшее время.
     

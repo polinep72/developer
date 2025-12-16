@@ -1011,7 +1011,9 @@ def get_calendar_overview(year: int, month: int, user_id: Optional[int] = None) 
             date_from = date(year, month, 1)
             date_to = date(year, month, last_day)
             
-            # Базовый запрос
+            # Базовый запрос - считаем все бронирования для истории календаря
+            # Показываем все бронирования, включая отмененные и завершенные,
+            # чтобы пользователь видел полную историю
             query = """
                 SELECT 
                     b.date,
@@ -1019,7 +1021,6 @@ def get_calendar_overview(year: int, month: int, user_id: Optional[int] = None) 
                 FROM bookings b
                 WHERE b.date >= %s 
                     AND b.date <= %s
-                    AND b.cancel = FALSE
             """
             params: List[Any] = [date_from, date_to]
             

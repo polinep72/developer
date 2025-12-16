@@ -2,11 +2,11 @@ services:
   app:
     build: .
     ports:
-      - "8087:8087"
+      - "8089:8087"
     env_file:
       - .env
     environment:
-      - DB_HOST=192.168.1.22
+      - DB_HOST=192.168.1.139
       - DB_PORT=5432
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}

@@ -4,6 +4,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from logger import logger
 
+# Единая конфигурация из ядра
+try:
+    from wsb_core.app_config import WSB_TIMEZONE, WSB_BOT_SKIP_PENDING
+except Exception:
+    WSB_TIMEZONE = "Europe/Moscow"
+    WSB_BOT_SKIP_PENDING = True
+
 # Загружаем переменные из .env файла в окружение
 # Порядок:
 # 1) Корень монорепозитория WSB_core/.env
@@ -37,7 +44,7 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT", "5432") # Порт по умолчанию
 
 # --- Scheduler Timezone ---
-SCHEDULER_TIMEZONE = os.getenv("SCHEDULER_TIMEZONE", "Europe/Moscow")
+SCHEDULER_TIMEZONE = os.getenv("SCHEDULER_TIMEZONE", WSB_TIMEZONE)
 
 
 # --- Проверка наличия критически важных переменных ---

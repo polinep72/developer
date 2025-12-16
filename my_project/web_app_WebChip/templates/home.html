@@ -95,6 +95,34 @@
     .logout-button:hover {
         background-color: #4CAF50;
     }	
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin: 20px auto 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 16px;
+            border: 1px solid #4CAF50;
+            background: #f8f9fa;
+            color: #2f6f32;
+            border-radius: 5px;
+            cursor: pointer;
+            min-width: 160px;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: #4CAF50;
+            color: #fff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -109,13 +137,51 @@
 			{% endif %}
 		</div>
     </div>
-    <div class="container">
-        <h1>Склад кристаллов</h1>
-        <a href="/search" class="button">Поиск</a>
-        <a href="/inflow" class="button">Поступление</a>
-        <a href="/outflow" class="button">Расход</a>
-        <a href="/refund" class="button">Возврат</a>
-		<a href="/inventory" class="button">Инвентаризация</a>
+    <div class="tabs">
+        <button class="tab-btn active" data-target="tab-crystal">Склад кристаллов</button>
+        <button class="tab-btn" data-target="tab-wafer">Склад пластин</button>
+        <button class="tab-btn" data-target="tab-remote">Дальний склад</button>
     </div>
+    <div class="container">
+        <div id="tab-crystal" class="tab-content active">
+            <h1>Склад кристаллов</h1>
+            <a href="/search" class="button">Поиск</a>
+            <a href="/inflow" class="button">Поступление</a>
+            <a href="/outflow" class="button">Расход</a>
+            <a href="/refund" class="button">Возврат</a>
+            <a href="/inventory" class="button">Инвентаризация</a>
+        </div>
+        <div id="tab-wafer" class="tab-content">
+            <h1>Склад пластин</h1>
+            <a href="/search" class="button">Поиск</a>
+            <a href="/inflow" class="button">Поступление</a>
+            <a href="/outflow" class="button">Расход</a>
+            <a href="/refund" class="button">Возврат</a>
+            <a href="/inventory" class="button">Инвентаризация</a>
+        </div>
+        <div id="tab-remote" class="tab-content">
+            <h1>Дальний склад</h1>
+            <a href="/search" class="button">Поиск</a>
+            <a href="/inflow" class="button">Поступление</a>
+            <a href="/outflow" class="button">Расход</a>
+            <a href="/refund" class="button">Возврат</a>
+            <a href="/inventory" class="button">Инвентаризация</a>
+        </div>
+    </div>
+    <script>
+        const tabs = document.querySelectorAll('.tab-btn');
+        const sections = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabs.forEach(b => b.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+
+                btn.classList.add('active');
+                const target = btn.getAttribute('data-target');
+                document.getElementById(target)?.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>

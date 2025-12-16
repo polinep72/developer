@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    network_mode: "host" # <--- ДОБАВИТЬ ЭТО
+    env_file:
+      - .env
+    dns:
+      - "8.8.8.8"
+      - "1.1.1.1"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+
+volumes:
+  pgdata:

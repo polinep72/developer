@@ -163,12 +163,17 @@ def fetch_heatmap_data(target_date: date):
             if not (start and end):
                 continue
 
+            # Формируем человекочитаемый интервал сразу
+            start_str = start.strftime("%H:%M")
+            effective_end_dt = finish if finish else end
+            end_str = effective_end_dt.strftime("%H:%M")
+
             for slot_idx, slot_label in enumerate(TIME_INTERVALS):
                 slot_hour, slot_minute = map(int, slot_label.split(":"))
                 slot_start = datetime.combine(target_date, time(slot_hour, slot_minute))
                 slot_end = slot_start + timedelta(minutes=30)
 
-                effective_end = finish if finish else end
+                effective_end = effective_end_dt
                 overlapping = start < slot_end and effective_end > slot_start
                 if not overlapping:
                     continue
@@ -178,21 +183,21 @@ def fetch_heatmap_data(target_date: date):
 
                 if finish and slot_start < finish and slot_start >= start:
                     status = STATUS_CODES["finished_usage"]
-                    hover_text = f"Завершено: {user_fi}"
+                    hover_text = f"Завершено: {user_fi}\n{start_str}–{end_str}"
                 elif not finish:
                     if slot_start >= start and slot_start < end:
                         if effective_now >= end:
                             status = STATUS_CODES["finished_usage"]
-                            hover_text = f"Завершено (по времени): {user_fi}"
+                            hover_text = f"Завершено (по времени): {user_fi}\n{start_str}–{end_str}"
                         elif effective_now >= start:
                             status = STATUS_CODES["active_usage"]
-                            hover_text = f"Используется: {user_fi}"
+                            hover_text = f"Используется: {user_fi}\n{start_str}–{end_str}"
                         else:
                             status = STATUS_CODES["booked_future"]
-                            hover_text = f"Забронировано: {user_fi}"
+                            hover_text = f"Забронировано: {user_fi}\n{start_str}–{end_str}"
                     elif slot_start < end and slot_end > start and effective_now < start:
                         status = STATUS_CODES["booked_future"]
-                        hover_text = f"Забронировано: {user_fi}"
+                        hover_text = f"Забронировано: {user_fi}\n{start_str}–{end_str}"
 
                 if status != STATUS_CODES["free"]:
                     if usage[equip_idx][slot_idx] == STATUS_CODES["free"] or status > usage[equip_idx][slot_idx]:

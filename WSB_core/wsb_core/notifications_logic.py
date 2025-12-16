@@ -18,19 +18,22 @@ from .constants import (
     WORKING_HOURS_END,
     BOOKING_TIME_STEP_MINUTES,
 )
+from .app_config import (
+    WSB_TIMEZONE,
+    WSB_NOTIFICATION_BEFORE_START_MINUTES,
+    WSB_NOTIFICATION_BEFORE_END_MINUTES,
+)
 from .models import Booking, BookingStatus
 
 
 # --- Базовые константы уведомлений ---
 
-# За сколько минут до НАЧАЛА брони слать уведомление
-NOTIFICATION_BEFORE_START_MINUTES: int = 10
+# За сколько минут до НАЧАЛА/КОНЦА слать уведомления (читаем из app_config)
+NOTIFICATION_BEFORE_START_MINUTES: int = WSB_NOTIFICATION_BEFORE_START_MINUTES
+NOTIFICATION_BEFORE_END_MINUTES: int = WSB_NOTIFICATION_BEFORE_END_MINUTES
 
-# За сколько минут до КОНЦА брони слать уведомление
-NOTIFICATION_BEFORE_END_MINUTES: int = 10
-
-# Таймзона планировщика / уведомлений (должна совпадать с конфигом бота и портала)
-SCHEDULER_TIMEZONE: str = "Europe/Moscow"
+# Таймзона планировщика / уведомлений (единая)
+SCHEDULER_TIMEZONE: str = WSB_TIMEZONE
 
 
 @dataclass

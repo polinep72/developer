@@ -952,6 +952,11 @@ def _build_forecast(date_usage: Dict[date, float], end_date: date) -> Dict[str, 
         yaxis_title="Часы",
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
+        autosize=True,
+        bargap=0.25,
+        margin=dict(l=40, r=20, t=40, b=80),
+        xaxis=dict(tickangle=-30, automargin=True),
+        yaxis=dict(automargin=True),
     )
 
     legend = [

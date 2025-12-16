@@ -6,7 +6,7 @@ numpy==2.3.5
 psycopg[binary]==3.2.12
 python-dotenv==1.0.1
 passlib[bcrypt]==1.7.4
-bcrypt==4.3.0
+bcrypt==3.2.2
 python-jose[cryptography]==3.3.0
 redis==5.2.0
 APScheduler==3.10.4

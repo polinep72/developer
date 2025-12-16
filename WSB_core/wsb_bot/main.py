@@ -85,18 +85,17 @@ def main():
 
         # --- 2. Проверка соединения ---
         logger.debug("Проверка соединения...")
-        conn_test = None
         try:
-            conn_test = db_connection.get_connection()
-            if conn_test:
-                logger.debug(f"Соединение ОК. Статус: {conn_test.status}")
-                conn_test.rollback()
-            else:
-                raise ConnectionError("Не удалось получить соед. после инициализации!")
-        finally:
-            if conn_test:
-                db_connection.release_connection(conn_test)
-                logger.debug("Тестовое соед. возвращено.")
+            with db_connection.get_connection() as conn_test:
+                if conn_test:
+                    logger.debug(f"Соединение ОК. Статус: {conn_test.status}")
+                    conn_test.rollback()
+                    logger.debug("Тестовое соед. возвращено.")
+                else:
+                    raise ConnectionError("Не удалось получить соед. после инициализации!")
+        except Exception as e:
+            logger.error(f"Ошибка при проверке соединения: {e}", exc_info=True)
+            raise
 
         # --- 3. Регистрация обработчиков ---
         logger.info("Регистрация обработчиков...")
@@ -149,7 +148,7 @@ def main():
 
                     scheduler.add_job(
                         process_telegram_notifications,
-                        trigger=IntervalTrigger(minutes=2),  # Проверяем каждые 2 минуты
+                        trigger=IntervalTrigger(minutes=2, timezone=scheduler_tz),  # Явно указываем pytz timezone
                         args=[db_connection, bot],
                         id="notification_worker_telegram",
                         name="Обработка Telegram уведомлений из единого расписания",
@@ -157,7 +156,42 @@ def main():
                     )
                     logger.info("Воркер обработки Telegram уведомлений добавлен в планировщик.")
                 except Exception as e_worker:
-                    logger.warning(f"Не удалось добавить воркер Telegram уведомлений: {e_worker}")
+                    logger.error(f"Ошибка при добавлении воркера Telegram уведомлений: {e_worker}", exc_info=True)
+
+                # Добавляем воркер для отслеживания новых бронирований и отправки email
+                try:
+                    from wsb_core.booking_watcher import process_new_bookings
+                    from apscheduler.triggers.interval import IntervalTrigger
+
+                    def process_new_bookings_job():
+                        """Задача для отслеживания новых бронирований и отправки email"""
+                        try:
+                            import psycopg2
+                            with db_connection.get_connection() as conn:
+                                with conn.cursor() as cur:
+                                    result = process_new_bookings(cur, batch_size=50)
+                                    if result.get("sent", 0) > 0 or result.get("failed", 0) > 0:
+                                        logger.info(f"Обработано новых бронирований: обработано={result.get('processed', 0)}, "
+                                                   f"отправлено={result.get('sent', 0)}, ошибок={result.get('failed', 0)}, "
+                                                   f"пропущено={result.get('skipped', 0)}")
+                        except Exception as e:
+                            # Проверяем, является ли это ошибкой соединения БД
+                            error_str = str(e).lower()
+                            if "server closed the connection" in error_str or "connection" in error_str:
+                                logger.warning(f"Ошибка соединения с БД в process_new_bookings_job (пропускаем цикл): {e}")
+                            else:
+                                logger.error(f"Ошибка в process_new_bookings_job: {e}", exc_info=True)
+
+                    scheduler.add_job(
+                        process_new_bookings_job,
+                        trigger=IntervalTrigger(seconds=30, timezone=scheduler_tz),  # Явно указываем pytz timezone
+                        id="booking_watcher_email",
+                        name="Отслеживание новых бронирований и отправка email",
+                        replace_existing=True,
+                    )
+                    logger.info("Воркер отслеживания новых бронирований добавлен в планировщик.")
+                except Exception as e_watcher:
+                    logger.error(f"Ошибка при добавлении воркера отслеживания бронирований: {e_watcher}", exc_info=True)
             except Exception as e_sch_start:
                 logger.error(f"Ошибка запуска планировщика: {e_sch_start}", exc_info=True)
                 # В тестовой копии WSB_core не падаем, если планировщик не смог стартовать полностью

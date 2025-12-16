@@ -2953,10 +2953,14 @@ async function loadBookingsList() {
                     <td><span class="status-badge ${statusClass}">${booking.status || ""}</span></td>
                     ${isAdmin ? `<td>${booking.user_name || ""}</td>` : ""}
                     <td>
-                        ${(booking.can_cancel || booking.can_finish) ? `
+                        ${(
+                            booking.status !== "Завершено" &&
+                            booking.status !== "Отменено" &&
+                            (booking.can_cancel || booking.can_finish)
+                        ) ? `
                             ${booking.can_cancel ? `<button class="btn-extend-booking" data-booking-id="${booking.id}">Продлить</button>` : ""}
                             ${booking.can_finish ? `<button class="btn-finish-booking" data-booking-id="${booking.id}">Завершить</button>` : ""}
-                        ${booking.can_cancel ? `<button class="btn-cancel-booking" data-booking-id="${booking.id}">Отменить</button>` : ""}
+                            ${booking.can_cancel ? `<button class="btn-cancel-booking" data-booking-id="${booking.id}">Отменить</button>` : ""}
                         ` : ""}
                     </td>
                 `;

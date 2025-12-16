@@ -7,6 +7,7 @@ from typing import List, Optional, Dict, Any, cast
 from io import BytesIO
 from pathlib import Path
 import sys
+import pytz
 
 from fastapi import FastAPI, HTTPException, Request, Depends, Response, status, Query, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
@@ -27,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 # Подключаем ядро WSB_core, если оно находится в соседней папке с проектом
 try:
-    BASE_DIR = Path(__file__).resolve().parents[2]  # .../WSB_portal
+    # .../WSB_core/wsb_portal/app/main.py -> parents[3] = .../WSB_core
+    BASE_DIR = Path(__file__).resolve().parents[3]
     CORE_DIR = BASE_DIR / "WSB_core"
     if CORE_DIR.exists():
         core_path = str(CORE_DIR)
@@ -37,6 +39,7 @@ try:
 except Exception as e:
     logger.warning(f"Не удалось добавить WSB_core в sys.path: {e}")
 
+from wsb_core.app_config import WSB_TIMEZONE, WSB_PORTAL_PORT
 from .services.heatmap import get_heatmap_payload
 from .services.dashboard import (
     get_dashboard_initial,
@@ -106,29 +109,12 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 AUTH_COOKIE_NAME = "wsb_access"
 
-# Планировщик для периодических задач (напоминания о начале работы)
+# Планировщик для периодических задач (воркеры уведомлений)
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-scheduler = BackgroundScheduler()
-
-def send_booking_reminders_job():
-    """Задача для отправки напоминаний о начале работы"""
-    try:
-        from .services.booking_reminders import send_booking_start_reminders
-        result = send_booking_start_reminders(minutes_before=15)
-        logger.info(f"Задача отправки напоминаний выполнена: {result}")
-    except Exception as exc:
-        logger.error(f"Ошибка в задаче отправки напоминаний: {exc}")
-
-# Запускаем задачу каждую минуту
-scheduler.add_job(
-    send_booking_reminders_job,
-    trigger=IntervalTrigger(minutes=1),
-    id='send_booking_reminders',
-    name='Отправка напоминаний о начале работы',
-    replace_existing=True
-)
+# APScheduler ожидает pytz-таймзону (для normalize). Используем pytz.timezone.
+scheduler = BackgroundScheduler(timezone=pytz.timezone(WSB_TIMEZONE))
 
 def process_email_notifications_job():
     """Задача для обработки email-уведомлений из единого расписания"""
@@ -142,7 +128,7 @@ def process_email_notifications_job():
 # Запускаем воркер каждые 2 минуты
 scheduler.add_job(
     process_email_notifications_job,
-    trigger=IntervalTrigger(minutes=2),
+    trigger=IntervalTrigger(minutes=2, timezone=pytz.timezone(WSB_TIMEZONE)),
     id='process_email_notifications',
     name='Обработка Email уведомлений из единого расписания',
     replace_existing=True
@@ -229,8 +215,8 @@ def stop_previous_instances(port: int = 8090):
 @app.on_event("startup")
 async def startup_event():
     """Запуск планировщика при старте приложения"""
-    # Останавливаем предыдущие экземпляры сервера
-    stop_previous_instances(port=8090)
+    # Останавливаем предыдущие экземпляры сервера на том же порту
+    stop_previous_instances(port=WSB_PORTAL_PORT)
     
     scheduler.start()
     logger.info("Планировщик напоминаний запущен")

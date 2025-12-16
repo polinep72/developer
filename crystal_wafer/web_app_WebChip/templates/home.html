@@ -45,6 +45,12 @@
 			margin-right: 10px;
 			font-weight: bold;
 			color: #333;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		.user-info:hover {
+			text-decoration: underline;
+			color: #007CBB;
 		}
 		.user-icon {
 			font-size: 24px;
@@ -212,7 +218,7 @@
         </div>
 		<div class="user-menu">
 			{% if session.get('username') %}
-				<span class="user-info">{{ session['username'] }}</span>
+				<a href="/profile" class="user-info">{{ session['username'] }}</a>
 				<button onclick="location.href='/logout'" class="logout-button">Выйти</button>
 			{% else %}
 				<i class="user-icon" onclick="location.href='/login'">&#128100;</i>

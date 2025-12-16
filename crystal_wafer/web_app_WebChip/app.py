@@ -17,7 +17,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.5"
+__version__ = "1.3.7"
 
 # Импортируем WSGIMiddleware
 try:
@@ -99,14 +99,22 @@ def setup_logging():
                         msg = self.format(record)
                         # Используем имя отправителя, если оно указано
                         from_header = f"{self.fromname} <{self.fromaddr}>" if hasattr(self, 'fromname') and self.fromname else self.fromaddr
-                        msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
+                        msg_text = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
                             from_header,
                             ','.join(self.toaddrs),
                             self.getSubject(record),
                             formatdate(),
                             msg
                         )
-                        smtp.sendmail(self.fromaddr, self.toaddrs, msg)
+                        # Исправляем кодировку: используем UTF-8 для поддержки кириллицы
+                        from email.mime.text import MIMEText
+                        from email.header import Header
+                        email_msg = MIMEText(msg, 'plain', 'utf-8')
+                        email_msg['From'] = Header(from_header, 'utf-8')
+                        email_msg['To'] = Header(','.join(self.toaddrs), 'utf-8')
+                        email_msg['Subject'] = Header(self.getSubject(record), 'utf-8')
+                        email_msg['Date'] = formatdate()
+                        smtp.sendmail(self.fromaddr, self.toaddrs, email_msg.as_string())
                         smtp.quit()
                     except smtplib.SMTPAuthenticationError as e:
                         # Ошибка аутентификации - логируем в консоль, но не пытаемся отправить email
@@ -143,7 +151,14 @@ def setup_logging():
 setup_logging()
 
 _flask_app = Flask(__name__)
-_flask_app.secret_key = os.getenv('SECRET_KEY', 'a_default_secret_key_change_it')  # Добавим дефолтный ключ
+
+# Генерация SECRET_KEY для безопасности сессий
+import secrets
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    SECRET_KEY = secrets.token_hex(32)
+    _flask_app.logger.warning("⚠️ SECRET_KEY не установлен в переменных окружения. Сгенерирован временный ключ. Установите SECRET_KEY в .env файле для production!")
+_flask_app.secret_key = SECRET_KEY
 
 # Настраиваем логирование Werkzeug, чтобы скрыть предупреждение о development server
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
@@ -1084,9 +1099,9 @@ def search():
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-    if filter_conditions:
-        query_search += " AND " + " AND ".join(filter_conditions)
-    
+        if filter_conditions:
+            query_search += " AND " + " AND ".join(filter_conditions)
+
     query_search += " ORDER BY display_item_id;"
 
     # Выполняем поиск только если это POST запрос (при нажатии кнопки "Найти")
@@ -1356,21 +1371,21 @@ def add_to_cart():
 
             # Обновляем запрос на вставку в корзину
             query_insert_cart = """
-                INSERT INTO cart (
-                    user_id, item_id, 
-                    cons_w, cons_gp, 
-                    start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
-                    note, stor, cells, 
+            INSERT INTO cart (
+                user_id, item_id, 
+                cons_w, cons_gp, 
+                start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
+                note, stor, cells, 
                     id_chip, id_pack,
                     warehouse_type,
-                    date_added
-                )
+                date_added
+            )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id, item_id, warehouse_type) 
-                DO UPDATE SET 
-                    cons_w = cart.cons_w + EXCLUDED.cons_w,
-                    cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
-                    date_added = EXCLUDED.date_added; 
+            DO UPDATE SET 
+                cons_w = cart.cons_w + EXCLUDED.cons_w,
+                cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
+                date_added = EXCLUDED.date_added; 
             """
             params_cart = (
                 user_id, item_id,
@@ -1567,65 +1582,65 @@ def export_cart():
     else:
         # Обычный экспорт для склада кристаллов
         query_export = """
-        SELECT 
-            c.start AS "Номер запуска",
-            c.manufacturer AS "Производитель",
-            c.technology AS "Технологический процесс",
-            c.lot AS "Партия (Lot ID)",
-            c.wafer AS "Пластина (Wafer)",
-            c.quadrant AS "Quadrant",
-            c.internal_lot AS "Внутренняя партия",
-            chip.name_chip AS "Номер кристалла",
-            c.chip_code AS "Шифр кристалла",
-            pack.name_pack AS "Упаковка",
+    SELECT 
+        c.start AS "Номер запуска",
+        c.manufacturer AS "Производитель",
+        c.technology AS "Технологический процесс",
+        c.lot AS "Партия (Lot ID)",
+        c.wafer AS "Пластина (Wafer)",
+        c.quadrant AS "Quadrant",
+        c.internal_lot AS "Внутренняя партия",
+        chip.name_chip AS "Номер кристалла",
+        c.chip_code AS "Шифр кристалла",
+        pack.name_pack AS "Упаковка",
             c.stor AS "Место хранения",
             c.cells AS "Ячейка хранения",
-            c.note AS "Примечание",
-            TO_CHAR(c.date_added, 'YYYY-MM-DD') AS "Дата расхода",
-            c.cons_w AS "Расход Wafer, шт.",
-            c.cons_gp AS "Расход GelPack, шт."
-        FROM cart c
-        LEFT JOIN chip ON c.id_chip = chip.id
-        LEFT JOIN pack ON c.id_pack = pack.id
+        c.note AS "Примечание",
+        TO_CHAR(c.date_added, 'YYYY-MM-DD') AS "Дата расхода",
+        c.cons_w AS "Расход Wafer, шт.",
+        c.cons_gp AS "Расход GelPack, шт."
+    FROM cart c
+    LEFT JOIN chip ON c.id_chip = chip.id
+    LEFT JOIN pack ON c.id_pack = pack.id
         WHERE c.user_id = %s AND c.warehouse_type = %s
-        ORDER BY c.date_added DESC
-        """
-        try:
+    ORDER BY c.date_added DESC
+    """
+    try:
             results = execute_query(query_export, (user_id, warehouse_type))
-        except Exception as e:
-            _flask_app.logger.error(f"Ошибка при экспорте корзины (SQL): {e}")
-            flash("Не удалось подготовить данные для экспорта.", "danger")
-            return redirect(url_for('cart_view'))
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при экспорте корзины (SQL): {e}")
+        flash("Не удалось подготовить данные для экспорта.", "danger")
+        return redirect(url_for('cart_view'))
 
-        if not results:
-            flash("Корзина пуста. Нет данных для экспорта.", "info")
-            return redirect(url_for('cart_view'))
+    if not results:
+        flash("Корзина пуста. Нет данных для экспорта.", "info")
+        return redirect(url_for('cart_view'))
 
-        filled_columns = [
-            "Номер запуска", "Производитель", "Технологический процесс", "Партия (Lot ID)", "Пластина (Wafer)",
-            "Quadrant", "Внутренняя партия", "Номер кристалла", "Шифр кристалла", "Упаковка",
+    filled_columns = [
+        "Номер запуска", "Производитель", "Технологический процесс", "Партия (Lot ID)", "Пластина (Wafer)",
+        "Quadrant", "Внутренняя партия", "Номер кристалла", "Шифр кристалла", "Упаковка",
             "Место хранения", "Ячейка хранения", "Примечание",
-            "Дата расхода", "Расход Wafer, шт.", "Расход GelPack, шт."
-        ]
-        df_from_db = pd.DataFrame(results, columns=filled_columns)
+        "Дата расхода", "Расход Wafer, шт.", "Расход GelPack, шт."
+    ]
+    df_from_db = pd.DataFrame(results, columns=filled_columns)
 
-        final_excel_columns = [
-            "Номер запуска", "Производитель", "Технологический процесс", "Партия (Lot ID)", "Пластина (Wafer)",
-            "Quadrant", "Внутренняя партия", "Номер кристалла", "Шифр кристалла", "Упаковка",
-            "Дата расхода", "Расход Wafer, шт.", "Расход GelPack, шт.", "Расход общий, шт.",
-            "Дата возврата", "Возврат Wafer, шт.", "Возврат GelPack, шт.", "Возврат общий, шт.",
-            "Примечание", "Куда передано (Производственная партия)", "ФИО",
-            "Место хранения", "Ячейка хранения"
-        ]
+    final_excel_columns = [
+        "Номер запуска", "Производитель", "Технологический процесс", "Партия (Lot ID)", "Пластина (Wafer)",
+        "Quadrant", "Внутренняя партия", "Номер кристалла", "Шифр кристалла", "Упаковка",
+        "Дата расхода", "Расход Wafer, шт.", "Расход GelPack, шт.", "Расход общий, шт.",
+        "Дата возврата", "Возврат Wafer, шт.", "Возврат GelPack, шт.", "Возврат общий, шт.",
+        "Примечание", "Куда передано (Производственная партия)", "ФИО",
+        "Место хранения", "Ячейка хранения"
+    ]
 
-        df_export = pd.DataFrame(columns=final_excel_columns)
+    df_export = pd.DataFrame(columns=final_excel_columns)
 
-        # Копируем данные из df_from_db в df_export.
-        for col in df_from_db.columns:
-            if col in df_export.columns:
-                df_export[col] = df_from_db[col]
+    # Копируем данные из df_from_db в df_export.
+    for col in df_from_db.columns:
+        if col in df_export.columns:
+            df_export[col] = df_from_db[col]
 
-        # Вычисляем "Расход общий, шт."
+    # Вычисляем "Расход общий, шт."
         df_export["Расход общий, шт."] = df_export["Расход Wafer, шт."].fillna(0) + df_export["Расход GelPack, шт."].fillna(0)
 
     output = BytesIO()
@@ -1660,16 +1675,37 @@ def export_cart():
 @_flask_app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
+        username = request.form.get('username', '').strip()
         u_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        secret_question = request.form.get('secret_question', '').strip()
+        secret_answer = request.form.get('secret_answer', '').strip()
 
-        if not username or not u_password:
-            flash("Имя пользователя и пароль не могут быть пустыми.", "danger")
+        # Валидация
+        if not username or len(username) < 3:
+            flash("Имя пользователя должно содержать минимум 3 символа.", "danger")
             return render_template('register.html')
 
-        # ВАЖНО: Хешируйте пароли в реальном приложении!
-        # from werkzeug.security import generate_password_hash
-        # hashed_password = generate_password_hash(u_password)
+        if not u_password or len(u_password) < 4:
+            flash("Пароль должен содержать минимум 4 символа.", "danger")
+            return render_template('register.html')
+        
+        if u_password != confirm_password:
+            flash("Пароли не совпадают.", "danger")
+            return render_template('register.html')
+        
+        if not secret_question or len(secret_question) < 5:
+            flash("Секретный вопрос должен содержать минимум 5 символов.", "danger")
+            return render_template('register.html')
+        
+        if not secret_answer or len(secret_answer) < 2:
+            flash("Ответ на секретный вопрос должен содержать минимум 2 символа.", "danger")
+            return render_template('register.html')
+
+        # Хешируем пароль и секретный ответ для безопасности
+        from werkzeug.security import generate_password_hash
+        hashed_password = generate_password_hash(u_password)
+        hashed_secret_answer = generate_password_hash(secret_answer.lower().strip())
 
         try:
             # Проверка, существует ли пользователь
@@ -1678,12 +1714,9 @@ def register():
                 flash("Пользователь с таким именем уже существует.", "warning")
                 return render_template('register.html')
 
-            # query_register = "INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id"
-            # params_register = (username, hashed_password) # Используйте hashed_password
-
-            # НЕБЕЗОПАСНО: сохранение пароля как есть
-            query_register = "INSERT INTO public.users (username, password) VALUES (%s, %s) RETURNING id"
-            params_register = (username, u_password)
+            # Безопасное сохранение: пароль и секретный ответ хешированы
+            query_register = "INSERT INTO public.users (username, password, secret_question, secret_answer) VALUES (%s, %s, %s, %s) RETURNING id"
+            params_register = (username, hashed_password, secret_question, hashed_secret_answer)
 
             new_user_id_tuple = execute_query(query_register, params_register, fetch=True)  # fetch=True из-за RETURNING
 
@@ -1691,7 +1724,7 @@ def register():
                 new_user_id = new_user_id_tuple[0][0]
                 session['user_id'] = new_user_id
                 session['username'] = username
-                flash("Регистрация прошла успешно!", "success")
+                flash("Регистрация прошла успешно! Запомните ваш секретный вопрос и ответ для восстановления пароля.", "success")
                 return redirect(url_for('home'))
             else:
                 flash("Не удалось создать пользователя.", "danger")
@@ -1715,12 +1748,7 @@ def login():
             flash("Введите имя пользователя и пароль.", "warning")
             return render_template('login.html')
 
-        # ВАЖНО: Сравнивайте хешированные пароли!
-        # from werkzeug.security import check_password_hash
-        # query_login = "SELECT id, username, password FROM users WHERE username = %s"
-
-        # НЕБЕЗОПАСНО: прямое сравнение паролей
-        # Пробуем разные варианты: с указанием схемы и без
+        # Безопасная проверка хешированных паролей
         query_login = "SELECT id, username, password, is_admin, is_blocked FROM public.users WHERE username = %s"
 
         try:
@@ -1738,12 +1766,33 @@ def login():
                     flash("Ваш аккаунт заблокирован. Обратитесь к администратору.", "danger")
                     return render_template('login.html')
                 
-                # user_db_password = user_data[2] # Это пароль из БД (в реальном приложении - хеш)
-                # if check_password_hash(user_db_password, u_password):
-                db_password = user_data[2]
-                _flask_app.logger.info(f"Сравнение паролей: введенный пароль (длина)={len(u_password)}, пароль в БД (длина)={len(db_password) if db_password else 0}")
+                db_password_hash = user_data[2]  # Пароль из БД (хеш или открытый текст для старых записей)
                 
-                if db_password == u_password:  # Прямое сравнение (НЕБЕЗОПАСНО)
+                # Проверяем пароль: если это хеш (начинается с pbkdf2:), используем check_password_hash
+                # Если это открытый текст (для старых записей), сравниваем напрямую
+                password_valid = False
+                
+                if not db_password_hash:
+                    _flask_app.logger.warning(f"Для пользователя {username} пароль в БД пуст")
+                    password_valid = False
+                elif db_password_hash.startswith('pbkdf2:') or db_password_hash.startswith('scrypt:'):
+                    # Хешированный пароль (werkzeug может использовать pbkdf2 или scrypt)
+                    from werkzeug.security import check_password_hash
+                    try:
+                        password_valid = check_password_hash(db_password_hash, u_password)
+                        _flask_app.logger.info(f"Проверка хешированного пароля для {username}: результат={password_valid}")
+                    except Exception as e:
+                        _flask_app.logger.error(f"Ошибка при проверке хешированного пароля для {username}: {e}")
+                        password_valid = False
+                else:
+                    # Старый открытый пароль (для обратной совместимости до миграции)
+                    password_valid = (db_password_hash == u_password)
+                    if password_valid:
+                        _flask_app.logger.warning(f"Пользователь {username} использует незахешированный пароль. Рекомендуется миграция.")
+                    else:
+                        _flask_app.logger.info(f"Неверный пароль для пользователя {username} (открытый текст)")
+                
+                if password_valid:
                     session['user_id'] = user_data[0]  # id
                     session['username'] = user_data[1]  # username
                     session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
@@ -1758,10 +1807,11 @@ def login():
                     return redirect(url_for('home'))
                 else:
                     _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
-                    flash("Неправильный пароль.", "danger")
+                    # Показываем одинаковое сообщение для безопасности (защита от перечисления пользователей)
+                    flash("Неверное имя пользователя или пароль.", "danger")
             else:
-                _flask_app.logger.warning(f"Пользователь не найден: {username}")
-                flash("Пользователь с таким именем не найден.", "danger")
+                # Показываем одинаковое сообщение для безопасности
+                flash("Неверное имя пользователя или пароль.", "danger")
         except Exception as e:
             _flask_app.logger.error(f"Ошибка при входе: {e}", exc_info=True)
             flash(f"Произошла ошибка на сервере.", "danger")
@@ -1769,6 +1819,288 @@ def login():
         return render_template('login.html')  # При ошибке или неверных данных
 
     return render_template('login.html')
+
+
+@_flask_app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    """Восстановление пароля - первый шаг: запрос секретного вопроса"""
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        
+        if not username:
+            flash("Введите имя пользователя.", "warning")
+            return render_template('forgot_password.html')
+        
+        try:
+            # Получаем секретный вопрос пользователя
+            query_user = "SELECT secret_question FROM public.users WHERE username = %s"
+            user_data = execute_query(query_user, (username,), fetch=True)
+            
+            if user_data and user_data[0] and user_data[0][0]:
+                secret_question = user_data[0][0]
+                # Передаем username и secret_question в шаблон для следующего шага
+                return render_template('forgot_password.html', 
+                                     username=username, 
+                                     secret_question=secret_question)
+            else:
+                # Всегда показываем одинаковое сообщение (безопасность)
+                flash("Если пользователь с таким именем существует, на ваш вопрос будет запрошен ответ.", "info")
+                return render_template('forgot_password.html')
+        except Exception as e:
+            _flask_app.logger.error(f"Ошибка при получении секретного вопроса: {e}", exc_info=True)
+            flash("Произошла ошибка. Попробуйте позже.", "danger")
+    
+    return render_template('forgot_password.html')
+
+
+@_flask_app.route('/reset_password', methods=['POST'])
+def reset_password():
+    """Восстановление пароля - второй шаг: проверка ответа и сброс пароля"""
+    username = request.form.get('username', '').strip()
+    secret_answer = request.form.get('secret_answer', '').strip()
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+    
+    # Валидация
+    if not username or not secret_answer or not new_password:
+        flash("Заполните все поля.", "warning")
+        return redirect(url_for('forgot_password'))
+    
+    if new_password != confirm_password:
+        flash("Пароли не совпадают.", "danger")
+        # Возвращаемся к секретному вопросу
+        try:
+            query_user = "SELECT secret_question FROM public.users WHERE username = %s"
+            user_data = execute_query(query_user, (username,), fetch=True)
+            if user_data and user_data[0] and user_data[0][0]:
+                return render_template('forgot_password.html', 
+                                     username=username, 
+                                     secret_question=user_data[0][0])
+        except:
+            pass
+        return redirect(url_for('forgot_password'))
+    
+    if len(new_password) < 4:
+        flash("Пароль должен содержать минимум 4 символа.", "danger")
+        return redirect(url_for('forgot_password'))
+    
+    try:
+        # Получаем секретный ответ из БД
+        query_user = "SELECT id, secret_answer FROM public.users WHERE username = %s"
+        user_data = execute_query(query_user, (username,), fetch=True)
+        
+        if not user_data or not user_data[0]:
+            # Всегда одинаковое сообщение
+            flash("Если пользователь с таким именем существует и ответ верный, пароль будет изменен.", "info")
+            return redirect(url_for('forgot_password'))
+        
+        user_id = user_data[0][0]
+        stored_hashed_answer = user_data[0][1]
+        
+        if not stored_hashed_answer:
+            flash("Для этого пользователя не установлен секретный вопрос. Обратитесь к администратору.", "warning")
+            return redirect(url_for('forgot_password'))
+        
+        # Проверяем ответ (сравниваем хеши)
+        from werkzeug.security import check_password_hash, generate_password_hash
+        
+        # Нормализуем введенный ответ (как при регистрации)
+        normalized_answer = secret_answer.lower().strip()
+        
+        # Логируем для диагностики (без самого ответа, только длину)
+        try:
+            hash_preview = stored_hashed_answer[:10] if stored_hashed_answer else 'None'
+            hash_length = len(stored_hashed_answer) if stored_hashed_answer else 0
+            _flask_app.logger.info(f"Проверка секретного ответа для {username}: длина введенного ответа={len(normalized_answer)}, длина хеша в БД={hash_length}, хеш начинается с={hash_preview}")
+        except Exception as log_err:
+            _flask_app.logger.warning(f"Ошибка при логировании информации о хеше: {log_err}")
+        
+        try:
+            # Проверяем, что секретный ответ захеширован (безопасность)
+            if not stored_hashed_answer:
+                _flask_app.logger.warning(f"Секретный ответ для {username} не установлен в БД")
+                flash("Для этого пользователя не установлен секретный вопрос. Обратитесь к администратору.", "warning")
+                return redirect(url_for('forgot_password'))
+            
+            if not (stored_hashed_answer.startswith('pbkdf2:') or stored_hashed_answer.startswith('scrypt:')):
+                # Секретный ответ не захеширован - это проблема безопасности
+                _flask_app.logger.error(f"КРИТИЧНО: Секретный ответ для {username} не захеширован! Это уязвимость безопасности.")
+                flash("Обнаружена проблема безопасности. Обратитесь к администратору для восстановления доступа.", "danger")
+                return redirect(url_for('forgot_password'))
+            
+            # Безопасная проверка хешированного ответа
+            password_valid = check_password_hash(stored_hashed_answer, normalized_answer)
+            _flask_app.logger.info(f"Проверка хешированного секретного ответа для {username}: результат={password_valid}")
+            
+            if password_valid:
+                # Ответ верный - обновляем пароль (хешируем новый пароль)
+                try:
+                    hashed_new_password = generate_password_hash(new_password)
+                    query_update = "UPDATE public.users SET password = %s WHERE id = %s"
+                    execute_query(query_update, (hashed_new_password, user_id), fetch=False)
+                    
+                    _flask_app.logger.info(f"Пароль успешно сброшен для пользователя: {username}")
+                    flash("Пароль успешно изменен! Теперь вы можете войти с новым паролем.", "success")
+                    return redirect(url_for('login'))
+                except Exception as update_err:
+                    _flask_app.logger.error(f"Ошибка при обновлении пароля для {username}: {update_err}", exc_info=True)
+                    flash("Произошла ошибка при сохранении нового пароля. Попробуйте еще раз или обратитесь к администратору.", "danger")
+                    # Возвращаемся к секретному вопросу
+                    query_user = "SELECT secret_question FROM public.users WHERE username = %s"
+                    user_data = execute_query(query_user, (username,), fetch=True)
+                    if user_data and user_data[0] and user_data[0][0]:
+                        return render_template('forgot_password.html', 
+                                             username=username, 
+                                             secret_question=user_data[0][0])
+                    return redirect(url_for('forgot_password'))
+            else:
+                # Неверный ответ
+                flash("Неверный ответ на секретный вопрос.", "danger")
+                # Возвращаемся к секретному вопросу
+                query_user = "SELECT secret_question FROM public.users WHERE username = %s"
+                user_data = execute_query(query_user, (username,), fetch=True)
+                if user_data and user_data[0] and user_data[0][0]:
+                    return render_template('forgot_password.html', 
+                                         username=username, 
+                                         secret_question=user_data[0][0])
+                return redirect(url_for('forgot_password'))
+        except Exception as check_error:
+            _flask_app.logger.error(f"Ошибка при проверке секретного ответа для {username}: {check_error}", exc_info=True)
+            flash("Произошла ошибка при проверке ответа. Попробуйте еще раз.", "danger")
+            # Возвращаемся к секретному вопросу
+            try:
+                query_user = "SELECT secret_question FROM public.users WHERE username = %s"
+                user_data = execute_query(query_user, (username,), fetch=True)
+                if user_data and user_data[0] and user_data[0][0]:
+                    return render_template('forgot_password.html', 
+                                         username=username, 
+                                         secret_question=user_data[0][0])
+            except Exception as render_err:
+                _flask_app.logger.error(f"Ошибка при получении секретного вопроса для отображения: {render_err}")
+            return redirect(url_for('forgot_password'))
+    
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при сбросе пароля: {e}", exc_info=True)
+        flash("Произошла ошибка при сбросе пароля. Попробуйте позже.", "danger")
+        return redirect(url_for('forgot_password'))
+
+
+@_flask_app.route('/profile')
+def profile():
+    """Личный кабинет пользователя"""
+    # Проверка авторизации
+    if 'user_id' not in session:
+        flash("Пожалуйста, войдите в систему.", "warning")
+        return redirect(url_for('login', next=request.url))
+    
+    user_id = session['user_id']
+    
+    try:
+        # Получаем данные пользователя
+        query_user = "SELECT id, username, email, secret_question FROM public.users WHERE id = %s"
+        user_data = execute_query(query_user, (user_id,), fetch=True)
+        
+        if not user_data or not user_data[0]:
+            flash("Пользователь не найден.", "danger")
+            return redirect(url_for('home'))
+        
+        user = {
+            'id': user_data[0][0],
+            'username': user_data[0][1],
+            'email': user_data[0][2] if len(user_data[0]) > 2 else None,
+            'secret_question': user_data[0][3] if len(user_data[0]) > 3 else None
+        }
+        
+        return render_template('profile.html', user=user)
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при получении профиля: {e}", exc_info=True)
+        flash("Произошла ошибка при загрузке профиля.", "danger")
+        return redirect(url_for('home'))
+
+
+@_flask_app.route('/update_profile', methods=['POST'])
+def update_profile():
+    """Обновление профиля пользователя"""
+    # Проверка авторизации
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Пользователь не авторизован"}), 401
+    
+    user_id = session['user_id']
+    data = request.get_json()
+    
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+    confirm_password = data.get('confirm_password', '').strip()
+    secret_question = data.get('secret_question', '').strip()
+    secret_answer = data.get('secret_answer', '').strip()
+    
+    if not username:
+        return jsonify({"success": False, "message": "Имя пользователя обязательно"}), 400
+    
+    if len(username) < 3:
+        return jsonify({"success": False, "message": "Имя пользователя должно содержать минимум 3 символа"}), 400
+    
+    # Проверка пароля, если указан
+    if password:
+        if len(password) < 4:
+            return jsonify({"success": False, "message": "Пароль должен содержать минимум 4 символа"}), 400
+        if password != confirm_password:
+            return jsonify({"success": False, "message": "Пароли не совпадают"}), 400
+    
+    # Проверка секретного вопроса и ответа
+    if secret_question and not secret_answer:
+        return jsonify({"success": False, "message": "Укажите ответ на секретный вопрос"}), 400
+    
+    if secret_answer and not secret_question:
+        return jsonify({"success": False, "message": "Укажите секретный вопрос"}), 400
+    
+    if secret_question and len(secret_question) < 5:
+        return jsonify({"success": False, "message": "Секретный вопрос должен содержать минимум 5 символов"}), 400
+    
+    if secret_answer and len(secret_answer) < 2:
+        return jsonify({"success": False, "message": "Ответ на секретный вопрос должен содержать минимум 2 символа"}), 400
+    
+    try:
+        from werkzeug.security import generate_password_hash
+        
+        # Проверка, что username уникален (если изменился)
+        existing_user = execute_query("SELECT id FROM public.users WHERE username = %s AND id != %s", (username, user_id))
+        if existing_user:
+            return jsonify({"success": False, "message": "Пользователь с таким именем уже существует"}), 400
+        
+        # Формируем запрос на обновление
+        update_fields = ["username = %s", "email = %s"]
+        params = [username, email if email else None]
+        
+        # Обновляем пароль только если он указан
+        if password:
+            hashed_password = generate_password_hash(password)
+            update_fields.append("password = %s")
+            params.append(hashed_password)
+        
+        # Обновляем секретный вопрос и ответ только если они указаны
+        if secret_question and secret_answer:
+            hashed_secret_answer = generate_password_hash(secret_answer.lower().strip())
+            update_fields.append("secret_question = %s")
+            update_fields.append("secret_answer = %s")
+            params.append(secret_question)
+            params.append(hashed_secret_answer)
+        
+        update_fields_str = ", ".join(update_fields)
+        params.append(user_id)
+        
+        query = f"UPDATE public.users SET {update_fields_str} WHERE id = %s"
+        execute_query(query, tuple(params), fetch=False)
+        
+        # Обновляем сессию, если изменилось имя пользователя
+        if username != session.get('username'):
+            session['username'] = username
+        
+        return jsonify({"success": True, "message": "Профиль успешно обновлен", "new_username": username})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при обновлении профиля: {e}", exc_info=True)
+        return jsonify({"success": False, "message": f"Ошибка: {str(e)}"}), 500
 
 
 @_flask_app.route('/logout')
@@ -1900,8 +2232,11 @@ def update_user():
         
         # Обновляем пароль только если он указан
         if password and password.strip():
+            # Хешируем новый пароль
+            from werkzeug.security import generate_password_hash
+            hashed_password = generate_password_hash(password.strip())
             update_fields.append("password = %s")
-            params.append(password.strip())
+            params.append(hashed_password)
         
         update_fields_str = ", ".join(update_fields)
         params.append(user_id)
@@ -1949,7 +2284,24 @@ def delete_user():
         
         username = user_info[0][0]
         
-        # Удаляем пользователя
+        # Сначала удаляем связанные записи из user_logs (если таблица существует)
+        try:
+            delete_logs_query = "DELETE FROM public.user_logs WHERE user_id = %s"
+            execute_query(delete_logs_query, (user_id,), fetch=False)
+            _flask_app.logger.info(f"Удалены записи из user_logs для пользователя {username} (ID: {user_id})")
+        except Exception as logs_err:
+            # Если таблица user_logs не существует или нет записей - это нормально
+            _flask_app.logger.warning(f"Не удалось удалить записи из user_logs: {logs_err}")
+        
+        # Также удаляем записи из корзины пользователя
+        try:
+            delete_cart_query = "DELETE FROM public.cart WHERE user_id = %s"
+            execute_query(delete_cart_query, (user_id,), fetch=False)
+            _flask_app.logger.info(f"Удалены записи из cart для пользователя {username} (ID: {user_id})")
+        except Exception as cart_err:
+            _flask_app.logger.warning(f"Не удалось удалить записи из cart: {cart_err}")
+        
+        # Теперь удаляем пользователя
         query = "DELETE FROM public.users WHERE id = %s"
         execute_query(query, (user_id,), fetch=False)
         

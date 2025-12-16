@@ -1,0 +1,34 @@
+services:
+  web_app_dash:
+    build:
+      context: ./web_app_dash
+      dockerfile: Dockerfile
+    env_file:
+      - ./web_app_dash/.env
+    ports:
+      - "8050:8050"
+    environment:
+      - DB_HOST=${POSTGRE_HOST}
+      - DB_PORT=${POSTGRE_PORT}
+      - DB_USER=${POSTGRE_USER}
+      - DB_PASSWORD=${POSTGRE_PASSWORD}
+      - DB_NAME=${POSTGRE_DBNAME}
+
+  web_app_webchip:
+    build:
+      context: ./web_app_WebChip
+      dockerfile: Dockerfile
+    env_file:
+      - ./web_app_WebChip/.env
+    ports:
+      - "8087:8087"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+
+volumes:
+  pgdata:  # Оставляем, хотя не используем, для совместимости с прошлым конфигом

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление пользователями - ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f6f8;
+        }
+        .header {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            max-width: 300px;
+            object-fit: contain;
+        }
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            text-decoration: underline;
+            color: #007CBB;
+        }
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #007CBB;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-primary {
+            background-color: #007CBB;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #006AA3;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table th {
+            background-color: #007CBB;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-admin {
+            background-color: #007CBB;
+            color: white;
+        }
+        .badge-blocked {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-active {
+            background-color: #28a745;
+            color: white;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .edit-form {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 2px solid #007CBB;
+        }
+        .edit-form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .current-user {
+            background-color: #fff3cd !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+        <a href="/" class="btn btn-secondary">Главное меню</a>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <a href="/profile" class="user-info">{{ session['username'] }}</a>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Управление пользователями</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 10px; margin-bottom: 20px; background-color: {% if category == 'danger' %}#f8d7da{% elif category == 'success' %}#d4edda{% else %}#d1ecf1{% endif %}; 
+                                color: {% if category == 'danger' %}#721c24{% elif category == 'success' %}#155724{% else %}#0c5460{% endif %}; 
+                                border-radius: 5px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Имя пользователя</th>
+                    <th>Электронная почта</th>
+                    <th>Пароль</th>
+                    <th>Администратор</th>
+                    <th>Заблокирован</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr id="user-row-{{ user.id }}" {% if user.id == session.get('user_id') %}class="current-user"{% endif %}>
+                    <td id="username-{{ user.id }}">{{ user.username }}</td>
+                    <td id="email-{{ user.id }}">{{ user.email or '-' }}</td>
+                    <td>******</td>
+                    <td id="admin-{{ user.id }}">
+                        {% if user.is_admin %}
+                            <span class="badge badge-admin">Да</span>
+                        {% else %}
+                            <span class="badge">Нет</span>
+                        {% endif %}
+                    </td>
+                    <td id="blocked-{{ user.id }}">
+                        {% if user.is_blocked %}
+                            <span class="badge badge-blocked">Да</span>
+                        {% else %}
+                            <span class="badge badge-active">Нет</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-primary" onclick="toggleEditForm({{ user.id }})">Редактировать</button>
+                        {% if user.id != session.get('user_id') %}
+                        <button class="btn btn-danger" onclick="deleteUser({{ user.id }}, '{{ user.username }}')">Удалить</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <div id="edit-form-{{ user.id }}" class="edit-form">
+                            <h3>Редактирование пользователя: {{ user.username }}</h3>
+                            <form onsubmit="updateUser(event, {{ user.id }})">
+                                <div class="form-group">
+                                    <label for="edit-username-{{ user.id }}">Имя пользователя:</label>
+                                    <input type="text" id="edit-username-{{ user.id }}" name="username" value="{{ user.username }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-email-{{ user.id }}">Электронная почта:</label>
+                                    <input type="email" id="edit-email-{{ user.id }}" name="email" value="{{ user.email or '' }}" placeholder="email@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-password-{{ user.id }}">Новый пароль (оставьте пустым, чтобы не менять):</label>
+                                    <input type="password" id="edit-password-{{ user.id }}" name="password" placeholder="Оставить без изменений">
+                                </div>
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="edit-is_admin-{{ user.id }}" name="is_admin" {% if user.is_admin %}checked{% endif %}>
+                                        <label for="edit-is_admin-{{ user.id }}">Администратор</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="edit-is_blocked-{{ user.id }}" name="is_blocked" {% if user.is_blocked %}checked{% endif %}>
+                                        <label for="edit-is_blocked-{{ user.id }}">Заблокирован</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-success">Сохранить</button>
+                                    <button type="button" class="btn btn-secondary" onclick="toggleEditForm({{ user.id }})">Отмена</button>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function toggleEditForm(userId) {
+            const form = document.getElementById('edit-form-' + userId);
+            form.classList.toggle('active');
+        }
+
+        function updateUser(event, userId) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const username = formData.get('username');
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const is_admin = document.getElementById('edit-is_admin-' + userId).checked;
+            const is_blocked = document.getElementById('edit-is_blocked-' + userId).checked;
+
+            // Проверка на изменение собственного статуса администратора
+            const currentUserId = {% if session.get('user_id') %}{{ session.get('user_id') }}{% else %}null{% endif %};
+            if (userId === currentUserId && !is_admin) {
+                if (!confirm('Вы уверены, что хотите убрать права администратора у самого себя? Это может ограничить ваш доступ.')) {
+                    return;
+                }
+            }
+
+            const data = {
+                user_id: userId,
+                username: username,
+                email: email || null,
+                password: password || null,
+                is_admin: is_admin,
+                is_blocked: is_blocked
+            };
+
+            fetch('/update_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Пользователь успешно обновлен');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось обновить пользователя');
+            });
+        }
+
+        function deleteUser(userId, username) {
+            if (!confirm('Вы уверены, что хотите удалить пользователя "' + username + '"? Это действие нельзя отменить.')) {
+                return;
+            }
+
+            if (!confirm('ВНИМАНИЕ! Удаление пользователя необратимо. Продолжить?')) {
+                return;
+            }
+
+            fetch('/delete_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Пользователь успешно удален');
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить пользователя');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
+from datetime import timedelta
 
 import telebot
 
@@ -54,6 +55,74 @@ def process_telegram_notifications(
     try:
         with db.get_connection() as conn:
             with conn.cursor() as cur:
+                # Автоотмена неподтвержденных бронирований (статус не active) при наступлении времени начала
+                cur.execute(
+                    """
+                    SELECT id, user_id, time_start
+                    FROM bookings
+                    WHERE cancel = FALSE
+                      AND finish IS NULL
+                      AND time_start <= NOW()
+                      AND time_start >= NOW() - INTERVAL '20 minutes' -- не трогаем старые периоды
+                      AND (status IS NULL OR status NOT IN ('active'))
+                    """
+                )
+                auto_cancel_rows = cur.fetchall()
+                if auto_cancel_rows:
+                    cancelled_ids = []
+                    for row in auto_cancel_rows:
+                        booking_id = row["id"]
+                        user_id = row["user_id"]
+                        cur.execute(
+                            "UPDATE bookings SET cancel = TRUE, status = 'cancelled' WHERE id = %s AND cancel = FALSE AND finish IS NULL",
+                            (booking_id,),
+                        )
+                        cancelled_ids.append(booking_id)
+                        try:
+                            bot.send_message(
+                                user_id,
+                                f"⚠️ Время подтверждения брони {booking_id} истекло. Бронь отменена автоматически.",
+                            )
+                        except Exception as e_msg:
+                            logger.warning(f"Не удалось отправить сообщение об автоотмене {booking_id}: {e_msg}")
+                        if cancelled_ids:
+                            conn.commit()
+                            logger.info(f"Автоотменены просроченные брони: {cancelled_ids}")
+
+                # Автозавершение бронирований после окончания (если еще не завершены)
+                cur.execute(
+                    """
+                    SELECT id, user_id, time_end
+                    FROM bookings
+                    WHERE cancel = FALSE
+                      AND finish IS NULL
+                      AND time_end <= NOW()
+                      AND time_end >= NOW() - INTERVAL '20 minutes' -- не трогаем старые периоды
+                    """
+                )
+                auto_finish_rows = cur.fetchall()
+                if auto_finish_rows:
+                    finished_ids = []
+                    now_ts = datetime.now()
+                    for row in auto_finish_rows:
+                        booking_id = row["id"]
+                        user_id = row["user_id"]
+                        cur.execute(
+                            "UPDATE bookings SET finish = %s, status = 'finished' WHERE id = %s AND cancel = FALSE AND finish IS NULL",
+                            (now_ts, booking_id),
+                        )
+                        finished_ids.append(booking_id)
+                        try:
+                            bot.send_message(
+                                user_id,
+                                f"✅ Работа по бронированию {booking_id} завершена автоматически.",
+                            )
+                        except Exception as e_msg:
+                            logger.warning(f"Не удалось отправить сообщение об автозавершении {booking_id}: {e_msg}")
+                    if finished_ids:
+                        conn.commit()
+                        logger.info(f"Автозавершены брони: {finished_ids}")
+
                 # Получаем задачи для обработки
                 cur.execute(
                     """
@@ -156,47 +225,157 @@ def process_telegram_notifications(
                                 (NotificationStatus.DONE.value, task_id),
                             )
                             continue
-
-                        # Формируем сообщение в зависимости от типа события
+                        
+                        # Определяем тип события
                         event_type = NotificationEventType(event_type_str)
-                        message_text = _format_notification_message(
-                            event_type, equip_name, time_start, time_end
-                        )
-
-                        # Отправляем уведомление
-                        try:
-                            bot.send_message(user_id, message_text)
-                            stats["sent"] += 1
-                            logger.info(
-                                f"Telegram уведомление отправлено пользователю {user_id} для брони {booking_id}"
+                        
+                        # Проверяем, что время бронирования еще не прошло
+                        now_check = datetime.now()
+                        if event_type == NotificationEventType.START:
+                            # Для уведомления о начале: проверяем, что время начала еще не прошло
+                            if isinstance(time_start, datetime) and time_start <= now_check:
+                                logger.info(
+                                    f"Бронирование {booking_id} уже началось ({time_start} <= {now_check}), пропускаем уведомление о начале"
+                                )
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.DONE.value, task_id),
+                                )
+                                continue
+                        elif event_type == NotificationEventType.END:
+                            # Для уведомления об окончании: проверяем, что время окончания еще не прошло
+                            if isinstance(time_end, datetime) and time_end <= now_check:
+                                logger.info(
+                                    f"Бронирование {booking_id} уже закончилось ({time_end} <= {now_check}), пропускаем уведомление об окончании"
+                                )
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.DONE.value, task_id),
+                                )
+                                continue
+                        
+                        # Для уведомлений о начале используем специальную логику с кнопкой подтверждения
+                        if event_type == NotificationEventType.START:
+                            # Используем логику из notification_service для отправки уведомления с кнопкой
+                            try:
+                                from utils import keyboards
+                                import constants as const
+                                
+                                if booking_id is None:
+                                    raise ValueError("booking_id is None")
+                                
+                                markup = keyboards.generate_start_confirmation_keyboard(booking_id)
+                                start_time_str = time_start.strftime('%H:%M')
+                                minutes_before = const.NOTIFICATION_BEFORE_START_MINUTES
+                                timeout_minutes = const.BOOKING_CONFIRMATION_TIMEOUT_SECONDS // 60
+                                message_text = (
+                                    f"❗ Ваше бронирование на '{equip_name}' начинается через {minutes_before} мин ({start_time_str}).\n\n"
+                                    f"Пожалуйста, **подтвердите актуальность** в течение {timeout_minutes} минут, иначе бронь будет автоматически отменена."
+                                )
+                                
+                                sent_msg = bot.send_message(
+                                    user_id,
+                                    message_text,
+                                    reply_markup=markup,
+                                    parse_mode='Markdown'
+                                )
+                                stats["sent"] += 1
+                                logger.info(
+                                    f"Telegram уведомление с кнопкой подтверждения отправлено пользователю {user_id} для брони {booking_id} (msg_id: {sent_msg.message_id})"
+                                )
+                                
+                                # Помечаем как выполненное
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.DONE.value, task_id),
+                                )
+                            except telebot.apihelper.ApiTelegramException as e_notify:
+                                error_msg = f"Telegram API error: {e_notify.error_code} - {e_notify.description}"
+                                logger.warning(
+                                    f"Не удалось отправить Telegram уведомление пользователю {user_id}: {error_msg}"
+                                )
+                                stats["failed"] += 1
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, last_error = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.FAILED.value, error_msg[:500], task_id),
+                                )
+                                continue
+                            except Exception as e_notify:
+                                logger.error(f"Ошибка при отправке уведомления о начале для брони {booking_id}: {e_notify}", exc_info=True)
+                                stats["failed"] += 1
+                                error_msg = str(e_notify)[:500]
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, last_error = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.FAILED.value, error_msg, task_id),
+                                )
+                                continue
+                        else:
+                            # Для других типов уведомлений используем формат + клавиатура для окончания
+                            message_text = _format_notification_message(
+                                event_type, equip_name, time_start, time_end
                             )
 
-                            # Помечаем как выполненное
-                            cur.execute(
-                                """
-                                UPDATE wsb_notifications_schedule
-                                SET status = %s, updated_at = CURRENT_TIMESTAMP
-                                WHERE id = %s
-                                """,
-                                (NotificationStatus.DONE.value, task_id),
-                            )
+                            markup = None
+                            if event_type == NotificationEventType.END and booking_id is not None:
+                                try:
+                                    from utils import keyboards
+                                    markup = keyboards.generate_extend_prompt_keyboard(booking_id)
+                                except Exception as kb_err:
+                                    logger.warning(f"Не удалось построить клавиатуру продления для брони {booking_id}: {kb_err}")
 
-                        except telebot.apihelper.ApiTelegramException as e:
-                            error_msg = f"Telegram API error: {e.error_code} - {e.description}"
-                            logger.warning(
-                                f"Не удалось отправить Telegram уведомление пользователю {user_id}: {error_msg}"
-                            )
-                            stats["failed"] += 1
+                            # Отправляем уведомление
+                            try:
+                                bot.send_message(user_id, message_text, reply_markup=markup)
+                                stats["sent"] += 1
+                                logger.info(
+                                    f"Telegram уведомление отправлено пользователю {user_id} для брони {booking_id}"
+                                )
 
-                            # Помечаем как неудачное
-                            cur.execute(
-                                """
-                                UPDATE wsb_notifications_schedule
-                                SET status = %s, last_error = %s, updated_at = CURRENT_TIMESTAMP
-                                WHERE id = %s
-                                """,
-                                (NotificationStatus.FAILED.value, error_msg[:500], task_id),
-                            )
+                                # Помечаем как выполненное
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.DONE.value, task_id),
+                                )
+                            except telebot.apihelper.ApiTelegramException as e:
+                                error_msg = f"Telegram API error: {e.error_code} - {e.description}"
+                                logger.warning(
+                                    f"Не удалось отправить Telegram уведомление пользователю {user_id}: {error_msg}"
+                                )
+                                stats["failed"] += 1
+
+                                # Помечаем как неудачное
+                                cur.execute(
+                                    """
+                                    UPDATE wsb_notifications_schedule
+                                    SET status = %s, last_error = %s, updated_at = CURRENT_TIMESTAMP
+                                    WHERE id = %s
+                                    """,
+                                    (NotificationStatus.FAILED.value, error_msg[:500], task_id),
+                                )
 
                     except Exception as e:
                         error_msg = str(e)[:500]

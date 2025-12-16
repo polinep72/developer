@@ -1,0 +1,16 @@
+DB_USER=postgres
+DB_PASSWORD=27915002
+DB_NAME=equipment
+DB_HOST=localhost
+DB_HOST139=192.168.1.139
+DB_HOST22=192.168.1.22
+DB_PORT=5432
+
+
+
+
+
+
+
+
+

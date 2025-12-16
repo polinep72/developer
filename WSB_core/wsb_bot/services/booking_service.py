@@ -508,13 +508,30 @@ def create_booking(db: Database, user_id: int, equipment_id: int, selected_date_
         time_interval = f"{start_datetime.strftime('%H:%M')}-{end_datetime.strftime('%H:%M')}"
         duration_in_db = duration_timedelta.total_seconds() / 3600.0
         data_booking_ts = datetime.now()
-        insert_query = "INSERT INTO bookings (user_id, equip_id, date, time_start, time_end, time_interval, duration, cancel, finish, data_booking) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, NULL, %s) RETURNING id;"
-        params = (user_id, equipment_id, selected_date_obj, start_datetime, end_datetime, time_interval, duration_in_db, data_booking_ts)
+        insert_query = "INSERT INTO bookings (user_id, equip_id, date, time_start, time_end, time_interval, duration, cancel, finish, data_booking, status) VALUES (%s, %s, %s, %s, %s, %s, %s, FALSE, NULL, %s, %s) RETURNING id;"
+        params = (user_id, equipment_id, selected_date_obj, start_datetime, end_datetime, time_interval, duration_in_db, data_booking_ts, "planned")
         result: QueryResult = db.execute_query(insert_query, params, fetch_results=True, commit=True)
 
         if result and 'id' in result[0]:
             new_id = result[0]['id']
             logger.info(f"Создана бронь ID {new_id} user {user_id}, equip {equipment_id} на {selected_date_str} {time_interval}")
+            
+            # Перепланируем уведомления для новой брони в едином расписании wsb_notifications_schedule
+            try:
+                from wsb_core.notifications_schedule import rebuild_schedule_for_booking, NotificationChannel
+                with db.get_connection() as conn:
+                    with conn.cursor() as cur:
+                        created_count = rebuild_schedule_for_booking(
+                            cur,
+                            booking_id=new_id,
+                            channels=(NotificationChannel.TELEGRAM, NotificationChannel.EMAIL),
+                        )
+                        conn.commit()
+                        logger.info(f"Создано {created_count} записей в wsb_notifications_schedule для брони {new_id}")
+            except Exception as e_schedule:
+                logger.error(f"Ошибка при перепланировании уведомлений для брони {new_id}: {e_schedule}", exc_info=True)
+                # Не прерываем выполнение, бронь уже создана
+            
             return True, const.MSG_BOOKING_SUCCESS, new_id
         else:
             logger.error(f"INSERT {user_id} не вернул ID.");
@@ -538,7 +555,7 @@ def cancel_booking(db: Database, booking_id: int, user_id: Optional[int] = None,
             logger.warning(f"{user_id} пытался отменить начавшуюся {booking_id}.")
             return False, const.MSG_CANCEL_FAIL_TOO_LATE, b_user_id
 
-    query = "UPDATE bookings SET cancel = TRUE WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
+    query = "UPDATE bookings SET cancel = TRUE, status = 'cancelled' WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
     try:
         # execute_query возвращает None при успешном UPDATE/DELETE с fetch_results=False
         # Исключение будет выброшено, если запрос не выполнен
@@ -566,7 +583,7 @@ def finish_booking(db: Database, booking_id: int, user_id: int) -> Tuple[bool, s
     if time_start_naive > now_dt + timedelta(minutes=1): logger.warning(f"Попытка завершить не начавшуюся {booking_id} ({time_start_naive} > {now_dt})."); return False, const.MSG_FINISH_FAIL_NOT_ACTIVE
 
     finish_time_ts = datetime.now()
-    query = "UPDATE bookings SET finish = %s WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
+    query = "UPDATE bookings SET finish = %s, status = 'finished' WHERE id = %s AND cancel = FALSE AND finish IS NULL;"
     params = (finish_time_ts, booking_id)
     try:
         # execute_query возвращает None при успешном UPDATE/DELETE с fetch_results=False
@@ -604,14 +621,8 @@ def extend_booking(db: Database, booking_id: int, user_id: int, extension_str: s
     # 2. Если ядро доступно — пробуем использовать его
     if extend_booking_core is not None:
         try:
-            # Берём «сырое» соединение из пула Database
-            conn = Database.get_connection()
-        except Exception as e_conn:
-            logger.error(f"Не удалось получить соединение для extend_booking_core: {e_conn}", exc_info=True)
-            conn = None
-
-        if conn is not None:
-            try:
+            # Берём соединение из пула Database через контекстный менеджер
+            with Database.get_connection() as conn:
                 with conn.cursor() as cur:
                     from wsb_core.bookings_core import BookingCoreResult  # локальный импорт для type checking
 
@@ -632,39 +643,34 @@ def extend_booking(db: Database, booking_id: int, user_id: int, extension_str: s
                         msg = core_result.message or const.MSG_ERROR_GENERAL
                         return False, msg
 
-                    try:
-                        conn.commit()
-                    except Exception as e_commit:
-                        logger.error(f"Ошибка COMMIT после extend_booking_core: {e_commit}", exc_info=True)
-                        return False, const.MSG_ERROR_GENERAL
-
-                    # Формируем текст ответа, максимально сохраняя старый формат
-                    booking_info = find_booking_by_id(db, booking_id)
-                    equip_name = (booking_info or {}).get("equipment_name", "???")
-                    new_end = core_result.extra.get("new_end")
-                    if isinstance(new_end, datetime):
-                        new_end_str = _format_time(new_end)
-                    else:
-                        new_end_str = "??:??"
-
-                    logger.info(
-                        f"[core] {user_id} продлил {booking_id} ({equip_name}) на {extension_str}. "
-                        f"New end: {new_end if isinstance(new_end, datetime) else 'unknown'}"
-                    )
-                    msg = (
-                        f"{const.MSG_BOOKING_EXTENDED_WSB}\n"
-                        f"Оборудование: *{equip_name}*\n"
-                        f"Новое время окончания: {new_end_str}"
-                    )
-                    return True, msg
-            except Exception as e_core:
-                logger.error(f"Ошибка extend_booking_core для {booking_id}: {e_core}", exc_info=True)
-                # откатываемся к локальной реализации
-            finally:
                 try:
-                    Database.release_connection(conn)
-                except Exception:
-                    pass
+                    conn.commit()
+                except Exception as e_commit:
+                    logger.error(f"Ошибка COMMIT после extend_booking_core: {e_commit}", exc_info=True)
+                    return False, const.MSG_ERROR_GENERAL
+
+                # Формируем текст ответа, максимально сохраняя старый формат
+                booking_info = find_booking_by_id(db, booking_id)
+                equip_name = (booking_info or {}).get("equipment_name", "???")
+                new_end = core_result.extra.get("new_end")
+                if isinstance(new_end, datetime):
+                    new_end_str = _format_time(new_end)
+                else:
+                    new_end_str = "??:??"
+
+                logger.info(
+                    f"[core] {user_id} продлил {booking_id} ({equip_name}) на {extension_str}. "
+                    f"New end: {new_end if isinstance(new_end, datetime) else 'unknown'}"
+                )
+                msg = (
+                    f"{const.MSG_BOOKING_EXTENDED_WSB}\n"
+                    f"Оборудование: *{equip_name}*\n"
+                    f"Новое время окончания: {new_end_str}"
+                )
+                return True, msg
+        except Exception as e_core:
+            logger.error(f"Ошибка extend_booking_core для {booking_id}: {e_core}", exc_info=True)
+            # откатываемся к локальной реализации
 
     # 3. Фоллбэк — старая локальная реализация (без ядра)
     booking_info: Optional[BookingRow] = find_booking_by_id(db, booking_id)
@@ -752,13 +758,27 @@ def extend_booking(db: Database, booking_id: int, user_id: int, extension_str: s
         return False, const.MSG_ERROR_GENERAL
 
 def confirm_start_booking(db: Database, booking_id: int, user_id: int) -> bool:
-    """ "Подтверждает" актуальность брони."""
+    """ Подтверждает актуальность брони: снимает ожидание, ставит status='active'. """
     booking_info: Optional[BookingRow] = find_booking_by_id(db, booking_id)
     if booking_info:
         b_user_id = booking_info.get('user_id'); b_cancel = booking_info.get('cancel', False); b_finish_time = booking_info.get('finish')
-        if b_user_id == user_id and not b_cancel and b_finish_time is None: logger.info(f"User {user_id} подтвердил {booking_id}."); return True
-        else: logger.warning(f"Попытка подтвердить неактив/чужую {booking_id} user {user_id}.")
-    else: logger.warning(f"Не найдена {booking_id} для подтверждения user {user_id}.")
+        if b_user_id == user_id and not b_cancel and b_finish_time is None:
+            try:
+                db.execute_query(
+                    "UPDATE bookings SET status = 'active' WHERE id = %s;",
+                    (booking_id,),
+                    commit=True,
+                    fetch_results=False,
+                )
+                logger.info(f"User {user_id} подтвердил {booking_id}. Статус -> active.")
+                return True
+            except Exception as e_upd:
+                logger.error(f"Ошибка установки status=active для {booking_id}: {e_upd}", exc_info=True)
+                return False
+        else:
+            logger.warning(f"Попытка подтвердить неактив/чужую {booking_id} user {user_id}.")
+    else:
+        logger.warning(f"Не найдена {booking_id} для подтверждения user {user_id}.")
     return False
 
 def auto_cancel_unconfirmed_booking(db: Database, booking_id: int) -> Tuple[bool, Optional[int], Optional[str]]:

@@ -121,6 +121,9 @@ def _is_booking_row_active(row: dict[str, Any], *, now: Optional[datetime] = Non
         return False
     if row.get("finish") is not None:
         return False
+    status_val = row.get("status")
+    if status_val in ("cancelled", "finished"):
+        return False
 
     time_start = row.get("time_start")
     time_end = row.get("time_end")
@@ -205,22 +208,32 @@ def rebuild_schedule_for_booking(
     notify_start_at = time_start - timedelta(minutes=NOTIFICATION_BEFORE_START_MINUTES)
     notify_end_at = time_end - timedelta(minutes=NOTIFICATION_BEFORE_END_MINUTES)
 
+    # Проверяем, что время уведомлений еще не прошло
+    now = datetime.now()
+    
+    # Создаем уведомления только если время уведомления еще не прошло
     for ch in channels:
-        _insert_event(
-            cur,
-            booking_id=booking_id,
-            channel=ch,
-            event_type=NotificationEventType.START,
-            run_at=notify_start_at,
-        )
-        _insert_event(
-            cur,
-            booking_id=booking_id,
-            channel=ch,
-            event_type=NotificationEventType.END,
-            run_at=notify_end_at,
-        )
-        created += 2
+        # Уведомление о начале - только если время уведомления еще не прошло
+        if notify_start_at > now:
+            _insert_event(
+                cur,
+                booking_id=booking_id,
+                channel=ch,
+                event_type=NotificationEventType.START,
+                run_at=notify_start_at,
+            )
+            created += 1
+        
+        # Уведомление об окончании - только если время уведомления еще не прошло
+        if notify_end_at > now:
+            _insert_event(
+                cur,
+                booking_id=booking_id,
+                channel=ch,
+                event_type=NotificationEventType.END,
+                run_at=notify_end_at,
+            )
+            created += 1
 
     return created
 

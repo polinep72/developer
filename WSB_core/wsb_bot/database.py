@@ -10,11 +10,32 @@ from typing import Optional, List, Tuple, Any, Dict, Union
 QueryResult = Optional[List[Dict[str, Any]]]
 
 
+class ConnectionWrapper:
+    """Обертка для соединения БД, реализующая протокол контекстного менеджера."""
+    
+    def __init__(self, conn, db_class):
+        self.conn = conn
+        self.db_class = db_class
+    
+    def __enter__(self):
+        return self.conn
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Возвращаем соединение в пул при выходе из контекста
+        if self.conn:
+            self.db_class.release_connection(self.conn)
+        return False  # Не подавляем исключения
+    
+    def __getattr__(self, name):
+        # Проксируем все остальные атрибуты к соединению
+        return getattr(self.conn, name)
+
+
 class Database:
     _pool: Optional[psycopg2.pool.SimpleConnectionPool] = None
 
     @classmethod
-    def initialize_pool(cls, min_conn: int = 1, max_conn: int = 5): # <-- Параметры по умолчанию
+    def initialize_pool(cls, min_conn: int = 2, max_conn: int = 10): # <-- Увеличен размер пула
         """Инициализирует пул соединений."""
         if cls._pool is None:
             # Проверка на корректность параметров
@@ -38,13 +59,12 @@ class Database:
                     cursor_factory=DictCursor  # Используем DictCursor по умолчанию
                 )
                 # Проверка соединения при инициализации
-                conn = cls.get_connection()
-                if conn:
-                    logger.info(f"Пул соединений успешно инициализирован. Версия PostgreSQL: {conn.server_version}")
-                    conn.rollback() # Откатываем любую возможную начальную транзакцию
-                    cls.release_connection(conn)
-                else:
-                     raise ConnectionError("Не удалось получить тестовое соединение из пула.") # Используем ConnectionError
+                with cls.get_connection() as conn:
+                    if conn:
+                        logger.info(f"Пул соединений успешно инициализирован. Версия PostgreSQL: {conn.server_version}")
+                        conn.rollback() # Откатываем любую возможную начальную транзакцию
+                    else:
+                        raise ConnectionError("Не удалось получить тестовое соединение из пула.")
             except (Exception, psycopg2.DatabaseError) as error:
                 logger.critical(f"Ошибка инициализации пула соединений: {error}", exc_info=True)
                 cls._pool = None # Сбрасываем пул в случае ошибки
@@ -61,16 +81,23 @@ class Database:
 
     @classmethod
     def get_connection(cls):
-        """Получает соединение из пула."""
+        """Получает соединение из пула.
+        
+        Может использоваться как контекстный менеджер:
+            with db.get_connection() as conn:
+                # работа с соединением
+        Соединение автоматически возвращается в пул при выходе из блока.
+        """
         if cls._pool is None:
             logger.error("Пул соединений не инициализирован при попытке получить соединение!")
-            raise ConnectionError("Database connection pool is not initialized.") # Используем ConnectionError
+            raise ConnectionError("Database connection pool is not initialized.")
         try:
             conn = cls._pool.getconn()
-            return conn
+            # Возвращаем объект-обертку, который реализует протокол контекстного менеджера
+            return ConnectionWrapper(conn, cls)
         except (Exception, psycopg2.Error) as e:
             logger.error(f"Ошибка при получении соединения из пула: {e}", exc_info=True)
-            raise ConnectionError(f"Failed to get connection from pool: {e}") # Пробрасываем как ConnectionError
+            raise ConnectionError(f"Failed to get connection from pool: {e}")
 
     @classmethod
     def release_connection(cls, conn):
@@ -106,10 +133,9 @@ class Database:
             ConnectionError: Если не удалось получить соединение.
             Exception: Другие возможные ошибки.
         """
-        conn = None
         results: QueryResult = None
-        try:
-            conn = self.get_connection() # Получаем соединение
+        # Используем контекстный менеджер для автоматического возврата соединения в пул
+        with self.get_connection() as conn:
             with conn.cursor() as cursor: # DictCursor по умолчанию
                 query_type = query.strip().split(maxsplit=1)[0].upper()
                 logger.debug(f"Выполнение запроса [{query_type}]: {query.strip()}... Params: {params}")
@@ -140,29 +166,6 @@ class Database:
                     results = None # Возвращаем None, если результаты не запрашивались
 
                 return results # Возвращаем список словарей или None
-
-        except (psycopg2.Error, ConnectionError) as db_error: # Ловим ошибки БД и соединения
-            # Роллбэк, если коммит не удался или не требовался
-            if conn and not commit:
-                 try:
-                     conn.rollback()
-                     logger.warning(f"Транзакция отменена (rollback) из-за ошибки выполнения: {db_error}")
-                 except Exception as rb_error:
-                     logger.error(f"Ошибка при попытке rollback после ошибки выполнения: {rb_error}")
-
-            logger.error(f"Ошибка выполнения SQL запроса: {query.strip()} Params: {params} Ошибка: {db_error}", exc_info=True)
-            raise db_error # Пробрасываем ошибку БД или соединения дальше
-
-        except Exception as other_error: # Ловим прочие непредвиденные ошибки
-            if conn and not commit:
-                 try: conn.rollback()
-                 except Exception: pass
-            logger.error(f"Непредвиденная ошибка при выполнении SQL: {other_error}", exc_info=True)
-            raise other_error # Пробрасываем дальше
-
-        finally:
-            if conn:
-                self.release_connection(conn) # Всегда возвращаем соединение в пул
 
     # Методы commit_transaction и rollback_transaction остаются без изменений
     def commit_transaction(self, conn):

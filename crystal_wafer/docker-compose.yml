@@ -1,0 +1,47 @@
+version: '3.8' # Эту строку можно удалить, если Docker Compose выдает предупреждение
+
+services:
+  web_app_dash:
+    build:
+      context: ./web_app_dash
+      dockerfile: Dockerfile
+    container_name: web_app_dash_container
+    env_file:
+      - .env
+    ports:
+      - "8083:8083"
+    environment:
+      # Оставляем DB_HOST=host.docker.internal, так как extra_hosts его правильно обработает
+      - DB_HOST=host.docker.internal 
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME1=${DB_NAME1}
+    restart: unless-stopped
+    extra_hosts: # <--- ДОБАВЛЯЕМ ИЛИ РАСКОММЕНТИРОВЫВАЕМ ЭТУ СЕКЦИЮ
+      - "host.docker.internal:host-gateway"
+
+  web_app_webchip:
+    build:
+      context: ./web_app_WebChip
+      dockerfile: Dockerfile
+    container_name: web_app_webchip_container
+    env_file:
+      - .env
+    ports:
+      - "8087:8087"
+    environment:
+      # Оставляем DB_HOST=host.docker.internal
+      - DB_HOST=host.docker.internal
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME2=${DB_NAME2}
+      - SECRET_KEY=${SECRET_KEY}
+    restart: unless-stopped
+    extra_hosts: # <--- ДОБАВЛЯЕМ ИЛИ РАСКОММЕНТИРОВЫВАЕМ ЭТУ СЕКЦИЮ
+      - "host.docker.internal:host-gateway"
+
+# volumes: (удалите, если не используются)
+#   pgdata1:
+#   pgdata2:

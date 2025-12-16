@@ -147,3 +147,74 @@ if request.method == 'POST':
         _flask_app.logger.info(f"/search final SQL filter: conditions={filter_conditions}, params={params_search}")
 ```
 В `SOLUTIONS_HISTORY.md` и `CHANGELOG.md` зафиксированы активные работы по поиску и корректному подключению к серверу `192.168.1.139`.
+
+ИИ Агент: Бот обновлён — поиск теперь учитывает новые склады (invoice_p, invoice_f, consumption_p, consumption_f) и выводит результаты блоками с разделителем.
+```47:126:telegram_bot_HMCB/app.py
+    query = """
+    WITH
+    income_union AS (
+        SELECT 'Склад кристаллов' AS wh, id_n_chip, SUM(quan_w) total_income_w, SUM(quan_gp) total_income_gp
+        FROM invoice
+        WHERE COALESCE(note, '') != 'возврат'
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Склад пластин' AS wh, id_n_chip, SUM(quan_w), SUM(quan_gp)
+        FROM invoice_p
+        WHERE COALESCE(note, '') != 'возврат'
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Дальний склад' AS wh, id_n_chip, SUM(quan_w), SUM(quan_gp)
+        FROM invoice_f
+        WHERE COALESCE(note, '') != 'возврат'
+        GROUP BY 1,2
+    ),
+    ...
+    SELECT
+        ak.wh,
+        nc.n_chip AS chip_code,
+        (COALESCE(inc.total_income_w, 0) + COALESCE(ret.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) AS stock_w,
+        (COALESCE(inc.total_income_gp, 0) + COALESCE(ret.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) AS stock_gp
+    ...
+    ORDER BY ak.wh, nc.n_chip;
+    """
+```
+```98:130:telegram_bot_HMCB/app.py
+                if results:
+                    # Группируем по складам и показываем только строки с ненулевым остатком
+                    warehouse_order = ["Склад кристаллов", "Склад пластин", "Дальний склад"]
+                    grouped = {w: [] for w in warehouse_order}
+                    ...
+                    for wh in warehouse_order:
+                        items = grouped.get(wh, [])
+                        if items:
+                            response_parts.append(wh)
+                            ...
+                            response_parts.append("---------------")
+```
+
+ИИ Агент: Телеграм-бот теперь выводит блоки по всем складам, даже если остатки нулевые; при отсутствии данных по складу — сообщение «Информация по этому кристаллу не найдена.»
+```87:145:telegram_bot_HMCB/app.py
+                if results:
+                    warehouse_order = ["Склад кристаллов", "Склад пластин", "Дальний склад"]
+                    # Структура: {chip_code: {wh: (stock_w, stock_gp)}}
+                    chips = {}
+                    for wh, chip_code, stock_wafer, stock_gelpak in results:
+                        chip_entry = chips.setdefault(chip_code, {})
+                        chip_entry[wh] = (
+                            stock_wafer if stock_wafer is not None else 0,
+                            stock_gelpak if stock_gelpak is not None else 0
+                        )
+
+                    response_parts = []
+                    for chip_code, per_wh in chips.items():
+                        for wh in warehouse_order:
+                            response_parts.append(wh)
+                            if wh in per_wh:
+                                stock_w, stock_gp = per_wh[wh]
+                                response_parts.append(f"Шифр: {chip_code}")
+                                response_parts.append(f"  Остаток Wafer: {stock_w} шт.")
+                                response_parts.append(f"  Остаток GelPak: {stock_gp} шт.")
+                            else:
+                                response_parts.append("Информация по этому кристаллу не найдена.")
+                            response_parts.append("---------------")
+```
