@@ -551,31 +551,31 @@
         function deleteUser(userId, username) {
             confirmAction('Вы уверены, что хотите удалить пользователя "' + username + '"?<br><br><strong>ВНИМАНИЕ!</strong> Удаление пользователя необратимо. Это действие нельзя отменить.', function() {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch('/delete_user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                },
-                body: JSON.stringify({
-                    user_id: userId
+                fetch('/delete_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message || 'Пользователь успешно удален', 'success');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                showToast('Не удалось удалить пользователя. Проверьте подключение к интернету.', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message || 'Пользователь успешно удален', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showToast('Не удалось удалить пользователя. Проверьте подключение к интернету.', 'error');
+                });
             });
         }
         
