@@ -157,6 +157,12 @@ setup_logging()
 
 _flask_app = Flask(__name__)
 
+# Максимальный размер загружаемого файла (10 MB)
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB в байтах
+
+# Ограничение размера загружаемых файлов для защиты от DoS атак
+_flask_app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
 # Генерация SECRET_KEY для безопасности сессий
 import secrets
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -206,6 +212,19 @@ def ratelimit_handler(e):
     """Обработка ошибки превышения лимита запросов"""
     flash("Слишком много попыток входа. Пожалуйста, подождите минуту перед следующей попыткой.", "warning")
     return render_template('login.html'), 429
+
+# Обработчик ошибки превышения размера файла
+@_flask_app.errorhandler(413)
+def request_entity_too_large(e):
+    """Обработка ошибки превышения размера загружаемого файла"""
+    max_size_mb = MAX_FILE_SIZE / (1024 * 1024)
+    _flask_app.logger.warning(f"Попытка загрузки файла превышающего лимит: {MAX_FILE_SIZE} байт")
+    if request.is_json or request.path.startswith('/api/') or request.path in ['/inflow', '/outflow', '/refund']:
+        return jsonify({"success": False, "message": f"Файл слишком большой. Максимальный размер: {max_size_mb} MB"}), 413
+    flash(f"Файл слишком большой. Максимальный размер: {max_size_mb} MB", "danger")
+    # Перенаправляем на предыдущую страницу или главную
+    referer = request.headers.get('Referer', '/')
+    return redirect(referer), 413
 
 # Обработчик необработанных исключений
 @_flask_app.errorhandler(Exception)
@@ -680,6 +699,16 @@ def inflow():
     if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
         _flask_app.logger.warning(f"Inflow POST: Invalid file format: {file.filename}")
         return jsonify({"success": False, "message": "Неверный формат файла. Допускаются только .xlsx и .xls"}), 400
+    
+    # Проверка размера файла
+    file.seek(0, 2)  # Переход в конец файла
+    file_size = file.tell()
+    file.seek(0)  # Возврат в начало
+    
+    if file_size > MAX_FILE_SIZE:
+        max_size_mb = MAX_FILE_SIZE / (1024 * 1024)
+        _flask_app.logger.warning(f"Inflow POST: File too large: {file.filename} ({file_size} bytes)")
+        return jsonify({"success": False, "message": f"Файл слишком большой. Максимальный размер: {max_size_mb} MB"}), 400
 
     # --- НОВЫЕ ПЕРЕМЕННЫЕ ---
     user_id = session['user_id']
@@ -866,6 +895,16 @@ def outflow():
     file = request.files.get('file')
     if not file or file.filename == '':
         return jsonify({"success": False, "message": "Файл не выбран."}), 400
+    
+    # Проверка размера файла
+    file.seek(0, 2)  # Переход в конец файла
+    file_size = file.tell()
+    file.seek(0)  # Возврат в начало
+    
+    if file_size > MAX_FILE_SIZE:
+        max_size_mb = MAX_FILE_SIZE / (1024 * 1024)
+        _flask_app.logger.warning(f"Outflow POST: File too large: {file.filename} ({file_size} bytes)")
+        return jsonify({"success": False, "message": f"Файл слишком большой. Максимальный размер: {max_size_mb} MB"}), 400
 
     user_id = session['user_id']
     file_name = file.filename
@@ -1080,6 +1119,16 @@ def refund():
     file = request.files.get('file')
     if not file or file.filename == '':
         return jsonify({"success": False, "message": "Файл не выбран."}), 400
+    
+    # Проверка размера файла
+    file.seek(0, 2)  # Переход в конец файла
+    file_size = file.tell()
+    file.seek(0)  # Возврат в начало
+    
+    if file_size > MAX_FILE_SIZE:
+        max_size_mb = MAX_FILE_SIZE / (1024 * 1024)
+        _flask_app.logger.warning(f"Refund POST: File too large: {file.filename} ({file_size} bytes)")
+        return jsonify({"success": False, "message": f"Файл слишком большой. Максимальный размер: {max_size_mb} MB"}), 400
 
     user_id = session['user_id']
     file_name = file.filename
