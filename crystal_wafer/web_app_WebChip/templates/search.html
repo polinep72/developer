@@ -36,11 +36,15 @@
         .logo {
             display: flex;
             align-items: center;
+            cursor: pointer;
         }
         .logo img {
             height: 50px;
             max-width: 300px;
             object-fit: contain;
+        }
+        .logo:hover {
+            opacity: 0.8;
         }
 
         .user-menu {
@@ -204,7 +208,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">
+        <div class="logo" onclick="window.location.href='/'">
             <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
         </div>
 		<a href="/" class="btn btn-secondary">Главное меню</a>

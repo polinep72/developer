@@ -21,8 +21,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-bottom: 3px solid #007CBB;
         }
+        .logo {
+            cursor: pointer;
+        }
         .logo img {
             height: 40px;
+        }
+        .logo:hover {
+            opacity: 0.8;
         }
         .user-menu {
             display: flex;
@@ -152,7 +158,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">
+        <div class="logo" onclick="window.location.href='/'">
             <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
         </div>
         <a href="/" class="btn btn-secondary">Главное меню</a>

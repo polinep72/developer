@@ -17,7 +17,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.7"
+__version__ = "1.3.8"
 
 # Импортируем WSGIMiddleware
 try:
