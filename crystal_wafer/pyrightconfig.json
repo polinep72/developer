@@ -1,0 +1,16 @@
+{
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "pythonVersion": "3.9",
+  "typeCheckingMode": "basic",
+  "include": [
+    "web_app_WebChip"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "venv"
+  ]
+}
+

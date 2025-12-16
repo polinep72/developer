@@ -17,7 +17,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.8"
+__version__ = "1.3.9"
 
 # Импортируем WSGIMiddleware
 try:
@@ -1085,9 +1085,14 @@ def search():
         )
     
     # Фильтр по шифру кристалла (необязательный) - добавляем только если есть непустое значение
+    # Ищем точное вхождение запрошенной последовательности символов
+    # Например, "315" найдет HJB315, HJB0315, HJB3150, но не найдет HJB308
     if chip_name_form and chip_name_form.strip():
+        search_pattern = chip_name_form.strip()
+        # Используем ILIKE для поиска последовательности символов в любом месте шифра
         filter_conditions.append("nc.n_chip ILIKE %s")
-        params_search.append(f"%{chip_name_form.strip()}%")
+        params_search.append(f"%{search_pattern}%")
+        _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
     if manufacturer_filter_form and manufacturer_filter_form != "all":
@@ -1099,8 +1104,8 @@ def search():
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-        if filter_conditions:
-            query_search += " AND " + " AND ".join(filter_conditions)
+    if filter_conditions:
+        query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
 
@@ -1369,8 +1374,8 @@ def add_to_cart():
                     id_chip_val = invoice_data[0][0]
                     id_pack_val = invoice_data[0][1]
 
-            # Обновляем запрос на вставку в корзину
-            query_insert_cart = """
+        # Обновляем запрос на вставку в корзину
+        query_insert_cart = """
             INSERT INTO cart (
                 user_id, item_id, 
                 cons_w, cons_gp, 
@@ -1386,20 +1391,20 @@ def add_to_cart():
                 cons_w = cart.cons_w + EXCLUDED.cons_w,
                 cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
                 date_added = EXCLUDED.date_added; 
-            """
-            params_cart = (
-                user_id, item_id,
-                quantity_w, quantity_gp,
-                data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
-                data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
-                data.get('note'), data.get('stor'), data.get('cells'),
+        """
+        params_cart = (
+            user_id, item_id,
+            quantity_w, quantity_gp,
+            data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
+            data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
+            data.get('note'), data.get('stor'), data.get('cells'),
                 id_chip_val, id_pack_val,
                 warehouse_type,  # Добавляем тип склада
-                date_added
-            )
+            date_added
+        )
 
-            execute_query(query_insert_cart, params_cart, fetch=False)
-            return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
+        execute_query(query_insert_cart, params_cart, fetch=False)
+        return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
             
     except Exception as e:
         _flask_app.logger.error(f"Ошибка добавления в корзину: {e}", exc_info=True)
@@ -1581,7 +1586,7 @@ def export_cart():
         
     else:
         # Обычный экспорт для склада кристаллов
-        query_export = """
+        query_export = f"""
     SELECT 
         c.start AS "Номер запуска",
         c.manufacturer AS "Производитель",
