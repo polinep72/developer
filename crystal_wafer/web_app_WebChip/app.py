@@ -2222,13 +2222,13 @@ def login():
                 return redirect(url_for('home'))
         else:
             # Защита от перечисления пользователей:
-                # Всегда показываем одинаковое сообщение и добавляем задержку
-                if user_found and is_blocked:
-                    _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
-                elif user_found and not password_valid:
-                    _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
+            # Всегда показываем одинаковое сообщение и добавляем задержку
+            if user_found and is_blocked:
+                _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
+            elif user_found and not password_valid:
+                _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
             else:
-                    _flask_app.logger.warning(f"Попытка входа несуществующего пользователя: {username}")
+                _flask_app.logger.warning(f"Попытка входа несуществующего пользователя: {username}")
                 
                 # Задержка для замедления брутфорса (500ms)
                 time.sleep(0.5)
