@@ -258,6 +258,68 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        /* Модальное окно подтверждения */
+        .modal-confirm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        .modal-confirm .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-confirm h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .modal-confirm p {
+            margin-bottom: 25px;
+            color: #555;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .modal-confirm .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .modal-confirm .btn-confirm {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .modal-confirm .btn-confirm:hover {
+            background-color: #c82333;
+        }
+        .modal-confirm .btn-cancel {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-confirm .btn-cancel:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -408,9 +470,43 @@
             // Проверка на изменение собственного статуса администратора
             const currentUserId = {% if session.get('user_id') %}{{ session.get('user_id') }}{% else %}null{% endif %};
             if (userId === currentUserId && !is_admin) {
-                if (!confirm('Вы уверены, что хотите убрать права администратора у самого себя? Это может ограничить ваш доступ.')) {
-                    return;
-                }
+                confirmAction('Вы уверены, что хотите убрать права администратора у самого себя?<br><br>Это может ограничить ваш доступ к некоторым функциям системы.', function() {
+                    // Продолжаем сохранение после подтверждения - отправляем данные через fetch
+                    const data = {
+                        user_id: userId,
+                        username: username,
+                        email: email || null,
+                        password: password || null,
+                        is_admin: is_admin,
+                        is_blocked: is_blocked
+                    };
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    fetch('/update_user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message || 'Пользователь успешно обновлен', 'success');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'), 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        showToast('Не удалось обновить пользователя. Проверьте подключение к интернету.', 'error');
+                    });
+                });
+                return;
             }
 
             const data = {
@@ -449,15 +545,8 @@
         }
 
         function deleteUser(userId, username) {
-            if (!confirm('Вы уверены, что хотите удалить пользователя "' + username + '"? Это действие нельзя отменить.')) {
-                return;
-            }
-
-            if (!confirm('ВНИМАНИЕ! Удаление пользователя необратимо. Продолжить?')) {
-                return;
-            }
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            confirmAction('Вы уверены, что хотите удалить пользователя "' + username + '"?<br><br><strong>ВНИМАНИЕ!</strong> Удаление пользователя необратимо. Это действие нельзя отменить.', function() {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             fetch('/delete_user', {
                 method: 'POST',
                 headers: {
@@ -482,6 +571,7 @@
             .catch(error => {
                 console.error('Ошибка:', error);
                 showToast('Не удалось удалить пользователя. Проверьте подключение к интернету.', 'error');
+            });
             });
         }
         

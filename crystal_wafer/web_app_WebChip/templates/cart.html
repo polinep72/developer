@@ -282,6 +282,68 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        /* Модальное окно подтверждения */
+        .modal-confirm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        .modal-confirm .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-confirm h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .modal-confirm p {
+            margin-bottom: 25px;
+            color: #555;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .modal-confirm .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .modal-confirm .btn-confirm {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .modal-confirm .btn-confirm:hover {
+            background-color: #c82333;
+        }
+        .modal-confirm .btn-cancel {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-confirm .btn-cancel:hover {
+            background-color: #5a6268;
+        }
         /* Индикаторы загрузки */
         .button-loading {
             position: relative;
@@ -382,10 +444,7 @@
         <div class="cart-actions">
             <a href="/search?warehouse={{ warehouse_type|default('crystals') }}" class="button">Назад к поиску</a>
         <button id="export-cart" onclick="exportCart()">Экспортировать корзину в Excel</button>
-            <form action="/clear_cart" method="POST" style="margin: 0;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-			<button type="submit" class="btn btn-danger">Очистить корзину</button>
-		</form>
+            <button type="button" class="btn btn-danger" id="clear-cart-btn">Очистить корзину</button>
         </div>
         {% else %}
         <p>Ваша корзина пуста.</p>
@@ -393,6 +452,56 @@
         {% endif %}
     </div>
     <script>
+		// Универсальная функция для модального подтверждения действий
+		function confirmAction(message, callback) {
+			const modal = document.createElement('div');
+			modal.className = 'modal-confirm';
+			modal.innerHTML = `
+				<div class="modal-content">
+					<h3>Подтверждение</h3>
+					<p>${message}</p>
+					<div class="modal-actions">
+						<button class="btn-cancel">Отмена</button>
+						<button class="btn-confirm">Да, подтверждаю</button>
+					</div>
+				</div>
+			`;
+			
+			// Закрытие по клику на фон
+			modal.addEventListener('click', function(e) {
+				if (e.target === modal) {
+					modal.remove();
+				}
+			});
+			
+			// Кнопка отмены
+			const cancelBtn = modal.querySelector('.btn-cancel');
+			cancelBtn.addEventListener('click', function() {
+				modal.remove();
+			});
+			
+			// Кнопка подтверждения
+			const confirmBtn = modal.querySelector('.btn-confirm');
+			confirmBtn.addEventListener('click', function() {
+				modal.remove();
+				if (callback) callback();
+			});
+			
+			// Закрытие по Esc
+			const escHandler = function(e) {
+				if (e.key === 'Escape') {
+					modal.remove();
+					document.removeEventListener('keydown', escHandler);
+				}
+			};
+			document.addEventListener('keydown', escHandler);
+			
+			document.body.appendChild(modal);
+			
+			// Фокус на кнопке отмены для доступности
+			cancelBtn.focus();
+		}
+		
 		// Универсальная функция для показа индикатора загрузки на кнопке
 		function setButtonLoading(button, loading) {
 			if (loading) {
@@ -456,44 +565,41 @@
 				const originalButton = this;
 				const itemId = this.dataset.id;
 				
-				if (!confirm('Вы уверены, что хотите удалить этот элемент из корзины?')) {
-					return;
-				}
+				confirmAction('Вы уверены, что хотите удалить этот элемент из корзины?', function() {
+					setButtonLoading(originalButton, true);
 
-				setButtonLoading(originalButton, true);
-
-			const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-			fetch('/remove_from_cart', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-CSRFToken': csrfToken,
-				},
-					body: JSON.stringify({
-						item_id: itemId
-					}),
-				})
-				.then(response => response.json())
-				.then(data => {
-					setButtonLoading(originalButton, false);
-					if (data.success) {
-						// Удаляем строку из таблицы
-						const row = originalButton.closest('tr');
-						row.remove();
-						// Проверяем, остались ли еще элементы в корзине
-						const remainingRows = document.querySelectorAll('tbody tr');
-						if (remainingRows.length === 0) {
-							location.reload(); // Перезагружаем страницу если корзина пуста
+					const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+					fetch('/remove_from_cart', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-CSRFToken': csrfToken,
+						},
+						body: JSON.stringify({
+							item_id: itemId
+						}),
+					})
+					.then(response => response.json())
+					.then(data => {
+						setButtonLoading(originalButton, false);
+						if (data.success) {
+							// Удаляем строку из таблицы
+							const row = originalButton.closest('tr');
+							row.remove();
+							// Проверяем, остались ли еще элементы в корзине
+							const remainingRows = document.querySelectorAll('tbody tr');
+							if (remainingRows.length === 0) {
+								location.reload(); // Перезагружаем страницу если корзина пуста
+							}
+						} else {
+							showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
 						}
-					} else {
-						showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
-					}
-				})
-				.catch(error => {
-					setButtonLoading(originalButton, false);
-					console.error('Ошибка:', error);
-					showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
-				});
+					})
+					.catch(error => {
+						setButtonLoading(originalButton, false);
+						console.error('Ошибка:', error);
+						showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
+					});
 			});
 		});
 
