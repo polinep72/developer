@@ -576,10 +576,10 @@
 					showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
 				});
 			});
-		});
+			});
 
-		// Удаление элемента из корзины
-		document.querySelectorAll('.remove-item').forEach(button => {
+			// Удаление элемента из корзины
+			document.querySelectorAll('.remove-item').forEach(button => {
 			button.addEventListener('click', function () {
 				const originalButton = this;
 				const itemId = this.dataset.id;
