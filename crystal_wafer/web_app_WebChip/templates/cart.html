@@ -243,6 +243,45 @@
 		.quantity-input-gp {
 			width: 60px; /* Уменьшенная ширина полей ввода */
 		}
+        /* Toast уведомления */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            font-size: 14px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .toast-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .toast-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .toast-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 </head>
 <body>
@@ -354,14 +393,14 @@
 				.then(response => response.json())
 				.then(data => {
 					if (data.success) {
-						alert('Количество обновлено');
+						showToast('Количество обновлено', 'success');
 					} else {
-						alert('Ошибка обновления: ' + data.message);
+						showToast('Ошибка обновления: ' + (data.message || 'Неизвестная ошибка'), 'error');
 					}
 				})
 				.catch(error => {
 					console.error('Ошибка:', error);
-					alert('Ошибка сохранения данных.');
+					showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
 				});
 			});
 		});
@@ -398,12 +437,12 @@
 							location.reload(); // Перезагружаем страницу если корзина пуста
 						}
 					} else {
-						alert('Ошибка удаления: ' + data.message);
+						showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
 					}
 				})
 				.catch(error => {
 					console.error('Ошибка:', error);
-					alert('Ошибка удаления элемента.');
+					showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
 				});
 			});
 		});
@@ -455,7 +494,7 @@
 			})
 			.catch(error => {
 				console.error('Ошибка экспорта:', error);
-				alert('Не удалось экспортировать корзину: ' + error.message);
+				showToast('Не удалось экспортировать корзину: ' + (error.message || 'Неизвестная ошибка'), 'error');
 			})
 			.finally(() => {
 				// Возвращаем кнопке исходное состояние

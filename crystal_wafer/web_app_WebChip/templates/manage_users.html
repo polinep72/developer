@@ -219,6 +219,45 @@
         .current-user {
             background-color: #fff3cd !important;
         }
+        /* Toast уведомления */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            font-size: 14px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .toast-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .toast-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .toast-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 </head>
 <body>
@@ -333,6 +372,23 @@
     </div>
 
     <script>
+        // Функция для показа toast-уведомлений
+        function showToast(message, type = 'error', duration = 4000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
         function toggleEditForm(userId) {
             const form = document.getElementById('edit-form-' + userId);
             form.classList.toggle('active');
@@ -378,15 +434,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message || 'Пользователь успешно обновлен');
-                    location.reload();
+                    showToast(data.message || 'Пользователь успешно обновлен', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                    showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось обновить пользователя');
+                showToast('Не удалось обновить пользователя. Проверьте подключение к интернету.', 'error');
             });
         }
 
@@ -413,15 +471,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message || 'Пользователь успешно удален');
-                    location.reload();
+                    showToast(data.message || 'Пользователь успешно удален', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                    showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось удалить пользователя');
+                showToast('Не удалось удалить пользователя. Проверьте подключение к интернету.', 'error');
             });
         }
     </script>
