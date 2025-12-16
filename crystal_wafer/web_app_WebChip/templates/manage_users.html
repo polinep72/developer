@@ -344,11 +344,15 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div style="padding: 10px; margin-bottom: 20px; background-color: {% if category == 'danger' %}#f8d7da{% elif category == 'success' %}#d4edda{% else %}#d1ecf1{% endif %}; 
-                                color: {% if category == 'danger' %}#721c24{% elif category == 'success' %}#155724{% else %}#0c5460{% endif %}; 
-                                border-radius: 5px;">
-                        {{ message }}
-                    </div>
+                    {# Показываем только релевантные сообщения для страницы управления пользователями #}
+                    {% if 'Добро пожаловать' not in message and 'Корзина' not in message and 'по вашему запросу' not in message|lower and 'найдено' not in message|lower %}
+                        <div class="flash-message flash-{{ category }} flash-message-container" style="padding: 10px; margin-bottom: 20px; background-color: {% if category == 'danger' %}#f8d7da{% elif category == 'success' %}#d4edda{% else %}#d1ecf1{% endif %}; 
+                                    color: {% if category == 'danger' %}#721c24{% elif category == 'success' %}#155724{% else %}#0c5460{% endif %}; 
+                                    border-radius: 5px; position: relative;">
+                            <span class="flash-message-close" onclick="this.parentElement.remove()" style="position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; font-weight: bold;">&times;</span>
+                            {{ message }}
+                        </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
