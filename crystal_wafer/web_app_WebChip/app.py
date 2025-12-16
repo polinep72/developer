@@ -15,6 +15,8 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, send_file, jsonify, session, redirect, url_for, make_response, flash
 from werkzeug.utils import escape
 from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from psycopg2.extras import execute_values
 # from waitress import serve
 from openpyxl.styles import NamedStyle
@@ -166,12 +168,27 @@ _flask_app.secret_key = SECRET_KEY
 # Инициализация CSRF защиты
 csrf = CSRFProtect(_flask_app)
 
+# Инициализация Rate Limiting
+limiter = Limiter(
+    _flask_app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"  # Для production рекомендуется использовать Redis
+)
+
 # Настраиваем логирование Werkzeug, чтобы скрыть предупреждение о development server
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 if not _flask_app.debug:  # Обычно в debug режиме Flask более многословен
     # Устанавливаем уровень INFO для логгера приложения
     _flask_app.logger.setLevel(logging.INFO)
+
+# Обработчик ошибок rate limiting
+@_flask_app.errorhandler(429)
+def ratelimit_handler(e):
+    """Обработка ошибки превышения лимита запросов"""
+    flash("Слишком много попыток входа. Пожалуйста, подождите минуту перед следующей попыткой.", "warning")
+    return render_template('login.html'), 429
 
 # Обработчик необработанных исключений
 @_flask_app.errorhandler(Exception)
@@ -615,9 +632,9 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-                # Вместо execute_values используем цикл
-                for record in all_data_to_insert:
-                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+            # Вместо execute_values используем цикл
+            for record in all_data_to_insert:
+                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
@@ -712,7 +729,7 @@ def outflow():
         df['Расход Wafer, шт.'] = pd.to_numeric(df['Расход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Расход GelPack, шт.' опциональна
         if 'Расход GelPack, шт.' in df.columns:
-        df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+            df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Расход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -906,7 +923,7 @@ def refund():
         df['Возврат Wafer, шт.'] = pd.to_numeric(df['Возврат Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Возврат GelPack, шт.' опциональна
         if 'Возврат GelPack, шт.' in df.columns:
-        df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+            df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Возврат GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1184,15 +1201,15 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-        params_search = []
-        filter_conditions = []
+    params_search = []
+    filter_conditions = []
     
     # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
     if warehouse_type in ('plates', 'far'):
-        filter_conditions.append(
-            "NOT ((COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) = 0 "
-            "AND (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) = 0)"
-        )
+            filter_conditions.append(
+                "NOT ((COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) = 0 "
+                "AND (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) = 0)"
+            )
     
     # Фильтр по шифру кристалла (необязательный) - добавляем только если есть непустое значение
     # Ищем точное вхождение запрошенной последовательности символов
@@ -1200,21 +1217,21 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-            filter_conditions.append("nc.n_chip ILIKE %s")
+        filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-        if manufacturer_filter_form and manufacturer_filter_form != "all":
-            filter_conditions.append("p.name_pr = %s")
-            params_search.append(manufacturer_filter_form)
+    if manufacturer_filter_form and manufacturer_filter_form != "all":
+        filter_conditions.append("p.name_pr = %s")
+        params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-        if filter_conditions:
+    if filter_conditions:
             query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
@@ -1477,49 +1494,49 @@ def add_to_cart():
         
         else:
             # Обычная логика для склада кристаллов
-    if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
-        return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
+            if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
+                return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
-        id_chip_val = None
-        id_pack_val = None
-        if item_id:
+            id_chip_val = None
+            id_pack_val = None
+            if item_id:
                 invoice_data = execute_query(f"SELECT id_chip, id_pack FROM {invoice_table} WHERE item_id = %s LIMIT 1", (item_id,), fetch=True)
-            if invoice_data:
-                id_chip_val = invoice_data[0][0]
-                id_pack_val = invoice_data[0][1]
+                if invoice_data:
+                    id_chip_val = invoice_data[0][0]
+                    id_pack_val = invoice_data[0][1]
 
-        # Обновляем запрос на вставку в корзину
-        query_insert_cart = """
-            INSERT INTO cart (
-                user_id, item_id, 
-                cons_w, cons_gp, 
-                start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
-                note, stor, cells, 
+            # Обновляем запрос на вставку в корзину
+            query_insert_cart = """
+                INSERT INTO cart (
+                    user_id, item_id, 
+                    cons_w, cons_gp, 
+                    start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
+                    note, stor, cells, 
                     id_chip, id_pack,
                     warehouse_type,
-                date_added
-            )
+                    date_added
+                )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id, item_id, warehouse_type) 
-            DO UPDATE SET 
-                cons_w = cart.cons_w + EXCLUDED.cons_w,
-                cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
-                date_added = EXCLUDED.date_added; 
-        """
-        params_cart = (
-            user_id, item_id,
-            quantity_w, quantity_gp,
-            data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
-            data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
-            data.get('note'), data.get('stor'), data.get('cells'),
+                DO UPDATE SET 
+                    cons_w = cart.cons_w + EXCLUDED.cons_w,
+                    cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
+                    date_added = EXCLUDED.date_added; 
+            """
+            params_cart = (
+                user_id, item_id,
+                quantity_w, quantity_gp,
+                data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
+                data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
+                data.get('note'), data.get('stor'), data.get('cells'),
                 id_chip_val, id_pack_val,
                 warehouse_type,  # Добавляем тип склада
-            date_added
-        )
+                date_added
+            )
 
-        execute_query(query_insert_cart, params_cart, fetch=False)
-        return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
+            execute_query(query_insert_cart, params_cart, fetch=False)
+            return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
             
     except Exception as e:
         _flask_app.logger.error(f"Ошибка добавления в корзину: {e}", exc_info=True)
@@ -1859,6 +1876,7 @@ def register():
 
 
 @_flask_app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Ограничение: максимум 5 попыток входа в минуту с одного IP
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
