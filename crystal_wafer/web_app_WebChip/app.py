@@ -22,7 +22,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.0"
+__version__ = "1.4.2"
 
 # Импортируем WSGIMiddleware
 try:
@@ -336,61 +336,63 @@ def log_user_action(action_type, user_id=None, table_name=None, record_id=None, 
         file_name: Имя файла (для обратной совместимости, сохраняется в details)
         target_table: Имя таблицы (для обратной совместимости, используется как table_name)
     """
-    try:
-        # Получаем user_id из session, если не передан
-        if user_id is None:
+    # Получаем user_id из session, если не передан
+    if user_id is None:
+        try:
             from flask import session
             user_id = session.get('user_id')
-        
-        # Получаем IP адрес и User-Agent из request
-        try:
-            from flask import request
-            ip_address = request.remote_addr
-            user_agent = request.headers.get('User-Agent', '')[:500]  # Ограничиваем длину User-Agent
         except RuntimeError:
-            # Если request context недоступен (например, в фоновых задачах)
-            ip_address = None
-            user_agent = None
-        
-        # Поддерживаем обратную совместимость: если переданы file_name/target_table
-        if file_name or target_table:
-            if details is None:
-                details = {}
-            elif isinstance(details, str):
-                details = {'text': details}
-            elif not isinstance(details, dict):
-                details = {'data': str(details)}
-            
-            if file_name:
-                details['file_name'] = file_name
-            if target_table:
-                table_name = target_table or table_name
-        
-        # Форматируем details для сохранения
+            user_id = None
+    
+    # Получаем IP адрес и User-Agent из request
+    try:
+        from flask import request
+        ip_address = request.remote_addr
+        user_agent = request.headers.get('User-Agent', '')[:500]  # Ограничиваем длину User-Agent
+    except RuntimeError:
+        # Если request context недоступен (например, в фоновых задачах)
+        ip_address = None
+        user_agent = None
+    
+    # Поддерживаем обратную совместимость: если переданы file_name/target_table
+    if file_name or target_table:
         if details is None:
-            details_str = None
-        elif isinstance(details, dict):
-            import json
-            details_str = json.dumps(details, ensure_ascii=False)
-        else:
-            details_str = str(details)
+            details = {}
+        elif isinstance(details, str):
+            details = {'text': details}
+        elif not isinstance(details, dict):
+            details = {'data': str(details)}
         
-        # Вставляем запись в audit_log
-        try:
-            query = """
-                INSERT INTO public.audit_log (user_id, action_type, table_name, record_id, details, ip_address, user_agent)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """
-            execute_query(query, (user_id, action_type, table_name, record_id, details_str, ip_address, user_agent), fetch=False)
-            
-            # Также логируем в консоль для отладки
-            _flask_app.logger.info(
-                f"AUDIT LOG: UserID={user_id}, Action={action_type}, Table={table_name}, "
-                f"RecordID={record_id}, IP={ip_address}"
-            )
-        except Exception as e:
-            # Логируем ошибку, но не прерываем выполнение основной функции
-            _flask_app.logger.error(f"Ошибка записи в audit_log: {e}", exc_info=True)
+        if file_name:
+            details['file_name'] = file_name
+        if target_table:
+            table_name = target_table or table_name
+    
+    # Форматируем details для сохранения
+    if details is None:
+        details_str = None
+    elif isinstance(details, dict):
+        import json
+        details_str = json.dumps(details, ensure_ascii=False)
+    else:
+        details_str = str(details)
+    
+    # Вставляем запись в audit_log
+    try:
+        query = """
+            INSERT INTO public.audit_log (user_id, action_type, table_name, record_id, details, ip_address, user_agent)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        execute_query(query, (user_id, action_type, table_name, record_id, details_str, ip_address, user_agent), fetch=False)
+        
+        # Также логируем в консоль для отладки
+        _flask_app.logger.info(
+            f"AUDIT LOG: UserID={user_id}, Action={action_type}, Table={table_name}, "
+            f"RecordID={record_id}, IP={ip_address}"
+        )
+    except Exception as e:
+        # Логируем ошибку, но не прерываем выполнение основной функции
+        _flask_app.logger.error(f"Ошибка записи в audit_log: {e}", exc_info=True)
 
 
 # --- ФУНКЦИИ ВАЛИДАЦИИ ВХОДНЫХ ДАННЫХ ---
@@ -587,7 +589,7 @@ def inflow():
         df['Приход Wafer, шт.'] = pd.to_numeric(df['Приход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Приход GelPack, шт.' опциональна
         if 'Приход GelPack, шт.' in df.columns:
-        df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+            df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Приход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -683,9 +685,9 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-                # Вместо execute_values используем цикл
-                for record in all_data_to_insert:
-                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+            # Вместо execute_values используем цикл
+            for record in all_data_to_insert:
+                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
@@ -2996,14 +2998,16 @@ def inventory():
                     timestamp_raw = datetime.now().strftime("%Y%m%d_%H%M%S")
                     filename_raw = f'inventory_stacked_raw_data_{timestamp_raw}.xlsx'
                     log_user_action(
+                        'export',
                         user_id=session.get('user_id'),
-                        action_type="Экспорт сырых данных (стек)",
-                        file_name=filename_raw,
-                        details=(
-                            f"Фильтры: Производитель='{selected_manufacturer_form}', "
-                            f"Партия='{selected_lot_id_form}', "
-                            f"Шифр='{selected_chip_code_filter_form}'"
-                        )
+                        table_name='inventory',
+                        details={
+                            'type': 'raw_stacked',
+                            'file_name': filename_raw,
+                            'manufacturer': selected_manufacturer_form,
+                            'lot': selected_lot_id_form,
+                            'chip_code': selected_chip_code_filter_form
+                        }
                     )
                     return send_file(output_raw, as_attachment=True, download_name=filename_raw,
                                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
