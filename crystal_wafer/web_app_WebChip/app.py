@@ -1733,10 +1733,11 @@ def add_to_cart():
             # Добавляем каждую найденную строку в корзину с количеством ostatok_w
             added_count = 0
             for row in all_items:
-                if not isinstance(row, (list, tuple)) or len(row) < 1:
+                if not isinstance(row, (list, tuple)) or len(row) < 15:
+                    _flask_app.logger.warning(f"Пропущена строка с недостаточным количеством элементов: {len(row) if isinstance(row, (list, tuple)) else 'не кортеж'}")
                     continue
                 row_item_id = row[0]
-                ostatok_w = int(row[10]) if row[10] else 0
+                ostatok_w = int(row[10]) if len(row) > 10 and row[10] else 0
                 
                 if ostatok_w <= 0:
                     continue  # Пропускаем строки с нулевым остатком
@@ -1765,9 +1766,9 @@ def add_to_cart():
                 params_cart = (
                     user_id, row_item_id,
                     ostatok_w, 0,  # quantity_w = ostatok_w, quantity_gp = 0
-                    row[2], row[3], row[4], row[7],  # start, manufacturer, technology, lot
-                    row[5], row[6], row[8], row[9],  # wafer, quadrant, internal_lot, chip_code
-                    row[12], row[13], row[14],  # note, stor, cells
+                    row[2] if len(row) > 2 else None, row[3] if len(row) > 3 else None, row[4] if len(row) > 4 else None, row[7] if len(row) > 7 else None,  # start, manufacturer, technology, lot
+                    row[5] if len(row) > 5 else None, row[6] if len(row) > 6 else None, row[8] if len(row) > 8 else None, row[9] if len(row) > 9 else None,  # wafer, quadrant, internal_lot, chip_code
+                    row[12] if len(row) > 12 else None, row[13] if len(row) > 13 else None, row[14] if len(row) > 14 else None,  # note, stor, cells
                     id_chip_val, id_pack_val,
                     warehouse_type,  # Добавляем тип склада
                     date_added
