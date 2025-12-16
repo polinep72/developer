@@ -1842,42 +1842,49 @@ def cart_view():  # Переименовал, чтобы не конфликто
 
 @_flask_app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():
-    # Получаем user_id (реальный или временный для неавторизованных)
-    user_id = get_temp_user_id(session)
-    warehouse_type = session.get('warehouse_type', 'crystals')
-    data = request.get_json()
+    _flask_app.logger.info(f"REMOVE_FROM_CART: Получен запрос от пользователя")
+    try:
+        # Получаем user_id (реальный или временный для неавторизованных)
+        user_id = get_temp_user_id(session)
+        warehouse_type = session.get('warehouse_type', 'crystals')
+        _flask_app.logger.info(f"REMOVE_FROM_CART: user_id={user_id}, warehouse_type={warehouse_type}")
+        data = request.get_json()
+        _flask_app.logger.info(f"REMOVE_FROM_CART: data={data}")
     item_id = data.get('item_id')  # ID товара (row[0] из search.html)
 
     if not item_id:
         return jsonify({'success': False, 'message': 'Неверный ID товара'}), 400
 
-    query_delete_cart = "DELETE FROM cart WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
-    try:
+        query_delete_cart = "DELETE FROM cart WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
         rows_deleted = execute_query(query_delete_cart, (item_id, user_id, warehouse_type), fetch=False)
+        _flask_app.logger.info(f"REMOVE_FROM_CART: rows_deleted={rows_deleted}")
         if rows_deleted > 0:
             return jsonify({'success': True, 'message': 'Товар удален'})
         else:
             return jsonify({'success': False, 'message': 'Товар не найден в корзине'})
     except Exception as e:
-        _flask_app.logger.error(f"Ошибка удаления из корзины: {e}")
+        _flask_app.logger.error(f"Ошибка удаления из корзины: {e}", exc_info=True)
         return jsonify({'success': False, 'message': f'Ошибка сервера: {e}'}), 500
 
 
 @_flask_app.route('/update_cart_item', methods=['POST'])
 def update_cart_item():
-    # Получаем user_id (реальный или временный для неавторизованных)
-    user_id = get_temp_user_id(session)
-    warehouse_type = session.get('warehouse_type', 'crystals')
-    data = request.get_json()
-    # В вашем HTML было data-id="{{ row[0] }}", что соответствует item_id
-    item_id = data.get('id')  # Или 'item_id', если вы так передаете из JS
-    cons_w_str = data.get('cons_w')
-    cons_gp_str = data.get('cons_gp')
-
-    if not item_id or cons_w_str is None or cons_gp_str is None:
-        return jsonify({"success": False, "message": "Неполные данные"}), 400
-
+    _flask_app.logger.info(f"UPDATE_CART_ITEM: Получен запрос от пользователя")
     try:
+        # Получаем user_id (реальный или временный для неавторизованных)
+        user_id = get_temp_user_id(session)
+        warehouse_type = session.get('warehouse_type', 'crystals')
+        _flask_app.logger.info(f"UPDATE_CART_ITEM: user_id={user_id}, warehouse_type={warehouse_type}")
+        data = request.get_json()
+        _flask_app.logger.info(f"UPDATE_CART_ITEM: data={data}")
+        # В вашем HTML было data-id="{{ row[0] }}", что соответствует item_id
+        item_id = data.get('id')  # Или 'item_id', если вы так передаете из JS
+        cons_w_str = data.get('cons_w')
+        cons_gp_str = data.get('cons_gp')
+
+        if not item_id or cons_w_str is None or cons_gp_str is None:
+            return jsonify({"success": False, "message": "Неполные данные"}), 400
+
         cons_w = int(cons_w_str)
         cons_gp = int(cons_gp_str)
         if cons_w < 0 or cons_gp < 0:
@@ -1897,10 +1904,11 @@ def update_cart_item():
             else:
                 # Это может случиться, если товар был удален в другой вкладке
                 return jsonify({"success": False, "message": "Товар не найден для обновления"})
-    except ValueError:  # Ошибка при int()
+    except ValueError as e:  # Ошибка при int()
+        _flask_app.logger.error(f"Ошибка обновления корзины (ValueError): {e}")
         return jsonify({"success": False, "message": "Неверный формат количества"}), 400
     except Exception as e:
-        _flask_app.logger.error(f"Ошибка обновления корзины: {e}")
+        _flask_app.logger.error(f"Ошибка обновления корзины: {e}", exc_info=True)
         return jsonify({"success": False, "message": f'Ошибка сервера: {e}'}), 500
 
 

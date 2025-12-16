@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ИПК ЭЛЕКТРОН-МАШ</title>
     <style>
         * {
@@ -613,8 +614,17 @@
 								item_id: itemId
 							}),
 						})
-						.then(response => response.json())
-						.then(data => {
+					.then(response => {
+						console.log('Remove response status:', response.status);
+						if (!response.ok) {
+							return response.text().then(text => {
+								console.error('Remove error response:', text);
+								throw new Error(`HTTP error! status: ${response.status}`);
+							});
+						}
+						return response.json();
+					})
+					.then(data => {
 							setButtonLoading(originalButton, false);
 							if (data.success) {
 								// Удаляем строку из таблицы
