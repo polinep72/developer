@@ -104,7 +104,8 @@ def setup_logging():
                             smtp.login(self.username, self.password)
                         msg = self.format(record)
                         # Используем имя отправителя, если оно указано
-                        from_header = f"{self.fromname} <{self.fromaddr}>" if hasattr(self, 'fromname') and self.fromname else self.fromaddr
+                        fromname = getattr(self, 'fromname', None)  # type: ignore
+                        from_header = f"{fromname} <{self.fromaddr}>" if fromname else self.fromaddr
                         msg_text = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
                             from_header,
                             ','.join(self.toaddrs),
@@ -116,9 +117,9 @@ def setup_logging():
                         from email.mime.text import MIMEText
                         from email.header import Header
                         email_msg = MIMEText(msg, 'plain', 'utf-8')
-                        email_msg['From'] = Header(from_header, 'utf-8')
-                        email_msg['To'] = Header(','.join(self.toaddrs), 'utf-8')
-                        email_msg['Subject'] = Header(self.getSubject(record), 'utf-8')
+                        email_msg['From'] = Header(from_header, 'utf-8')  # type: ignore
+                        email_msg['To'] = Header(','.join(self.toaddrs), 'utf-8')  # type: ignore
+                        email_msg['Subject'] = Header(self.getSubject(record), 'utf-8')  # type: ignore
                         email_msg['Date'] = formatdate()
                         smtp.sendmail(self.fromaddr, self.toaddrs, email_msg.as_string())
                         smtp.quit()
@@ -143,7 +144,7 @@ def setup_logging():
                 use_tls=smtp_use_tls
             )
             # Добавляем имя отправителя, если указано
-            smtp_handler.fromname = from_name
+            setattr(smtp_handler, 'fromname', from_name)  # type: ignore
             smtp_handler.setLevel(logging.ERROR)  # Только ERROR и CRITICAL
             smtp_handler.setFormatter(log_format)
             root_logger.addHandler(smtp_handler)
@@ -350,12 +351,12 @@ def get_or_create_id(table_name, column_name, value):
     
     select_query = f"SELECT id FROM {table_name_clean} WHERE {column_name_clean} = %s"
     existing = execute_query(select_query, (value,), fetch=True)
-    if existing:
+    if existing and isinstance(existing, list) and len(existing) > 0:
         return existing[0][0]
     else:
         insert_query = f"INSERT INTO {table_name_clean} ({column_name_clean}) VALUES (%s) RETURNING id"
         new_id_result = execute_query(insert_query, (value,), fetch=True)  # fetch=True из-за RETURNING
-        if new_id_result:
+        if new_id_result and isinstance(new_id_result, list) and len(new_id_result) > 0:
             return new_id_result[0][0]
         else:  # Если RETURNING не сработал или не вернул id
             # Можно попробовать SELECT MAX(id) или другой способ, но это плохая практика
@@ -384,7 +385,7 @@ def get_reference_id(table_name, column_name, value):
     
     select_query = f"SELECT id FROM {table_name_clean} WHERE {column_name_clean} = %s"
     existing = execute_query(select_query, (value,), fetch=True)
-    if existing:
+    if existing and isinstance(existing, list) and len(existing) > 0:
         return existing[0][0]
     else:
         raise ValueError(f"Справочная запись не найдена: {table_name_clean}.{column_name_clean} = {value}")
@@ -982,23 +983,32 @@ def outflow():
 
                 # Маппинг согласно требованиям:
                 # Номер запуска -> id_start
-                id_start = int(get_reference_id_with_cursor("start_p", "name_start", str(row["Номер запуска"])))
+                ref_id = get_reference_id_with_cursor("start_p", "name_start", str(row["Номер запуска"]))
+                id_start = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Производитель -> id_pr
-                id_pr = int(get_reference_id_with_cursor("pr", "name_pr", str(row["Производитель"])))
+                ref_id = get_reference_id_with_cursor("pr", "name_pr", str(row["Производитель"]))
+                id_pr = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Технологический процесс -> id_tech
-                id_tech = int(get_reference_id_with_cursor("tech", "name_tech", str(row["Технологический процесс"])))
+                ref_id = get_reference_id_with_cursor("tech", "name_tech", str(row["Технологический процесс"]))
+                id_tech = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Партия (Lot ID) -> id_lot
-                id_lot = int(get_reference_id_with_cursor("lot", "name_lot", str(row["Партия (Lot ID)"])))
+                ref_id = get_reference_id_with_cursor("lot", "name_lot", str(row["Партия (Lot ID)"]))
+                id_lot = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Пластина (Wafer) -> id_wafer
-                id_wafer = int(get_reference_id_with_cursor("wafer", "name_wafer", str(row["Пластина (Wafer)"])))
+                ref_id = get_reference_id_with_cursor("wafer", "name_wafer", str(row["Пластина (Wafer)"]))
+                id_wafer = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Quadrant -> id_quad
-                id_quad = int(get_reference_id_with_cursor("quad", "name_quad", str(row["Quadrant"])))
+                ref_id = get_reference_id_with_cursor("quad", "name_quad", str(row["Quadrant"]))
+                id_quad = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Внутренняя партия -> id_in_lot
-                id_in_lot = int(get_reference_id_with_cursor("in_lot", "in_lot", str(row["Внутренняя партия"])))
+                ref_id = get_reference_id_with_cursor("in_lot", "in_lot", str(row["Внутренняя партия"]))
+                id_in_lot = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Номер кристалла -> id_n_chip (согласно требованиям)
-                id_n_chip = int(get_reference_id_with_cursor("n_chip", "n_chip", str(row["Номер кристалла"])))
+                ref_id = get_reference_id_with_cursor("n_chip", "n_chip", str(row["Номер кристалла"]))
+                id_n_chip = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Шифр кристалла -> id_chip (согласно требованиям)
-                id_chip = int(get_reference_id_with_cursor("chip", "name_chip", str(row["Шифр кристалла"])))
+                ref_id = get_reference_id_with_cursor("chip", "name_chip", str(row["Шифр кристалла"]))
+                id_chip = int(ref_id) if ref_id is not None else None  # type: ignore
                 # Упаковка -> id_pack (опционально)
                 id_pack_val = row.get("Упаковка", "")
                 id_pack_result = get_reference_id_with_cursor("pack", "name_pack", str(id_pack_val)) if id_pack_val and str(id_pack_val).strip() else None
@@ -1899,7 +1909,7 @@ def update_cart_item():
         else:
             query_update = "UPDATE cart SET cons_w = %s, cons_gp = %s WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
             rows_updated = execute_query(query_update, (cons_w, cons_gp, item_id, user_id, warehouse_type), fetch=False)
-            if rows_updated > 0:
+            if isinstance(rows_updated, int) and rows_updated > 0:
                 return jsonify({"success": True, "message": "Количество обновлено"})
             else:
                 # Это может случиться, если товар был удален в другой вкладке
