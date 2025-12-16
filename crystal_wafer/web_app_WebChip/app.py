@@ -835,9 +835,9 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-                # Вместо execute_values используем цикл
-                for record in all_data_to_insert:
-                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+            # Вместо execute_values используем цикл
+            for record in all_data_to_insert:
+                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
