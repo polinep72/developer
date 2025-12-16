@@ -1516,7 +1516,7 @@ def get_chip_codes():
         else:
             # Если query нет, возвращаем первые 100 самых популярных
             sql_query = """
-                SELECT DISTINCT nc.n_chip 
+                SELECT nc.n_chip 
                 FROM n_chip nc
                 INNER JOIN invoice i ON i.id_n_chip = nc.id
                 GROUP BY nc.n_chip
