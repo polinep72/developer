@@ -620,15 +620,14 @@
 						showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
 					});
 			});
-		});
+			});
 
-				// Экспорт корзины
-		function exportCart() {
-			// Можно добавить индикатор загрузки, если нужно
-			const exportButton = document.getElementById('export-cart');
-			const originalText = exportButton.textContent;
-			exportButton.textContent = 'Подготовка...';
-			exportButton.disabled = true;
+			// Экспорт корзины
+			function exportCart() {
+				// Можно добавить индикатор загрузки, если нужно
+				const exportButton = document.getElementById('export-cart');
+				if (!exportButton) return;
+				setButtonLoading(exportButton, true);
 
 			fetch('/export_cart') // Делаем GET запрос на эндпоинт
 			.then(response => {
@@ -716,28 +715,29 @@
 					saveButton.click();
 				}
 			}
-		});
-		
-		// Очистка корзины с подтверждением
-		const clearCartBtn = document.getElementById('clear-cart-btn');
-		if (clearCartBtn) {
-			clearCartBtn.addEventListener('click', function() {
-				confirmAction('Вы уверены, что хотите очистить всю корзину?<br><br>Все добавленные товары будут удалены. Это действие нельзя отменить.', function() {
-					const form = document.createElement('form');
-					form.method = 'POST';
-					form.action = '/clear_cart';
-					
-					const csrfInput = document.createElement('input');
-					csrfInput.type = 'hidden';
-					csrfInput.name = 'csrf_token';
-					csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-					
-					form.appendChild(csrfInput);
-					document.body.appendChild(form);
-					form.submit();
-				});
 			});
-		}
+			
+			// Очистка корзины с подтверждением
+			const clearCartBtn = document.getElementById('clear-cart-btn');
+			if (clearCartBtn) {
+				clearCartBtn.addEventListener('click', function() {
+					confirmAction('Вы уверены, что хотите очистить всю корзину?<br><br>Все добавленные товары будут удалены. Это действие нельзя отменить.', function() {
+						const form = document.createElement('form');
+						form.method = 'POST';
+						form.action = '/clear_cart';
+						
+						const csrfInput = document.createElement('input');
+						csrfInput.type = 'hidden';
+						csrfInput.name = 'csrf_token';
+						csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+						
+						form.appendChild(csrfInput);
+						document.body.appendChild(form);
+						form.submit();
+					});
+				});
+			}
+		});
 	</script>
 </body>
 </html>
