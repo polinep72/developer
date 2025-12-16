@@ -132,6 +132,12 @@
             color: #777;
             margin-top: 5px;
         }
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
         .btn-primary {
             background-color: #007CBB;
             color: white;
@@ -201,36 +207,74 @@
         <form id="profileForm" onsubmit="updateProfile(event)">
             <div class="form-group">
                 <label for="username">Имя пользователя *</label>
-                <input type="text" id="username" name="username" value="{{ user.username }}" required minlength="3">
-                <div class="help-text">Минимум 3 символа</div>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       value="{{ user.username }}" 
+                       required 
+                       minlength="3"
+                       maxlength="50"
+                       pattern="[a-zA-Z0-9_-]+"
+                       title="Только буквы, цифры, дефис и подчеркивание">
+                <div class="help-text">Минимум 3 символа. Только буквы, цифры, дефис и подчеркивание.</div>
             </div>
 
             <div class="form-group">
                 <label for="email">Электронная почта</label>
-                <input type="email" id="email" name="email" value="{{ user.email or '' }}" placeholder="email@example.com">
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       value="{{ user.email or '' }}" 
+                       placeholder="email@example.com"
+                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                       title="Введите корректный email адрес">
+                <div class="help-text">Введите корректный email адрес (необязательно)</div>
             </div>
 
             <div class="form-group">
                 <label for="password">Новый пароль</label>
-                <input type="password" id="password" name="password" placeholder="Оставьте пустым, чтобы не менять">
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Оставьте пустым, чтобы не менять"
+                       minlength="4"
+                       autocomplete="new-password">
                 <div class="help-text">Минимум 4 символа. Если не хотите менять пароль, оставьте поле пустым.</div>
+                <div class="error-message" id="password-error"></div>
             </div>
 
             <div class="form-group">
                 <label for="confirm_password">Подтвердите новый пароль</label>
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Подтвердите новый пароль">
+                <input type="password" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       placeholder="Подтвердите новый пароль"
+                       minlength="4"
+                       autocomplete="new-password">
                 <div class="help-text">Необходимо, если вы меняете пароль</div>
+                <div class="error-message" id="confirm-password-error"></div>
             </div>
 
             <div class="form-group">
                 <label for="secret_question">Секретный вопрос</label>
-                <input type="text" id="secret_question" name="secret_question" value="{{ user.secret_question or '' }}" placeholder="Введите секретный вопрос">
+                <input type="text" 
+                       id="secret_question" 
+                       name="secret_question" 
+                       value="{{ user.secret_question or '' }}" 
+                       placeholder="Введите секретный вопрос"
+                       minlength="5"
+                       maxlength="255">
                 <div class="help-text">Минимум 5 символов. Используется для восстановления пароля.</div>
             </div>
 
             <div class="form-group">
                 <label for="secret_answer">Ответ на секретный вопрос</label>
-                <input type="text" id="secret_answer" name="secret_answer" placeholder="Введите ответ на секретный вопрос">
+                <input type="text" 
+                       id="secret_answer" 
+                       name="secret_answer" 
+                       placeholder="Введите ответ на секретный вопрос"
+                       minlength="2"
+                       maxlength="100">
                 <div class="help-text">Минимум 2 символа. Если меняете вопрос, обязательно укажите ответ.</div>
             </div>
 
@@ -239,8 +283,29 @@
     </div>
 
     <script>
+        // Функция для показа ошибки под полем
+        function showFieldError(fieldId, message) {
+            const errorDiv = document.getElementById(fieldId + '-error');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        // Функция для скрытия ошибки под полем
+        function hideFieldError(fieldId) {
+            const errorDiv = document.getElementById(fieldId + '-error');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }
+        
         function updateProfile(event) {
             event.preventDefault();
+            
+            // Очищаем предыдущие ошибки
+            hideFieldError('password');
+            hideFieldError('confirm-password');
             
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -248,6 +313,41 @@
             const confirm_password = document.getElementById('confirm_password').value.trim();
             const secret_question = document.getElementById('secret_question').value.trim();
             const secret_answer = document.getElementById('secret_answer').value.trim();
+            
+            // Валидация пароля
+            if (password) {
+                if (password.length < 4) {
+                    showFieldError('password', 'Пароль должен содержать минимум 4 символа');
+                    return;
+                }
+                
+                if (password !== confirm_password) {
+                    showFieldError('confirm-password', 'Пароли не совпадают');
+                    return;
+                }
+            } else if (confirm_password) {
+                // Если есть подтверждение, но нет пароля
+                showFieldError('password', 'Введите новый пароль');
+                return;
+            }
+            
+            // Валидация секретного вопроса и ответа
+            if (secret_question && secret_question.length < 5) {
+                alert('Секретный вопрос должен содержать минимум 5 символов');
+                return;
+            }
+            
+            if (secret_answer && secret_answer.length < 2) {
+                alert('Ответ на секретный вопрос должен содержать минимум 2 символа');
+                return;
+            }
+            
+            // Если меняется секретный вопрос, должен быть указан ответ
+            const oldSecretQuestion = '{{ user.secret_question or "" }}';
+            if (secret_question !== oldSecretQuestion && !secret_answer) {
+                alert('При изменении секретного вопроса необходимо указать ответ');
+                return;
+            }
 
             const data = {
                 username: username,
@@ -289,6 +389,26 @@
                 alert('Не удалось обновить профиль');
             });
         }
+        
+        // Валидация в реальном времени для подтверждения пароля
+        document.getElementById('confirm_password').addEventListener('blur', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            if (confirmPassword && password && password !== confirmPassword) {
+                showFieldError('confirm-password', 'Пароли не совпадают');
+            } else {
+                hideFieldError('confirm-password');
+            }
+        });
+        
+        document.getElementById('password').addEventListener('blur', function() {
+            const password = this.value;
+            if (password && password.length < 4) {
+                showFieldError('password', 'Пароль должен содержать минимум 4 символа');
+            } else {
+                hideFieldError('password');
+            }
+        });
     </script>
 </body>
 </html>

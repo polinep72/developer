@@ -81,6 +81,57 @@
         .register-container a:hover {
             text-decoration: underline;
         }
+        /* Toast уведомления */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            font-size: 14px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .toast-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .toast-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .toast-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        input:invalid, textarea:invalid {
+            border-color: #dc3545;
+        }
+        input:valid, textarea:valid {
+            border-color: #28a745;
+        }
     </style>
 </head>
 <body>
@@ -88,46 +139,168 @@
         <h1>Регистрация</h1>
         <form action="/register" method="post" id="registerForm">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <input type="text" name="username" placeholder="Введите логин" required minlength="3" maxlength="50">
+            <input type="text" 
+                   name="username" 
+                   placeholder="Введите логин" 
+                   required 
+                   minlength="3" 
+                   maxlength="50"
+                   pattern="[a-zA-Z0-9_-]+"
+                   title="Только буквы (a-z, A-Z), цифры, дефис и подчеркивание"
+                   autocomplete="username"
+                   id="username">
+            <div class="error-message" id="username-error"></div>
             
-            <input type="password" name="password" placeholder="Введите пароль" required minlength="4" id="password">
-            <input type="password" name="confirm_password" placeholder="Подтвердите пароль" required minlength="4" id="confirm_password">
+            <input type="password" 
+                   name="password" 
+                   placeholder="Введите пароль" 
+                   required 
+                   minlength="4" 
+                   id="password"
+                   autocomplete="new-password">
+            <div class="error-message" id="password-error"></div>
+            
+            <input type="password" 
+                   name="confirm_password" 
+                   placeholder="Подтвердите пароль" 
+                   required 
+                   minlength="4" 
+                   id="confirm_password"
+                   autocomplete="new-password">
+            <div class="error-message" id="confirm-password-error"></div>
             
             <label for="secret_question">Секретный вопрос (для восстановления пароля):</label>
-            <textarea name="secret_question" id="secret_question" placeholder="Например: Девичья фамилия матери? Или: Название первого питомца?" required maxlength="255"></textarea>
-            <div class="help-text">Придумайте вопрос, ответ на который знаете только вы</div>
+            <textarea name="secret_question" 
+                      id="secret_question" 
+                      placeholder="Например: Девичья фамилия матери? Или: Название первого питомца?" 
+                      required 
+                      minlength="5"
+                      maxlength="255"></textarea>
+            <div class="help-text">Придумайте вопрос, ответ на который знаете только вы (минимум 5 символов)</div>
+            <div class="error-message" id="secret-question-error"></div>
             
-            <input type="text" name="secret_answer" placeholder="Ответ на секретный вопрос" required maxlength="100" id="secret_answer">
-            <div class="help-text">Запомните ответ - он понадобится для восстановления пароля</div>
+            <input type="text" 
+                   name="secret_answer" 
+                   placeholder="Ответ на секретный вопрос" 
+                   required 
+                   minlength="2"
+                   maxlength="100" 
+                   id="secret_answer">
+            <div class="help-text">Запомните ответ - он понадобится для восстановления пароля (минимум 2 символа)</div>
+            <div class="error-message" id="secret-answer-error"></div>
             
             <button type="submit">Зарегистрироваться</button>
         </form>
         
         <script>
-            // Проверка совпадения паролей
+            // Функция для показа toast-уведомлений
+            function showToast(message, type = 'error', duration = 4000) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+            
+            // Функция для показа ошибки под полем
+            function showFieldError(fieldId, message) {
+                const errorDiv = document.getElementById(fieldId + '-error');
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                }
+            }
+            
+            // Функция для скрытия ошибки под полем
+            function hideFieldError(fieldId) {
+                const errorDiv = document.getElementById(fieldId + '-error');
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }
+            
+            // Валидация формы перед отправкой
             document.getElementById('registerForm').addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Очищаем предыдущие ошибки
+                ['username', 'password', 'confirm-password', 'secret-question', 'secret-answer'].forEach(id => {
+                    hideFieldError(id);
+                });
+                
+                const username = document.getElementById('username').value.trim();
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirm_password').value;
-                
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    alert('Пароли не совпадают!');
-                    return false;
-                }
-                
                 const secretQuestion = document.getElementById('secret_question').value.trim();
                 const secretAnswer = document.getElementById('secret_answer').value.trim();
                 
-                if (secretQuestion.length < 5) {
-                    e.preventDefault();
-                    alert('Секретный вопрос должен содержать минимум 5 символов');
-                    return false;
+                // Валидация имени пользователя
+                if (username.length < 3 || username.length > 50) {
+                    showFieldError('username', 'Имя пользователя должно быть от 3 до 50 символов');
+                    isValid = false;
+                } else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                    showFieldError('username', 'Имя пользователя может содержать только буквы, цифры, дефис и подчеркивание');
+                    isValid = false;
                 }
                 
+                // Валидация пароля
+                if (password.length < 4) {
+                    showFieldError('password', 'Пароль должен содержать минимум 4 символа');
+                    isValid = false;
+                }
+                
+                // Проверка совпадения паролей
+                if (password !== confirmPassword) {
+                    showFieldError('confirm-password', 'Пароли не совпадают');
+                    isValid = false;
+                }
+                
+                // Валидация секретного вопроса
+                if (secretQuestion.length < 5) {
+                    showFieldError('secret-question', 'Секретный вопрос должен содержать минимум 5 символов');
+                    isValid = false;
+                }
+                
+                // Валидация ответа на секретный вопрос
                 if (secretAnswer.length < 2) {
+                    showFieldError('secret-answer', 'Ответ на секретный вопрос должен содержать минимум 2 символа');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
                     e.preventDefault();
-                    alert('Ответ на секретный вопрос должен содержать минимум 2 символа');
+                    showToast('Пожалуйста, исправьте ошибки в форме', 'error');
                     return false;
+                }
+            });
+            
+            // Валидация в реальном времени
+            document.getElementById('username').addEventListener('blur', function() {
+                const username = this.value.trim();
+                if (username && (username.length < 3 || username.length > 50)) {
+                    showFieldError('username', 'Имя пользователя должно быть от 3 до 50 символов');
+                } else if (username && !/^[a-zA-Z0-9_-]+$/.test(username)) {
+                    showFieldError('username', 'Только буквы, цифры, дефис и подчеркивание');
+                } else {
+                    hideFieldError('username');
+                }
+            });
+            
+            document.getElementById('confirm_password').addEventListener('blur', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                if (confirmPassword && password !== confirmPassword) {
+                    showFieldError('confirm-password', 'Пароли не совпадают');
+                } else {
+                    hideFieldError('confirm-password');
                 }
             });
         </script>

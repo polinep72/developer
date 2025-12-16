@@ -100,10 +100,24 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <form action="/login" method="post">
+        <form action="/login" method="post" id="loginForm">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <input type="text" name="username" placeholder="Введите логин" required autofocus>
-            <input type="password" name="password" placeholder="Введите пароль" required>
+            <input type="text" 
+                   name="username" 
+                   placeholder="Введите логин" 
+                   required 
+                   autofocus
+                   minlength="3"
+                   maxlength="50"
+                   pattern="[a-zA-Z0-9_-]+"
+                   title="Только буквы, цифры, дефис и подчеркивание"
+                   autocomplete="username">
+            <input type="password" 
+                   name="password" 
+                   placeholder="Введите пароль" 
+                   required
+                   minlength="1"
+                   autocomplete="current-password">
             <button type="submit">Войти</button>
         </form>
         <a href="/forgot_password">Забыли пароль?</a>
