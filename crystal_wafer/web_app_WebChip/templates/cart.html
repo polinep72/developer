@@ -443,7 +443,7 @@
         </div>
         <div class="cart-actions">
             <a href="/search?warehouse={{ warehouse_type|default('crystals') }}" class="button">Назад к поиску</a>
-        <button id="export-cart" onclick="exportCart()">Экспортировать корзину в Excel</button>
+        <button id="export-cart" type="button">Экспортировать корзину в Excel</button>
             <button type="button" class="btn btn-danger" id="clear-cart-btn">Очистить корзину</button>
         </div>
         {% else %}
@@ -535,8 +535,10 @@
 			}
 		}
 		
-		// Сохранение изменений количества
-		document.querySelectorAll('.save-item').forEach(button => {
+		// Инициализация обработчиков после загрузки DOM
+		document.addEventListener('DOMContentLoaded', function() {
+			// Сохранение изменений количества
+			document.querySelectorAll('.save-item').forEach(button => {
 			button.addEventListener('click', function () {
 				const originalButton = this;
 				const row = this.closest('tr');
