@@ -735,7 +735,7 @@ def inflow():
         df['Приход Wafer, шт.'] = pd.to_numeric(df['Приход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Приход GelPack, шт.' опциональна
         if 'Приход GelPack, шт.' in df.columns:
-        df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+            df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Приход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
