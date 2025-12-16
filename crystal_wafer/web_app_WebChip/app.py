@@ -1574,8 +1574,8 @@ def get_lots():
             lots_raw = execute_query(lots_query)
             if lots_raw and isinstance(lots_raw, (list, tuple)):
                 lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
-        
-        lots = [row[0] for row in lots_raw] if lots_raw else []
+            else:
+                lots = []
         return jsonify({"lots": lots})
     except Exception as e:
         _flask_app.logger.error(f"Ошибка загрузки партий: {e}", exc_info=True)
@@ -2190,19 +2190,23 @@ def login():
             
             # Защита от перечисления пользователей: всегда выполняем проверку пароля
             # даже если пользователь не найден, чтобы время ответа было одинаковым
-            user_found = user_data_list and len(user_data_list) > 0
+            user_found = user_data_list and isinstance(user_data_list, (list, tuple)) and len(user_data_list) > 0
             password_valid = False
             is_blocked = False
             
-            if user_found:
+            if user_found and isinstance(user_data_list, (list, tuple)) and len(user_data_list) > 0:
                 user_data = user_data_list[0]  # Берем первый элемент списка (кортеж)
-                _flask_app.logger.info(f"Данные пользователя: id={user_data[0]}, username={user_data[1]}, пароль в БД (первые 3 символа)={user_data[2][:3] if user_data[2] else 'None'}...")
+                if not isinstance(user_data, (list, tuple)) or len(user_data) < 3:
+                    _flask_app.logger.error(f"Неверный формат данных пользователя: ожидается кортеж с минимум 3 элементами, получено: {user_data}")
+                    flash("Ошибка: неверный формат данных пользователя", "danger")
+                    return render_template('login.html')
+                _flask_app.logger.info(f"Данные пользователя: id={user_data[0]}, username={user_data[1]}, пароль в БД (первые 3 символа)={user_data[2][:3] if len(user_data) > 2 and user_data[2] else 'None'}...")
                 
                 # Проверяем, не заблокирован ли пользователь (но не сообщаем об этом отдельно)
                 is_blocked = len(user_data) > 4 and user_data[4]  # is_blocked
                 
                 if not is_blocked:
-                    db_password_hash = user_data[2]  # Пароль из БД (хеш или открытый текст для старых записей)
+                    db_password_hash = user_data[2] if len(user_data) > 2 else None  # Пароль из БД (хеш или открытый текст для старых записей)
                     
                     # Проверяем пароль: если это хеш (начинается с pbkdf2:), используем check_password_hash
                     # Если это открытый текст (для старых записей), сравниваем напрямую
@@ -2227,8 +2231,12 @@ def login():
                             _flask_app.logger.info(f"Неверный пароль для пользователя {username} (открытый текст)")
             
             # Если пароль верный и пользователь не заблокирован - успешный вход
-            if user_found and password_valid and not is_blocked:
+            if user_found and password_valid and not is_blocked and isinstance(user_data_list, (list, tuple)) and len(user_data_list) > 0:
                 user_data = user_data_list[0]
+                if not isinstance(user_data, (list, tuple)) or len(user_data) < 2:
+                    _flask_app.logger.error(f"Неверный формат данных пользователя при установке сессии: {user_data}")
+                    flash("Ошибка: неверный формат данных пользователя", "danger")
+                    return render_template('login.html')
                 session['user_id'] = user_data[0]  # id
                 session['username'] = user_data[1]  # username
                 session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
