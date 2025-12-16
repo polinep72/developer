@@ -3,6 +3,21 @@
 Все изменения в этом проекте будут задокументированы в этом файле.
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), проект использует [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-12-16
+
+### Added
+- CSRF protection для всех форм и AJAX запросов
+- Добавлен Flask-WTF в зависимости
+- CSRF токены во все HTML формы (login, register, search, forgot_password, reset_password, inventory, cart)
+- CSRF токены во все AJAX запросы (update_profile, update_user, delete_user, add_to_cart, update_cart_item, remove_from_cart)
+- Валидация входных данных (username, email, password, secret_question, secret_answer)
+- Функции валидации с защитой от XSS (escape HTML)
+- Санитизация текстовых полей
+
+### Fixed
+- Исправлены ошибки отступов в коде (inflow, outflow, refund, add_to_cart, export)
+- Исправлена логика поиска по шифру кристалла (точное совпадение последовательности символов)
+
 ## [1.3.9] - 2025-12-16
 
 ### Fixed
