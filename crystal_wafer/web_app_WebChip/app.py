@@ -170,7 +170,7 @@ csrf = CSRFProtect(_flask_app)
 
 # Инициализация Rate Limiting
 limiter = Limiter(
-    _flask_app,
+    app=_flask_app,
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"],
     storage_uri="memory://"  # Для production рекомендуется использовать Redis
@@ -323,23 +323,74 @@ def get_reference_id(table_name, column_name, value):
         raise ValueError(f"Справочная запись не найдена: {table_name}.{column_name} = {value}")
 
 
-def log_user_action(user_id, action_type, file_name=None, target_table=None, details=None):
-    # Простая заглушка, чтобы не было NameError
-    print(f"LOG: User {user_id}, Action: {action_type}, File: {file_name}, Table: {target_table}, Details: {details}")
-    _flask_app.logger.info(
-        f"USER ACTION: UserID='{user_id}', Action='{action_type}', File='{file_name}', "
-        f"Table='{target_table}', Details='{details}'"
-    )
-    # В реальном приложении здесь будет INSERT в таблицу логов
-    # query = """
-    #     INSERT INTO user_logs (user_id, action_type, file_name, target_table, details, timestamp)
-    #     VALUES (%s, %s, %s, %s, %s, NOW())
-    # """
-    # try:
-    #     execute_query(query, (user_id, action_type, file_name, target_table, details), fetch=False)
-    # except Exception as e:
-    #     print(f"Ошибка логирования: {e}")
-    pass
+def log_user_action(action_type, user_id=None, table_name=None, record_id=None, details=None, file_name=None, target_table=None):
+    """
+    Логирование действий пользователя для аудита
+    
+    Args:
+        action_type: Тип действия ('login', 'logout', 'create', 'update', 'delete', 'export', 'file_upload')
+        user_id: ID пользователя (если None, берется из session)
+        table_name: Имя таблицы БД (если действие связано с БД)
+        record_id: ID записи в таблице (если действие связано с конкретной записью)
+        details: Дополнительная информация (dict или строка)
+        file_name: Имя файла (для обратной совместимости, сохраняется в details)
+        target_table: Имя таблицы (для обратной совместимости, используется как table_name)
+    """
+    try:
+        # Получаем user_id из session, если не передан
+        if user_id is None:
+            from flask import session
+            user_id = session.get('user_id')
+        
+        # Получаем IP адрес и User-Agent из request
+        try:
+            from flask import request
+            ip_address = request.remote_addr
+            user_agent = request.headers.get('User-Agent', '')[:500]  # Ограничиваем длину User-Agent
+        except RuntimeError:
+            # Если request context недоступен (например, в фоновых задачах)
+            ip_address = None
+            user_agent = None
+        
+        # Поддерживаем обратную совместимость: если переданы file_name/target_table
+        if file_name or target_table:
+            if details is None:
+                details = {}
+            elif isinstance(details, str):
+                details = {'text': details}
+            elif not isinstance(details, dict):
+                details = {'data': str(details)}
+            
+            if file_name:
+                details['file_name'] = file_name
+            if target_table:
+                table_name = target_table or table_name
+        
+        # Форматируем details для сохранения
+        if details is None:
+            details_str = None
+        elif isinstance(details, dict):
+            import json
+            details_str = json.dumps(details, ensure_ascii=False)
+        else:
+            details_str = str(details)
+        
+        # Вставляем запись в audit_log
+        try:
+            query = """
+                INSERT INTO public.audit_log (user_id, action_type, table_name, record_id, details, ip_address, user_agent)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            execute_query(query, (user_id, action_type, table_name, record_id, details_str, ip_address, user_agent), fetch=False)
+            
+            # Также логируем в консоль для отладки
+            _flask_app.logger.info(
+                f"AUDIT LOG: UserID={user_id}, Action={action_type}, Table={table_name}, "
+                f"RecordID={record_id}, IP={ip_address}"
+            )
+        except Exception as e:
+            # Логируем ошибку, но не прерываем выполнение основной функции
+            _flask_app.logger.error(f"Ошибка записи в audit_log: {e}", exc_info=True)
 
 
 # --- ФУНКЦИИ ВАЛИДАЦИИ ВХОДНЫХ ДАННЫХ ---
@@ -536,7 +587,7 @@ def inflow():
         df['Приход Wafer, шт.'] = pd.to_numeric(df['Приход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Приход GelPack, шт.' опциональна
         if 'Приход GelPack, шт.' in df.columns:
-            df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Приход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -632,18 +683,18 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-            # Вместо execute_values используем цикл
-            for record in all_data_to_insert:
-                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+                # Вместо execute_values используем цикл
+                for record in all_data_to_insert:
+                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
 
             log_user_action(
-                user_id=user_id,  # Используем переменную, определенную ранее
-                action_type=f'Загрузка файла: Приход (склад: {warehouse_type})',
-                file_name=file_name,
-                target_table=invoice_table
+                'file_upload',
+                user_id=user_id,
+                table_name=invoice_table,
+                details={'warehouse_type': warehouse_type, 'file_name': file_name, 'rows_count': len(all_data_to_insert)}
             )
             return jsonify({"success": True,
                             "message": f"Данные из файла '{file_name}' успешно загружены ({len(all_data_to_insert)} строк)."}), 200
@@ -729,7 +780,7 @@ def outflow():
         df['Расход Wafer, шт.'] = pd.to_numeric(df['Расход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Расход GelPack, шт.' опциональна
         if 'Расход GelPack, шт.' in df.columns:
-            df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Расход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -854,10 +905,10 @@ def outflow():
             cur.close()
 
             log_user_action(
+                'file_upload',
                 user_id=user_id,
-                action_type=f'Загрузка файла: Расход (склад: {warehouse_type})',
-                file_name=file_name,
-                target_table=consumption_table
+                table_name=consumption_table,
+                details={'warehouse_type': warehouse_type, 'file_name': file_name, 'rows_count': len(all_data_to_insert), 'type': 'outflow'}
             )
             return jsonify({"success": True,
                             "message": f"Данные расхода из файла '{file_name}' успешно загружены ({len(all_data_to_insert)} строк)."}), 200
@@ -923,7 +974,7 @@ def refund():
         df['Возврат Wafer, шт.'] = pd.to_numeric(df['Возврат Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Возврат GelPack, шт.' опциональна
         if 'Возврат GelPack, шт.' in df.columns:
-            df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Возврат GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1006,10 +1057,10 @@ def refund():
             conn_refund_loop.commit()
 
             log_user_action(
+                'file_upload',
                 user_id=user_id,
-                action_type=f'Загрузка файла: Возврат (склад: {warehouse_type})',
-                file_name=file_name,
-                target_table=invoice_table
+                table_name=invoice_table,
+                details={'warehouse_type': warehouse_type, 'file_name': file_name, 'rows_count': len(all_data_to_insert), 'type': 'refund'}
             )
             return jsonify({"success": True,
                             "message": f"Данные возврата из файла '{file_name}' успешно загружены ({len(all_data_to_insert)} строк)."}), 200
@@ -1201,8 +1252,8 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-    params_search = []
-    filter_conditions = []
+        params_search = []
+        filter_conditions = []
     
     # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
     if warehouse_type in ('plates', 'far'):
@@ -1217,21 +1268,21 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-        filter_conditions.append("nc.n_chip ILIKE %s")
+            filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-    if manufacturer_filter_form and manufacturer_filter_form != "all":
-        filter_conditions.append("p.name_pr = %s")
-        params_search.append(manufacturer_filter_form)
+        if manufacturer_filter_form and manufacturer_filter_form != "all":
+            filter_conditions.append("p.name_pr = %s")
+            params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-    if filter_conditions:
+        if filter_conditions:
             query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
@@ -1494,49 +1545,49 @@ def add_to_cart():
         
         else:
             # Обычная логика для склада кристаллов
-            if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
-                return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
+    if not item_id or (quantity_w <= 0 and quantity_gp <= 0):
+        return jsonify({'success': False, 'message': 'Некорректные данные для добавления (ID или количество)'}), 400
 
             # Получаем id_chip и id_pack из invoice по item_id
-            id_chip_val = None
-            id_pack_val = None
-            if item_id:
+        id_chip_val = None
+        id_pack_val = None
+        if item_id:
                 invoice_data = execute_query(f"SELECT id_chip, id_pack FROM {invoice_table} WHERE item_id = %s LIMIT 1", (item_id,), fetch=True)
-                if invoice_data:
-                    id_chip_val = invoice_data[0][0]
-                    id_pack_val = invoice_data[0][1]
+            if invoice_data:
+                id_chip_val = invoice_data[0][0]
+                id_pack_val = invoice_data[0][1]
 
-            # Обновляем запрос на вставку в корзину
-            query_insert_cart = """
-                INSERT INTO cart (
-                    user_id, item_id, 
-                    cons_w, cons_gp, 
-                    start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
-                    note, stor, cells, 
+        # Обновляем запрос на вставку в корзину
+        query_insert_cart = """
+            INSERT INTO cart (
+                user_id, item_id, 
+                cons_w, cons_gp, 
+                start, manufacturer, technology, lot, wafer, quadrant, internal_lot, chip_code, 
+                note, stor, cells, 
                     id_chip, id_pack,
                     warehouse_type,
-                    date_added
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (user_id, item_id, warehouse_type) 
-                DO UPDATE SET 
-                    cons_w = cart.cons_w + EXCLUDED.cons_w,
-                    cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
-                    date_added = EXCLUDED.date_added; 
-            """
-            params_cart = (
-                user_id, item_id,
-                quantity_w, quantity_gp,
-                data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
-                data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
-                data.get('note'), data.get('stor'), data.get('cells'),
-                id_chip_val, id_pack_val,
-                warehouse_type,  # Добавляем тип склада
                 date_added
             )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (user_id, item_id, warehouse_type) 
+            DO UPDATE SET 
+                cons_w = cart.cons_w + EXCLUDED.cons_w,
+                cons_gp = cart.cons_gp + EXCLUDED.cons_gp,
+                date_added = EXCLUDED.date_added; 
+        """
+        params_cart = (
+            user_id, item_id,
+            quantity_w, quantity_gp,
+            data.get('launch'), data.get('manufacturer'), data.get('technology'), data.get('lot'),
+            data.get('wafer'), data.get('quadrant'), data.get('internal_lot'), data.get('chip_code'),
+            data.get('note'), data.get('stor'), data.get('cells'),
+                id_chip_val, id_pack_val,
+                warehouse_type,  # Добавляем тип склада
+            date_added
+        )
 
-            execute_query(query_insert_cart, params_cart, fetch=False)
-            return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
+        execute_query(query_insert_cart, params_cart, fetch=False)
+        return jsonify({'success': True, 'message': 'Товар добавлен/обновлен в корзине'})
             
     except Exception as e:
         _flask_app.logger.error(f"Ошибка добавления в корзину: {e}", exc_info=True)
@@ -1796,10 +1847,10 @@ def export_cart():
         response.headers['Content-Disposition'] = disposition
 
         log_user_action(
+            'export',
             user_id=session.get('user_id'),
-            action_type='Экспорт корзины',
-            file_name=base_filename,
-            target_table='cart_export'
+            table_name='cart',
+            details={'file_name': base_filename, 'warehouse_type': warehouse_type}
         )
         return response
 
@@ -1935,6 +1986,10 @@ def login():
                     session['username'] = user_data[1]  # username
                     session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
                     _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}, is_admin={session.get('is_admin')}")
+                    
+                    # Логируем успешный вход
+                    log_user_action('login', user_id=user_data[0], details={'username': username})
+                    
                     flash(f"Добро пожаловать, {session['username']}!", "success")
 
                     next_url = request.args.get('next')
@@ -2242,6 +2297,25 @@ def update_profile():
         if username != session.get('username'):
             session['username'] = username
         
+        # Логируем обновление профиля
+        update_details = {'updated_fields': []}
+        if password:
+            update_details['updated_fields'].append('password')
+        if secret_question_validated:
+            update_details['updated_fields'].append('secret_question')
+        if secret_answer_raw:
+            update_details['updated_fields'].append('secret_answer')
+        if username != session.get('username'):
+            update_details['updated_fields'].append('username')
+        
+        log_user_action(
+            'update',
+            user_id=user_id,
+            table_name='users',
+            record_id=user_id,
+            details=update_details
+        )
+        
         return jsonify({"success": True, "message": "Профиль успешно обновлен", "new_username": username})
     except Exception as e:
         _flask_app.logger.error(f"Ошибка при обновлении профиля: {e}", exc_info=True)
@@ -2250,6 +2324,11 @@ def update_profile():
 
 @_flask_app.route('/logout')
 def logout():
+    # Логируем выход перед очисткой сессии
+    user_id = session.get('user_id')
+    if user_id:
+        log_user_action('logout', user_id=user_id)
+    
     session.pop('user_id', None)
     session.pop('username', None)
     session.pop('is_admin', None)
@@ -2330,6 +2409,15 @@ def update_user_status():
         
         execute_query(query, (user_id,), fetch=False)
         
+        # Логируем изменение статуса пользователя
+        log_user_action(
+            'update',
+            user_id=session.get('user_id'),
+            table_name='users',
+            record_id=user_id,
+            details={'action': action, 'admin_id': session.get('user_id')}
+        )
+        
         action_names = {
             'block': 'заблокирован',
             'unblock': 'разблокирован',
@@ -2399,6 +2487,28 @@ def update_user():
         query = f"UPDATE public.users SET {update_fields_str} WHERE id = %s"
         execute_query(query, tuple(params), fetch=False)
         
+        # Логируем обновление пользователя
+        update_details = {
+            'admin_id': session.get('user_id'),
+            'updated_fields': []
+        }
+        if password:
+            update_details['updated_fields'].append('password')
+        if username_raw:
+            update_details['updated_fields'].append('username')
+        if email_raw:
+            update_details['updated_fields'].append('email')
+        update_details['updated_fields'].append('is_admin')
+        update_details['updated_fields'].append('is_blocked')
+        
+        log_user_action(
+            'update',
+            user_id=session.get('user_id'),
+            table_name='users',
+            record_id=user_id,
+            details=update_details
+        )
+        
         # Если изменяем свой статус администратора, обновляем сессию
         if user_id == session['user_id']:
             session['is_admin'] = is_admin
@@ -2459,6 +2569,15 @@ def delete_user():
         # Теперь удаляем пользователя
         query = "DELETE FROM public.users WHERE id = %s"
         execute_query(query, (user_id,), fetch=False)
+        
+        # Логируем удаление пользователя
+        log_user_action(
+            'delete',
+            user_id=session.get('user_id'),
+            table_name='users',
+            record_id=user_id,
+            details={'deleted_username': username, 'admin_id': session.get('user_id')}
+        )
         
         return jsonify({"success": True, "message": f"Пользователь '{username}' успешно удален"})
     except Exception as e:
@@ -2708,14 +2827,16 @@ def inventory():
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     filename = f'inventory_export_{timestamp}.xlsx'
                     log_user_action(
+                        'export',
                         user_id=session.get('user_id'),
-                        action_type="Экспорт инвентаризации (сводка)",
-                        file_name=filename,
-                        details=(
-                            f"Фильтры: Производитель='{selected_manufacturer_form}', "
-                            f"Партия='{selected_lot_id_form}', "
-                            f"Шифр='{selected_chip_code_filter_form}'"
-                        )
+                        table_name='inventory',
+                        details={
+                            'type': 'summary',
+                            'file_name': filename,
+                            'manufacturer': selected_manufacturer_form,
+                            'lot': selected_lot_id_form,
+                            'chip_code': selected_chip_code_filter_form
+                        }
                     )
                     return send_file(output, as_attachment=True, download_name=filename,
                                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
