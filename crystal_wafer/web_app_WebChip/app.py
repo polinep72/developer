@@ -23,7 +23,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.12"
+__version__ = "1.4.13"
 
 # Импортируем WSGIMiddleware
 try:
@@ -735,7 +735,7 @@ def inflow():
         df['Приход Wafer, шт.'] = pd.to_numeric(df['Приход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Приход GelPack, шт.' опциональна
         if 'Приход GelPack, шт.' in df.columns:
-            df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Приход GelPack, шт.'] = pd.to_numeric(df['Приход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Приход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -835,9 +835,9 @@ def inflow():
 
         # Используем уже созданное подключение и cursor
         try:
-            # Вместо execute_values используем цикл
-            for record in all_data_to_insert:
-                cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
+                # Вместо execute_values используем цикл
+                for record in all_data_to_insert:
+                    cur.execute(insert_query, record)  # psycopg2 подставит значения в %s
 
             conn_loop.commit()
             cur.close()
@@ -942,7 +942,7 @@ def outflow():
         df['Расход Wafer, шт.'] = pd.to_numeric(df['Расход Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Расход GelPack, шт.' опциональна
         if 'Расход GelPack, шт.' in df.columns:
-            df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Расход GelPack, шт.'] = pd.to_numeric(df['Расход GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Расход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1151,7 +1151,7 @@ def refund():
         df['Возврат Wafer, шт.'] = pd.to_numeric(df['Возврат Wafer, шт.'], errors='coerce').fillna(0).astype(int)
         # Колонка 'Возврат GelPack, шт.' опциональна
         if 'Возврат GelPack, шт.' in df.columns:
-            df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
+        df['Возврат GelPack, шт.'] = pd.to_numeric(df['Возврат GelPack, шт.'], errors='coerce').fillna(0).astype(int)
         else:
             df['Возврат GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
@@ -1429,8 +1429,8 @@ def search():
               COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
         """
     
-    params_search = []
-    filter_conditions = []
+        params_search = []
+        filter_conditions = []
     
     # Для складов "Склад пластин" и "Дальний склад" добавляем фильтр: скрываем строки где оба остатка = 0
     if warehouse_type in ('plates', 'far'):
@@ -1445,22 +1445,22 @@ def search():
     if chip_name_form and chip_name_form.strip():
         search_pattern = chip_name_form.strip()
         # Используем ILIKE для поиска последовательности символов в любом месте шифра
-        filter_conditions.append("nc.n_chip ILIKE %s")
+            filter_conditions.append("nc.n_chip ILIKE %s")
         params_search.append(f"%{search_pattern}%")
         _flask_app.logger.info(f"Поиск по шифру кристалла: '{search_pattern}', паттерн: '%{search_pattern}%'")
     
     # Фильтр по производителю
-    if manufacturer_filter_form and manufacturer_filter_form != "all":
-        filter_conditions.append("p.name_pr = %s")
-        params_search.append(manufacturer_filter_form)
+        if manufacturer_filter_form and manufacturer_filter_form != "all":
+            filter_conditions.append("p.name_pr = %s")
+            params_search.append(manufacturer_filter_form)
     
     # Добавляем фильтр по партии для всех складов
     if lot_filter_form and lot_filter_form != "all":
         filter_conditions.append("l.name_lot = %s")
         params_search.append(lot_filter_form)
 
-    if filter_conditions:
-        query_search += " AND " + " AND ".join(filter_conditions)
+        if filter_conditions:
+            query_search += " AND " + " AND ".join(filter_conditions)
 
     query_search += " ORDER BY display_item_id;"
 
@@ -1848,12 +1848,12 @@ def remove_from_cart():
         user_id = get_temp_user_id(session)
         warehouse_type = session.get('warehouse_type', 'crystals')
         _flask_app.logger.info(f"REMOVE_FROM_CART: user_id={user_id}, warehouse_type={warehouse_type}")
-        data = request.get_json()
+    data = request.get_json()
         _flask_app.logger.info(f"REMOVE_FROM_CART: data={data}")
-        item_id = data.get('item_id')  # ID товара (row[0] из search.html)
+    item_id = data.get('item_id')  # ID товара (row[0] из search.html)
 
-        if not item_id:
-            return jsonify({'success': False, 'message': 'Неверный ID товара'}), 400
+    if not item_id:
+        return jsonify({'success': False, 'message': 'Неверный ID товара'}), 400
 
         query_delete_cart = "DELETE FROM cart WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
         rows_deleted = execute_query(query_delete_cart, (item_id, user_id, warehouse_type), fetch=False)
