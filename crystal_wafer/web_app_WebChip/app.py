@@ -1283,10 +1283,10 @@ def search():
     lots = []
     try:
         manufacturers_query = "SELECT DISTINCT name_pr FROM pr ORDER BY name_pr"
+        manufacturers = []
         manufacturers_raw = execute_query(manufacturers_query)
-        if manufacturers_raw:
-            manufacturers = [row[0] for row in manufacturers_raw]
-        
+        if manufacturers_raw and isinstance(manufacturers_raw, (list, tuple)):
+            manufacturers = [row[0] for row in manufacturers_raw if isinstance(row, (list, tuple)) and len(row) > 0]
         # Загружаем список партий для всех складов
         # Фильтруем партии по выбранному производителю, если он указан
         # Получаем значение производителя из формы или аргументов
@@ -1303,14 +1303,14 @@ def search():
                 ORDER BY l.name_lot
             """
             lots_raw = execute_query(lots_query, (selected_manufacturer_for_lots,))
-            if lots_raw:
-                lots = [row[0] for row in lots_raw]
+            if lots_raw and isinstance(lots_raw, (list, tuple)):
+                lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
         else:
             # Если производитель не выбран, показываем все партии
             lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
             lots_raw = execute_query(lots_query)
-            if lots_raw:
-                lots = [row[0] for row in lots_raw]
+            if lots_raw and isinstance(lots_raw, (list, tuple)):
+                lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
     except Exception as e:
         flash(f"Ошибка загрузки списка производителей: {e}", "danger")
         _flask_app.logger.error(f"Ошибка загрузки списка производителей: {e}")
@@ -1536,7 +1536,10 @@ def get_chip_codes():
             params = ()
         
         results = execute_query(sql_query, params)
-        chip_codes = [row[0] for row in results if row[0]]
+        if not results or not isinstance(results, (list, tuple)):
+            chip_codes = []
+        else:
+            chip_codes = [row[0] for row in results if isinstance(row, (list, tuple)) and len(row) > 0 and row[0]]
         
         return jsonify({'success': True, 'chip_codes': chip_codes})
     except Exception as e:
@@ -1569,6 +1572,8 @@ def get_lots():
             # Все партии
             lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
             lots_raw = execute_query(lots_query)
+            if lots_raw and isinstance(lots_raw, (list, tuple)):
+                lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
         
         lots = [row[0] for row in lots_raw] if lots_raw else []
         return jsonify({"lots": lots})
@@ -1722,12 +1727,14 @@ def add_to_cart():
             search_pattern = f"{item_id_prefix}-%"
             all_items = execute_query(query_find_all_items, (search_pattern, search_pattern, search_pattern), fetch=True)
             
-            if not all_items:
+            if not all_items or not isinstance(all_items, (list, tuple)):
                 return jsonify({'success': False, 'message': 'Не найдено кристаллов для добавления'}), 400
 
             # Добавляем каждую найденную строку в корзину с количеством ostatok_w
             added_count = 0
             for row in all_items:
+                if not isinstance(row, (list, tuple)) or len(row) < 1:
+                    continue
                 row_item_id = row[0]
                 ostatok_w = int(row[10]) if row[10] else 0
                 
@@ -2609,6 +2616,7 @@ def manage_users():
         users_list = execute_query(query_users)
         
         users = []
+        if users_list and isinstance(users_list, (list, tuple)):
         if users_list:
             for user in users_list:
                 users.append({
