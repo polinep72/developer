@@ -17,7 +17,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.3.4"
+__version__ = "1.3.5"
 
 # Импортируем WSGIMiddleware
 try:
@@ -173,10 +173,35 @@ def handle_exception(e):
 
 @_flask_app.context_processor
 def inject_user():
-    return {'user_logged_in': 'username' in session, 'username': session.get('username')}
+    return {
+        'user_logged_in': 'username' in session,
+        'username': session.get('username'),
+        'is_admin': session.get('is_admin', False)
+    }
 
 
 # --- НАЧАЛО ОПРЕДЕЛЕНИЙ ВСПОМОГАТЕЛЬНЫХ ФУНКЦИЙ ---
+def get_temp_user_id(session):
+    """Генерирует временный ID пользователя для неавторизованных пользователей на основе session ID"""
+    if 'user_id' in session:
+        return session['user_id']
+    
+    # Для неавторизованных пользователей используем отрицательный ID на основе hash от уникального идентификатора сессии
+    if 'temp_user_id' not in session:
+        import hashlib
+        import uuid
+        # Генерируем уникальный идентификатор для сессии, если его еще нет
+        if 'session_unique_id' not in session:
+            session['session_unique_id'] = str(uuid.uuid4())
+        session_id = session['session_unique_id']
+        hash_obj = hashlib.md5(session_id.encode())
+        # Преобразуем первые 8 символов хеша в отрицательное число
+        hash_int = int(hash_obj.hexdigest()[:8], 16)
+        # Делаем отрицательным и ограничиваем диапазоном (чтобы не было слишком больших чисел)
+        session['temp_user_id'] = -(hash_int % 100000000)  # Отрицательное число до 100 млн
+    return session['temp_user_id']
+
+
 def get_db_connection():
     # Используем DB_NAME (основная БД с таблицами users, invoice и т.д.)
     # с fallback на DB_NAME2 для обратной совместимости
@@ -916,10 +941,6 @@ def search():
     lot_filter_form = 'all'
 
     if request.method == 'POST':
-        if 'user_id' not in session:
-            flash("Пожалуйста, войдите в систему для выполнения поиска.", "warning")
-            return redirect(url_for('login', next=request.url))
-        
         chip_name_form = request.form.get('chip_name', '').strip()
         manufacturer_filter_form = request.form.get('manufacturer', 'all')
         lot_filter_form = request.form.get('lot_filter', 'all')
@@ -1127,10 +1148,8 @@ def get_lots():
 
 @_flask_app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'Пользователь не авторизован'}), 401
-
-    user_id = session['user_id']
+    # Получаем user_id (реальный или временный для неавторизованных)
+    user_id = get_temp_user_id(session)
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'message': 'Нет данных'}), 400
@@ -1374,11 +1393,8 @@ def add_to_cart():
 
 @_flask_app.route('/cart', methods=['GET'])
 def cart_view():  # Переименовал, чтобы не конфликтовать с импортом, если он будет
-    if 'user_id' not in session:
-        flash("Пожалуйста, войдите, чтобы просмотреть корзину.", "warning")
-        return redirect(url_for('login'))
-
-    user_id = session['user_id']
+    # Получаем user_id (реальный или временный для неавторизованных)
+    user_id = get_temp_user_id(session)
     # Получаем тип склада из сессии или запроса
     warehouse_type = get_warehouse_type_from_request()
     session['warehouse_type'] = warehouse_type  # Сохраняем в сессию
@@ -1405,10 +1421,8 @@ def cart_view():  # Переименовал, чтобы не конфликто
 
 @_flask_app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():
-    if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'Пользователь не авторизован'}), 401
-
-    user_id = session['user_id']
+    # Получаем user_id (реальный или временный для неавторизованных)
+    user_id = get_temp_user_id(session)
     warehouse_type = session.get('warehouse_type', 'crystals')
     data = request.get_json()
     item_id = data.get('item_id')  # ID товара (row[0] из search.html)
@@ -1430,10 +1444,8 @@ def remove_from_cart():
 
 @_flask_app.route('/update_cart_item', methods=['POST'])
 def update_cart_item():
-    if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'Пользователь не авторизован'}), 401
-
-    user_id = session['user_id']
+    # Получаем user_id (реальный или временный для неавторизованных)
+    user_id = get_temp_user_id(session)
     warehouse_type = session.get('warehouse_type', 'crystals')
     data = request.get_json()
     # В вашем HTML было data-id="{{ row[0] }}", что соответствует item_id
@@ -1709,7 +1721,7 @@ def login():
 
         # НЕБЕЗОПАСНО: прямое сравнение паролей
         # Пробуем разные варианты: с указанием схемы и без
-        query_login = "SELECT id, username, password FROM public.users WHERE username = %s"
+        query_login = "SELECT id, username, password, is_admin, is_blocked FROM public.users WHERE username = %s"
 
         try:
             _flask_app.logger.info(f"Попытка входа пользователя: {username}")
@@ -1720,6 +1732,12 @@ def login():
                 user_data = user_data_list[0]  # Берем первый элемент списка (кортеж)
                 _flask_app.logger.info(f"Данные пользователя: id={user_data[0]}, username={user_data[1]}, пароль в БД (первые 3 символа)={user_data[2][:3] if user_data[2] else 'None'}...")
                 
+                # Проверяем, не заблокирован ли пользователь
+                if len(user_data) > 4 and user_data[4]:  # is_blocked
+                    _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
+                    flash("Ваш аккаунт заблокирован. Обратитесь к администратору.", "danger")
+                    return render_template('login.html')
+                
                 # user_db_password = user_data[2] # Это пароль из БД (в реальном приложении - хеш)
                 # if check_password_hash(user_db_password, u_password):
                 db_password = user_data[2]
@@ -1728,7 +1746,8 @@ def login():
                 if db_password == u_password:  # Прямое сравнение (НЕБЕЗОПАСНО)
                     session['user_id'] = user_data[0]  # id
                     session['username'] = user_data[1]  # username
-                    _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}")
+                    session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
+                    _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}, is_admin={session.get('is_admin')}")
                     flash(f"Добро пожаловать, {session['username']}!", "success")
 
                     next_url = request.args.get('next')
@@ -1756,18 +1775,194 @@ def login():
 def logout():
     session.pop('user_id', None)
     session.pop('username', None)
+    session.pop('is_admin', None)
     flash("Вы успешно вышли из системы.", "info")
     return redirect(url_for('home'))
 
 
+@_flask_app.route('/manage_users')
+def manage_users():
+    """Страница управления пользователями (только для администраторов)"""
+    # Проверка авторизации
+    if 'user_id' not in session:
+        flash("Пожалуйста, войдите в систему.", "warning")
+        return redirect(url_for('login', next=request.url))
+    
+    # Проверка прав администратора
+    if not session.get('is_admin'):
+        flash("У вас нет прав для доступа к этой странице.", "danger")
+        return redirect(url_for('home'))
+    
+    try:
+        # Получаем список всех пользователей со всеми полями
+        query_users = "SELECT id, username, password, email, is_admin, is_blocked FROM public.users ORDER BY username"
+        users_list = execute_query(query_users)
+        
+        users = []
+        if users_list:
+            for user in users_list:
+                users.append({
+                    'id': user[0],
+                    'username': user[1],
+                    'password': user[2],  # Не передаем пароль в шаблон, но храним для полноты
+                    'email': user[3] if len(user) > 3 else None,
+                    'is_admin': user[4] if len(user) > 4 and user[4] else False,
+                    'is_blocked': user[5] if len(user) > 5 and user[5] else False
+                })
+        
+        return render_template('manage_users.html', users=users)
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при загрузке списка пользователей: {e}", exc_info=True)
+        flash(f"Ошибка при загрузке списка пользователей: {e}", "danger")
+        return redirect(url_for('home'))
+
+
+@_flask_app.route('/update_user_status', methods=['POST'])
+def update_user_status():
+    """Обновление статуса пользователя (блокировка/администратор)"""
+    # Проверка авторизации
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Пользователь не авторизован"}), 401
+    
+    # Проверка прав администратора
+    if not session.get('is_admin'):
+        return jsonify({"success": False, "message": "У вас нет прав для выполнения этого действия"}), 403
+    
+    data = request.get_json()
+    user_id = data.get('user_id')
+    action = data.get('action')  # 'block', 'unblock', 'set_admin', 'remove_admin'
+    
+    if not user_id or not action:
+        return jsonify({"success": False, "message": "Недостаточно данных"}), 400
+    
+    # Нельзя изменять свой собственный статус
+    if user_id == session['user_id']:
+        return jsonify({"success": False, "message": "Нельзя изменять свой собственный статус"}), 400
+    
+    try:
+        if action == 'block':
+            query = "UPDATE public.users SET is_blocked = TRUE WHERE id = %s"
+        elif action == 'unblock':
+            query = "UPDATE public.users SET is_blocked = FALSE WHERE id = %s"
+        elif action == 'set_admin':
+            query = "UPDATE public.users SET is_admin = TRUE WHERE id = %s"
+        elif action == 'remove_admin':
+            query = "UPDATE public.users SET is_admin = FALSE WHERE id = %s"
+        else:
+            return jsonify({"success": False, "message": "Неизвестное действие"}), 400
+        
+        execute_query(query, (user_id,), fetch=False)
+        
+        action_names = {
+            'block': 'заблокирован',
+            'unblock': 'разблокирован',
+            'set_admin': 'назначен администратором',
+            'remove_admin': 'удалены права администратора'
+        }
+        
+        return jsonify({"success": True, "message": f"Пользователь {action_names.get(action, 'обновлен')}"})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при обновлении статуса пользователя: {e}", exc_info=True)
+        return jsonify({"success": False, "message": f"Ошибка: {str(e)}"}), 500
+
+
+@_flask_app.route('/update_user', methods=['POST'])
+def update_user():
+    """Обновление данных пользователя"""
+    # Проверка авторизации
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Пользователь не авторизован"}), 401
+    
+    # Проверка прав администратора
+    if not session.get('is_admin'):
+        return jsonify({"success": False, "message": "У вас нет прав для выполнения этого действия"}), 403
+    
+    data = request.get_json()
+    user_id = data.get('user_id')
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+    is_admin = data.get('is_admin', False)
+    is_blocked = data.get('is_blocked', False)
+    
+    if not user_id or not username:
+        return jsonify({"success": False, "message": "Недостаточно данных"}), 400
+    
+    try:
+        # Проверка, что username уникален (если изменился)
+        existing_user = execute_query("SELECT id, username FROM public.users WHERE username = %s AND id != %s", (username, user_id))
+        if existing_user:
+            return jsonify({"success": False, "message": "Пользователь с таким именем уже существует"}), 400
+        
+        # Формируем запрос на обновление
+        update_fields = ["username = %s", "email = %s", "is_admin = %s", "is_blocked = %s"]
+        params = [username, email if email else None, is_admin, is_blocked]
+        
+        # Обновляем пароль только если он указан
+        if password and password.strip():
+            update_fields.append("password = %s")
+            params.append(password.strip())
+        
+        update_fields_str = ", ".join(update_fields)
+        params.append(user_id)
+        
+        query = f"UPDATE public.users SET {update_fields_str} WHERE id = %s"
+        execute_query(query, tuple(params), fetch=False)
+        
+        # Если изменяем свой статус администратора, обновляем сессию
+        if user_id == session['user_id']:
+            session['is_admin'] = is_admin
+            session['username'] = username
+        
+        return jsonify({"success": True, "message": "Пользователь успешно обновлен"})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при обновлении пользователя: {e}", exc_info=True)
+        return jsonify({"success": False, "message": f"Ошибка: {str(e)}"}), 500
+
+
+@_flask_app.route('/delete_user', methods=['POST'])
+def delete_user():
+    """Удаление пользователя"""
+    # Проверка авторизации
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Пользователь не авторизован"}), 401
+    
+    # Проверка прав администратора
+    if not session.get('is_admin'):
+        return jsonify({"success": False, "message": "У вас нет прав для выполнения этого действия"}), 403
+    
+    data = request.get_json()
+    user_id = data.get('user_id')
+    
+    if not user_id:
+        return jsonify({"success": False, "message": "Не указан ID пользователя"}), 400
+    
+    # Нельзя удалить самого себя
+    if user_id == session['user_id']:
+        return jsonify({"success": False, "message": "Нельзя удалить самого себя"}), 400
+    
+    try:
+        # Получаем имя пользователя для сообщения
+        user_info = execute_query("SELECT username FROM public.users WHERE id = %s", (user_id,))
+        if not user_info:
+            return jsonify({"success": False, "message": "Пользователь не найден"}), 404
+        
+        username = user_info[0][0]
+        
+        # Удаляем пользователя
+        query = "DELETE FROM public.users WHERE id = %s"
+        execute_query(query, (user_id,), fetch=False)
+        
+        return jsonify({"success": True, "message": f"Пользователь '{username}' успешно удален"})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при удалении пользователя: {e}", exc_info=True)
+        return jsonify({"success": False, "message": f"Ошибка: {str(e)}"}), 500
+
+
 @_flask_app.route('/clear_cart', methods=['POST'])  # Должен быть POST
 def clear_cart():
-    if 'user_id' not in session:
-        flash("Необходимо войти в систему.", "warning")
-        # Вместо jsonify можно просто редиректить или возвращать ошибку
-        return redirect(url_for('login'))
-
-    user_id = session['user_id']
+    # Получаем user_id (реальный или временный для неавторизованных)
+    user_id = get_temp_user_id(session)
     warehouse_type = session.get('warehouse_type', 'crystals')
     try:
         query_clear = "DELETE FROM cart WHERE user_id = %s AND warehouse_type = %s"
