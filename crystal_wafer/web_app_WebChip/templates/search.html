@@ -687,6 +687,32 @@
 				});
 		});
 	}
+	
+	// Клавиатурные сокращения
+	document.addEventListener('keydown', function(e) {
+		// Enter в поле поиска - выполнить поиск
+		if (e.key === 'Enter' && (e.target.id === 'chip_name' || e.target.id === 'manufacturer' || e.target.id === 'lot_filter')) {
+			const searchForm = document.querySelector('form[method="post"]');
+			if (searchForm && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+				e.preventDefault();
+				searchForm.submit();
+			}
+		}
+		
+		// Esc - закрыть flash-сообщения и toast-уведомления
+		if (e.key === 'Escape') {
+			// Закрываем все flash-сообщения
+			const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+			flashMessages.forEach(msg => msg.remove());
+			
+			// Закрываем все toast-уведомления
+			const toasts = document.querySelectorAll('.toast');
+			toasts.forEach(toast => {
+				toast.style.opacity = '0';
+				setTimeout(() => toast.remove(), 300);
+			});
+		}
+	});
 </script>
 </body>
 </html>

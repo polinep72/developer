@@ -484,6 +484,44 @@
                 showToast('Не удалось удалить пользователя. Проверьте подключение к интернету.', 'error');
             });
         }
+        
+        // Клавиатурные сокращения
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S или Cmd+S - сохранить изменения пользователя (если есть открытая форма редактирования)
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                // Не сохраняем, если пользователь вводит текст в поле
+                if (document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    // Находим кнопку сохранения в открытой форме редактирования
+                    const editForm = document.querySelector('.edit-form');
+                    if (editForm) {
+                        const saveButton = editForm.querySelector('button[type="submit"], .save-user');
+                        if (saveButton && !saveButton.disabled) {
+                            saveButton.click();
+                        }
+                    }
+                }
+            }
+            
+            // Esc - закрыть flash-сообщения и toast-уведомления, закрыть форму редактирования
+            if (e.key === 'Escape') {
+                // Закрываем форму редактирования, если она открыта
+                const editForm = document.querySelector('.edit-form');
+                if (editForm) {
+                    editForm.style.display = 'none';
+                }
+                
+                const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+                flashMessages.forEach(msg => msg.remove());
+                
+                const toasts = document.querySelectorAll('.toast');
+                toasts.forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }
+        });
     </script>
 </body>
 </html>

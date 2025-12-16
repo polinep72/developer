@@ -467,6 +467,34 @@
                 hideFieldError('password');
             }
         });
+        
+        // Клавиатурные сокращения
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S или Cmd+S - сохранить профиль
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                // Не сохраняем, если пользователь вводит текст в поле
+                if (document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    const profileForm = document.getElementById('profileForm');
+                    if (profileForm) {
+                        profileForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+            
+            // Esc - закрыть flash-сообщения и toast-уведомления
+            if (e.key === 'Escape') {
+                const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+                flashMessages.forEach(msg => msg.remove());
+                
+                const toasts = document.querySelectorAll('.toast');
+                toasts.forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }
+        });
     </script>
 </body>
 </html>
