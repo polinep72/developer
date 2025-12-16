@@ -549,31 +549,31 @@
 					setButtonLoading(originalButton, true);
 
 					const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-			fetch('/update_cart_item', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-CSRFToken': csrfToken,
-				},
-					body: JSON.stringify({
-						id: itemId,
-						cons_w: consW,
-						cons_gp: consGP
-					}),
-				})
-				.then(response => response.json())
-				.then(data => {
-					setButtonLoading(originalButton, false);
-					if (data.success) {
-						showToast('Количество обновлено', 'success');
-					} else {
-						showToast('Ошибка обновления: ' + (data.message || 'Неизвестная ошибка'), 'error');
-					}
-				})
-				.catch(error => {
-					setButtonLoading(originalButton, false);
-					console.error('Ошибка:', error);
-					showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
+					fetch('/update_cart_item', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-CSRFToken': csrfToken,
+						},
+						body: JSON.stringify({
+							id: itemId,
+							cons_w: consW,
+							cons_gp: consGP
+						}),
+					})
+					.then(response => response.json())
+					.then(data => {
+						setButtonLoading(originalButton, false);
+						if (data.success) {
+							showToast('Количество обновлено', 'success');
+						} else {
+							showToast('Ошибка обновления: ' + (data.message || 'Неизвестная ошибка'), 'error');
+						}
+					})
+					.catch(error => {
+						setButtonLoading(originalButton, false);
+						console.error('Ошибка:', error);
+						showToast('Ошибка сохранения данных. Проверьте подключение к интернету.', 'error');
 					});
 				});
 			});
@@ -581,43 +581,44 @@
 			// Удаление элемента из корзины
 			document.querySelectorAll('.remove-item').forEach(button => {
 				button.addEventListener('click', function () {
-				const originalButton = this;
-				const itemId = this.dataset.id;
-				
-				confirmAction('Вы уверены, что хотите удалить этот элемент из корзины?', function() {
-					setButtonLoading(originalButton, true);
+					const originalButton = this;
+					const itemId = this.dataset.id;
+					
+					confirmAction('Вы уверены, что хотите удалить этот элемент из корзины?', function() {
+						setButtonLoading(originalButton, true);
 
-					const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-					fetch('/remove_from_cart', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'X-CSRFToken': csrfToken,
-						},
-						body: JSON.stringify({
-							item_id: itemId
-						}),
-					})
-					.then(response => response.json())
-					.then(data => {
-						setButtonLoading(originalButton, false);
-						if (data.success) {
-							// Удаляем строку из таблицы
-							const row = originalButton.closest('tr');
-							row.remove();
-							// Проверяем, остались ли еще элементы в корзине
-							const remainingRows = document.querySelectorAll('tbody tr');
-							if (remainingRows.length === 0) {
-								location.reload(); // Перезагружаем страницу если корзина пуста
+						const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+						fetch('/remove_from_cart', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-CSRFToken': csrfToken,
+							},
+							body: JSON.stringify({
+								item_id: itemId
+							}),
+						})
+						.then(response => response.json())
+						.then(data => {
+							setButtonLoading(originalButton, false);
+							if (data.success) {
+								// Удаляем строку из таблицы
+								const row = originalButton.closest('tr');
+								row.remove();
+								// Проверяем, остались ли еще элементы в корзине
+								const remainingRows = document.querySelectorAll('tbody tr');
+								if (remainingRows.length === 0) {
+									location.reload(); // Перезагружаем страницу если корзина пуста
+								}
+							} else {
+								showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
 							}
-						} else {
-							showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
-						}
-					})
-					.catch(error => {
-						setButtonLoading(originalButton, false);
-						console.error('Ошибка:', error);
-						showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
+						})
+						.catch(error => {
+							setButtonLoading(originalButton, false);
+							console.error('Ошибка:', error);
+							showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
+						});
 					});
 				});
 			});
