@@ -2617,8 +2617,9 @@ def manage_users():
         
         users = []
         if users_list and isinstance(users_list, (list, tuple)):
-        if users_list:
             for user in users_list:
+                if not isinstance(user, (list, tuple)) or len(user) < 1:
+                    continue
                 users.append({
                     'id': user[0],
                     'username': user[1],
