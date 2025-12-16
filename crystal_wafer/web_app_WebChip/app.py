@@ -9,6 +9,7 @@ import os
 import re
 from datetime import datetime, timedelta
 from io import BytesIO
+import time
 import pandas as pd
 import psycopg2  # Убедитесь, что psycopg2 или psycopg2-binary есть в requirements.txt
 from dotenv import load_dotenv
@@ -22,7 +23,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.4"
+__version__ = "1.4.5"
 
 # Импортируем WSGIMiddleware
 try:
@@ -2121,65 +2122,77 @@ def login():
             user_data_list = execute_query(query_login, (username,))  # execute_query возвращает список
             _flask_app.logger.info(f"Результат запроса: найдено записей = {len(user_data_list) if user_data_list else 0}")
             
-            if user_data_list:
+            # Защита от перечисления пользователей: всегда выполняем проверку пароля
+            # даже если пользователь не найден, чтобы время ответа было одинаковым
+            user_found = user_data_list and len(user_data_list) > 0
+            password_valid = False
+            is_blocked = False
+            
+            if user_found:
                 user_data = user_data_list[0]  # Берем первый элемент списка (кортеж)
                 _flask_app.logger.info(f"Данные пользователя: id={user_data[0]}, username={user_data[1]}, пароль в БД (первые 3 символа)={user_data[2][:3] if user_data[2] else 'None'}...")
                 
-                # Проверяем, не заблокирован ли пользователь
-                if len(user_data) > 4 and user_data[4]:  # is_blocked
-                    _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
-                    flash("Ваш аккаунт заблокирован. Обратитесь к администратору.", "danger")
-                    return render_template('login.html')
+                # Проверяем, не заблокирован ли пользователь (но не сообщаем об этом отдельно)
+                is_blocked = len(user_data) > 4 and user_data[4]  # is_blocked
                 
-                db_password_hash = user_data[2]  # Пароль из БД (хеш или открытый текст для старых записей)
-                
-                # Проверяем пароль: если это хеш (начинается с pbkdf2:), используем check_password_hash
-                # Если это открытый текст (для старых записей), сравниваем напрямую
-                password_valid = False
-                
-                if not db_password_hash:
-                    _flask_app.logger.warning(f"Для пользователя {username} пароль в БД пуст")
-                    password_valid = False
-                elif db_password_hash.startswith('pbkdf2:') or db_password_hash.startswith('scrypt:'):
-                    # Хешированный пароль (werkzeug может использовать pbkdf2 или scrypt)
-                    from werkzeug.security import check_password_hash
-                    try:
-                        password_valid = check_password_hash(db_password_hash, u_password)
-                        _flask_app.logger.info(f"Проверка хешированного пароля для {username}: результат={password_valid}")
-                    except Exception as e:
-                        _flask_app.logger.error(f"Ошибка при проверке хешированного пароля для {username}: {e}")
+                if not is_blocked:
+                    db_password_hash = user_data[2]  # Пароль из БД (хеш или открытый текст для старых записей)
+                    
+                    # Проверяем пароль: если это хеш (начинается с pbkdf2:), используем check_password_hash
+                    # Если это открытый текст (для старых записей), сравниваем напрямую
+                    if not db_password_hash:
+                        _flask_app.logger.warning(f"Для пользователя {username} пароль в БД пуст")
                         password_valid = False
-                else:
-                    # Старый открытый пароль (для обратной совместимости до миграции)
-                    password_valid = (db_password_hash == u_password)
-                    if password_valid:
-                        _flask_app.logger.warning(f"Пользователь {username} использует незахешированный пароль. Рекомендуется миграция.")
+                    elif db_password_hash.startswith('pbkdf2:') or db_password_hash.startswith('scrypt:'):
+                        # Хешированный пароль (werkzeug может использовать pbkdf2 или scrypt)
+                        from werkzeug.security import check_password_hash
+                        try:
+                            password_valid = check_password_hash(db_password_hash, u_password)
+                            _flask_app.logger.info(f"Проверка хешированного пароля для {username}: результат={password_valid}")
+                        except Exception as e:
+                            _flask_app.logger.error(f"Ошибка при проверке хешированного пароля для {username}: {e}")
+                            password_valid = False
                     else:
-                        _flask_app.logger.info(f"Неверный пароль для пользователя {username} (открытый текст)")
+                        # Старый открытый пароль (для обратной совместимости до миграции)
+                        password_valid = (db_password_hash == u_password)
+                        if password_valid:
+                            _flask_app.logger.warning(f"Пользователь {username} использует незахешированный пароль. Рекомендуется миграция.")
+                        else:
+                            _flask_app.logger.info(f"Неверный пароль для пользователя {username} (открытый текст)")
+            
+            # Если пароль верный и пользователь не заблокирован - успешный вход
+            if user_found and password_valid and not is_blocked:
+                user_data = user_data_list[0]
+                session['user_id'] = user_data[0]  # id
+                session['username'] = user_data[1]  # username
+                session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
+                _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}, is_admin={session.get('is_admin')}")
                 
-                if password_valid:
-                    session['user_id'] = user_data[0]  # id
-                    session['username'] = user_data[1]  # username
-                    session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
-                    _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}, is_admin={session.get('is_admin')}")
-                    
-                    # Логируем успешный вход
-                    log_user_action('login', user_id=user_data[0], details={'username': username})
-                    
-                    flash(f"Добро пожаловать, {session['username']}!", "success")
+                # Логируем успешный вход
+                log_user_action('login', user_id=user_data[0], details={'username': username})
+                
+                flash(f"Добро пожаловать, {session['username']}!", "success")
 
-                    next_url = request.args.get('next')
-                    if next_url and next_url.startswith('/'):  # Проверка безопасности next_url
-                        _flask_app.logger.info(f"Редирект на next_url: {next_url}")
-                        return redirect(next_url)
-                    _flask_app.logger.info("Редирект на главную страницу")
-                    return redirect(url_for('home'))
-                else:
-                    _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
-                    # Показываем одинаковое сообщение для безопасности (защита от перечисления пользователей)
-                    flash("Неверное имя пользователя или пароль.", "danger")
+                next_url = request.args.get('next')
+                if next_url and next_url.startswith('/'):  # Проверка безопасности next_url
+                    _flask_app.logger.info(f"Редирект на next_url: {next_url}")
+                    return redirect(next_url)
+                _flask_app.logger.info("Редирект на главную страницу")
+                return redirect(url_for('home'))
             else:
-                # Показываем одинаковое сообщение для безопасности
+                # Защита от перечисления пользователей:
+                # Всегда показываем одинаковое сообщение и добавляем задержку
+                if user_found and is_blocked:
+                    _flask_app.logger.warning(f"Попытка входа заблокированного пользователя: {username}")
+                elif user_found and not password_valid:
+                    _flask_app.logger.warning(f"Неверный пароль для пользователя: {username}")
+                else:
+                    _flask_app.logger.warning(f"Попытка входа несуществующего пользователя: {username}")
+                
+                # Задержка для замедления брутфорса (500ms)
+                time.sleep(0.5)
+                
+                # Всегда показываем одинаковое сообщение для безопасности (защита от перечисления пользователей)
                 flash("Неверное имя пользователя или пароль.", "danger")
         except Exception as e:
             _flask_app.logger.error(f"Ошибка при входе: {e}", exc_info=True)
@@ -2201,20 +2214,27 @@ def forgot_password():
             return render_template('forgot_password.html')
         
         try:
-            # Получаем секретный вопрос пользователя
+            # Защита от перечисления пользователей:
+            # Всегда показываем секретный вопрос, даже если пользователь не существует
+            # Это предотвращает утечку информации о существовании пользователя
             query_user = "SELECT secret_question FROM public.users WHERE username = %s"
             user_data = execute_query(query_user, (username,), fetch=True)
             
             if user_data and user_data[0] and user_data[0][0]:
+                # Пользователь существует - показываем его секретный вопрос
                 secret_question = user_data[0][0]
-                # Передаем username и secret_question в шаблон для следующего шага
-                return render_template('forgot_password.html', 
-                                     username=username, 
-                                     secret_question=secret_question)
+                _flask_app.logger.info(f"Запрос секретного вопроса для пользователя: {username}")
             else:
-                # Всегда показываем одинаковое сообщение (безопасность)
-                flash("Если пользователь с таким именем существует, на ваш вопрос будет запрошен ответ.", "info")
-                return render_template('forgot_password.html')
+                # Пользователь не существует - показываем общий секретный вопрос
+                # для защиты от перечисления пользователей
+                secret_question = "Введите секретный ответ, который вы указали при регистрации"
+                _flask_app.logger.warning(f"Попытка восстановления пароля для несуществующего пользователя: {username}")
+            
+            # Всегда показываем форму с секретным вопросом (настоящим или общим)
+            # Передаем username и secret_question в шаблон для следующего шага
+            return render_template('forgot_password.html', 
+                                 username=username, 
+                                 secret_question=secret_question)
         except Exception as e:
             _flask_app.logger.error(f"Ошибка при получении секретного вопроса: {e}", exc_info=True)
             flash("Произошла ошибка. Попробуйте позже.", "danger")
