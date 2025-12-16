@@ -2217,9 +2217,9 @@ def login():
                 next_url = request.args.get('next')
                 if next_url and next_url.startswith('/'):  # Проверка безопасности next_url
                     _flask_app.logger.info(f"Редирект на next_url: {next_url}")
-                        return redirect(next_url)
+                    return redirect(next_url)
                 _flask_app.logger.info("Редирект на главную страницу")
-                    return redirect(url_for('home'))
+                return redirect(url_for('home'))
                 else:
                 # Защита от перечисления пользователей:
                 # Всегда показываем одинаковое сообщение и добавляем задержку
