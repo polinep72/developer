@@ -2204,8 +2204,8 @@ def login():
             # Если пароль верный и пользователь не заблокирован - успешный вход
             if user_found and password_valid and not is_blocked:
                 user_data = user_data_list[0]
-                    session['user_id'] = user_data[0]  # id
-                    session['username'] = user_data[1]  # username
+                session['user_id'] = user_data[0]  # id
+                session['username'] = user_data[1]  # username
                 session['is_admin'] = user_data[3] if len(user_data) > 3 and user_data[3] else False  # is_admin
                 _flask_app.logger.info(f"Сессия установлена: user_id={session.get('user_id')}, username={session.get('username')}, is_admin={session.get('is_admin')}")
                 
