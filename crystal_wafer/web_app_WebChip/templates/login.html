@@ -165,6 +165,24 @@
                 }, 5000);
             });
         });
+        
+        // Клавиатурные сокращения
+        document.addEventListener('keydown', function(e) {
+            // Enter в форме логина - отправить форму
+            if (e.key === 'Enter' && (e.target.tagName === 'INPUT')) {
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    loginForm.submit();
+                }
+            }
+            
+            // Esc - закрыть flash-сообщения
+            if (e.key === 'Escape') {
+                const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+                flashMessages.forEach(msg => msg.remove());
+            }
+        });
     </script>
 </body>
 </html>
