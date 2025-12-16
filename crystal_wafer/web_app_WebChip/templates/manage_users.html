@@ -438,6 +438,53 @@
     </div>
 
     <script>
+        // Универсальная функция для модального подтверждения действий
+        function confirmAction(message, callback) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-confirm';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Подтверждение</h3>
+                    <p>${message}</p>
+                    <div class="modal-actions">
+                        <button class="btn-cancel">Отмена</button>
+                        <button class="btn-confirm">Да, подтверждаю</button>
+                    </div>
+                </div>
+            `;
+            
+            // Закрытие по клику на фон
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Кнопка отмены
+            const cancelBtn = modal.querySelector('.btn-cancel');
+            cancelBtn.addEventListener('click', function() {
+                modal.remove();
+            });
+            
+            // Кнопка подтверждения
+            const confirmBtn = modal.querySelector('.btn-confirm');
+            confirmBtn.addEventListener('click', function() {
+                modal.remove();
+                if (callback) callback();
+            });
+            
+            // Закрытие по Esc
+            const escHandler = function(e) {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+            
+            document.body.appendChild(modal);
+        }
+        
         // Функция для показа toast-уведомлений
         function showToast(message, type = 'error', duration = 4000) {
             const toast = document.createElement('div');
