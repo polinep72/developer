@@ -527,6 +527,23 @@
 			}
 		});
 		
+		// Функция для показа toast-уведомлений
+		function showToast(message, type = 'error', duration = 4000) {
+			const toast = document.createElement('div');
+			toast.className = `toast toast-${type}`;
+			toast.textContent = message;
+			document.body.appendChild(toast);
+			
+			setTimeout(() => {
+				toast.classList.add('show');
+			}, 10);
+			
+			setTimeout(() => {
+				toast.classList.remove('show');
+				setTimeout(() => toast.remove(), 300);
+			}, duration);
+		}
+		
 		// Универсальная функция для показа индикатора загрузки на кнопке
 		function setButtonLoading(button, loading) {
 			if (loading) {
@@ -547,10 +564,11 @@
 		document.addEventListener('DOMContentLoaded', function () {
 			const buttons = document.querySelectorAll('.add-to-cart');
 
-		buttons.forEach(button => {
-			button.addEventListener('click', function () {
-				const row = this.closest('tr'); // Находим строку таблицы
-				const itemId = this.dataset.id; // Извлекаем item_id из data-атрибута кнопки
+			buttons.forEach(button => {
+				button.addEventListener('click', function () {
+					const originalButton = this; // Сохраняем ссылку на кнопку
+					const row = this.closest('tr'); // Находим строку таблицы
+					const itemId = this.dataset.id; // Извлекаем item_id из data-атрибута кнопки
 				
 				// Для складов plates и far не используем поля quantity-input
 				const warehouseType = '{{ warehouse_type|default("crystals") }}';
