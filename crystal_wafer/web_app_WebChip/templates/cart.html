@@ -698,6 +698,27 @@
 				}
 			}
 		});
+		
+		// Очистка корзины с подтверждением
+		const clearCartBtn = document.getElementById('clear-cart-btn');
+		if (clearCartBtn) {
+			clearCartBtn.addEventListener('click', function() {
+				confirmAction('Вы уверены, что хотите очистить всю корзину?<br><br>Все добавленные товары будут удалены. Это действие нельзя отменить.', function() {
+					const form = document.createElement('form');
+					form.method = 'POST';
+					form.action = '/clear_cart';
+					
+					const csrfInput = document.createElement('input');
+					csrfInput.type = 'hidden';
+					csrfInput.name = 'csrf_token';
+					csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+					
+					form.appendChild(csrfInput);
+					document.body.appendChild(form);
+					form.submit();
+				});
+			});
+		}
 	</script>
 </body>
 </html>
