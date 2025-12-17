@@ -3406,9 +3406,20 @@ def inventory():
 # Создаем ASGI-совместимое приложение для Uvicorn.
 app = WSGIMiddleware(_flask_app)
 
+# Инициализация пула подключений при импорте модуля
+try:
+    init_db_pool()
+except Exception as e:
+    print(f"ПРЕДУПРЕЖДЕНИЕ: Не удалось инициализировать пул подключений при старте: {e}")
+    print("Пул будет инициализирован при первом запросе к БД")
+
 # Блок для запуска приложения
 if __name__ == '__main__':
     import sys
+    import atexit
+    
+    # Регистрируем закрытие пула при завершении приложения
+    atexit.register(close_db_pool)
     
     # Проверяем режим запуска из переменных окружения
     mode = os.getenv('MODE', 'development').lower()
