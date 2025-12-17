@@ -25,7 +25,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.14"
+__version__ = "1.4.15"
 
 # Импортируем WSGIMiddleware
 try:
@@ -303,6 +303,62 @@ def close_db_pool():
             _db_pool = None
 
 
+# --- КЭШИРОВАНИЕ ЧАСТО ЗАПРАШИВАЕМЫХ ДАННЫХ ---
+_cache = {}
+_cache_timestamps = {}
+
+def clear_cache(cache_key=None):
+    """
+    Очистка кэша
+    
+    Args:
+        cache_key: Если указан, очищается только этот ключ. Если None - очищается весь кэш
+    """
+    global _cache, _cache_timestamps
+    if cache_key:
+        _cache.pop(cache_key, None)
+        _cache_timestamps.pop(cache_key, None)
+        _flask_app.logger.info(f"Кэш очищен для ключа: {cache_key}")
+    else:
+        _cache.clear()
+        _cache_timestamps.clear()
+        _flask_app.logger.info("Весь кэш очищен")
+
+def get_cached_or_execute(cache_key, query_func, ttl_seconds=600, *args, **kwargs):
+    """
+    Получить данные из кэша или выполнить функцию запроса
+    
+    Args:
+        cache_key: Уникальный ключ для кэша
+        query_func: Функция для выполнения запроса, если данных нет в кэше
+        ttl_seconds: Время жизни кэша в секундах (по умолчанию 10 минут)
+        *args, **kwargs: Аргументы для query_func
+        
+    Returns:
+        Результат выполнения query_func или данные из кэша
+    """
+    global _cache, _cache_timestamps
+    now = datetime.now()
+    
+    # Проверяем наличие данных в кэше
+    if cache_key in _cache:
+        timestamp = _cache_timestamps.get(cache_key)
+        if timestamp:
+            elapsed_seconds = (now - timestamp).total_seconds()
+            if elapsed_seconds < ttl_seconds:
+                _flask_app.logger.debug(f"Кэш HIT для ключа: {cache_key} (возраст: {elapsed_seconds:.1f}s)")
+                return _cache[cache_key]
+            else:
+                _flask_app.logger.debug(f"Кэш EXPIRED для ключа: {cache_key} (возраст: {elapsed_seconds:.1f}s)")
+    
+    # Выполняем запрос и сохраняем в кэш
+    _flask_app.logger.debug(f"Кэш MISS для ключа: {cache_key}, выполняем запрос")
+    result = query_func(*args, **kwargs)
+    _cache[cache_key] = result
+    _cache_timestamps[cache_key] = now
+    return result
+
+
 # --- НАЧАЛО ОПРЕДЕЛЕНИЙ ВСПОМОГАТЕЛЬНЫХ ФУНКЦИЙ ---
 def get_temp_user_id(session):
     """Генерирует временный ID пользователя для неавторизованных пользователей на основе session ID"""
@@ -439,6 +495,19 @@ def get_or_create_id(table_name, column_name, value):
         insert_query = f"INSERT INTO {table_name_clean} ({column_name_clean}) VALUES (%s) RETURNING id"
         new_id_result = execute_query(insert_query, (value,), fetch=True)  # fetch=True из-за RETURNING
         if new_id_result and isinstance(new_id_result, list) and len(new_id_result) > 0:
+            # Очищаем кэш при добавлении новой записи в справочные таблицы
+            if table_name_clean == 'pr':
+                clear_cache('manufacturers_all')
+            elif table_name_clean == 'lot':
+                # Очищаем все кэши партий
+                for key in list(_cache.keys()):
+                    if key.startswith('lots_'):
+                        clear_cache(key)
+            elif table_name_clean == 'n_chip':
+                # Очищаем все кэши шифров кристаллов
+                for key in list(_cache.keys()):
+                    if key.startswith('chip_codes_'):
+                        clear_cache(key)
             return new_id_result[0][0]
         else:  # Если RETURNING не сработал или не вернул id
             # Можно попробовать SELECT MAX(id) или другой способ, но это плохая практика
@@ -1367,35 +1436,50 @@ def search():
     manufacturers = []
     lots = []
     try:
-        manufacturers_query = "SELECT DISTINCT name_pr FROM pr ORDER BY name_pr"
-        manufacturers = []
-        manufacturers_raw = execute_query(manufacturers_query)
-        if manufacturers_raw and isinstance(manufacturers_raw, (list, tuple)):
-            manufacturers = [row[0] for row in manufacturers_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+        # Используем кэш для списка производителей (TTL = 10 минут)
+        def get_manufacturers_from_db():
+            manufacturers_query = "SELECT DISTINCT name_pr FROM pr ORDER BY name_pr"
+            manufacturers_raw = execute_query(manufacturers_query)
+            if manufacturers_raw and isinstance(manufacturers_raw, (list, tuple)):
+                return [row[0] for row in manufacturers_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+            return []
+        
+        manufacturers = get_cached_or_execute('manufacturers_all', get_manufacturers_from_db, ttl_seconds=600)
+        
         # Загружаем список партий для всех складов
         # Фильтруем партии по выбранному производителю, если он указан
         # Получаем значение производителя из формы или аргументов
         selected_manufacturer_for_lots = request.form.get('manufacturer') or request.args.get('manufacturer', 'all')
         
         if selected_manufacturer_for_lots and selected_manufacturer_for_lots != 'all':
-            # Фильтруем партии по производителю через invoice таблицу
-            lots_query = f"""
-                SELECT DISTINCT l.name_lot 
-                FROM lot l
-                INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
-                INNER JOIN pr p ON inv.id_pr = p.id
-                WHERE p.name_pr = %s
-                ORDER BY l.name_lot
-            """
-            lots_raw = execute_query(lots_query, (selected_manufacturer_for_lots,))
-            if lots_raw and isinstance(lots_raw, (list, tuple)):
-                lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+            # Фильтруем партии по производителю через invoice таблицу (кэш с ключом, включающим производителя)
+            def get_lots_by_manufacturer_from_db():
+                lots_query = f"""
+                    SELECT DISTINCT l.name_lot 
+                    FROM lot l
+                    INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
+                    INNER JOIN pr p ON inv.id_pr = p.id
+                    WHERE p.name_pr = %s
+                    ORDER BY l.name_lot
+                """
+                lots_raw = execute_query(lots_query, (selected_manufacturer_for_lots,))
+                if lots_raw and isinstance(lots_raw, (list, tuple)):
+                    return [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+                return []
+            
+            cache_key_lots = f'lots_manufacturer_{selected_manufacturer_for_lots}_{warehouse_type}'
+            lots = get_cached_or_execute(cache_key_lots, get_lots_by_manufacturer_from_db, ttl_seconds=600)
         else:
-            # Если производитель не выбран, показываем все партии
-            lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
-            lots_raw = execute_query(lots_query)
-            if lots_raw and isinstance(lots_raw, (list, tuple)):
-                lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+            # Если производитель не выбран, показываем все партии (кэш для всех партий)
+            def get_all_lots_from_db():
+                lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
+                lots_raw = execute_query(lots_query)
+                if lots_raw and isinstance(lots_raw, (list, tuple)):
+                    return [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+                return []
+            
+            cache_key_lots = f'lots_all_{warehouse_type}'
+            lots = get_cached_or_execute(cache_key_lots, get_all_lots_from_db, ttl_seconds=600)
     except Exception as e:
         flash(f"Ошибка загрузки списка производителей: {e}", "danger")
         _flask_app.logger.error(f"Ошибка загрузки списка производителей: {e}")
@@ -1620,11 +1704,18 @@ def get_chip_codes():
             """
             params = ()
         
-        results = execute_query(sql_query, params)
-        if not results or not isinstance(results, (list, tuple)):
-            chip_codes = []
-        else:
-            chip_codes = [row[0] for row in results if isinstance(row, (list, tuple)) and len(row) > 0 and row[0]]
+        # Используем кэш для списка шифров кристаллов
+        def get_chip_codes_from_db():
+            results = execute_query(sql_query, params)
+            if not results or not isinstance(results, (list, tuple)):
+                return []
+            return [row[0] for row in results if isinstance(row, (list, tuple)) and len(row) > 0 and row[0]]
+        
+        # Ключ кэша зависит от query параметра
+        cache_key_chip_codes = f'chip_codes_{query}' if query else 'chip_codes_popular'
+        # Для фильтрованных запросов кэш на 5 минут, для популярных - 10 минут
+        ttl = 300 if query else 600
+        chip_codes = get_cached_or_execute(cache_key_chip_codes, get_chip_codes_from_db, ttl_seconds=ttl)
         
         return jsonify({'success': True, 'chip_codes': chip_codes})
     except Exception as e:
@@ -1644,23 +1735,34 @@ def get_lots():
     try:
         if manufacturer and manufacturer != 'all':
             # Фильтруем партии по производителю
-            lots_query = f"""
-                SELECT DISTINCT l.name_lot 
-                FROM lot l
-                INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
-                INNER JOIN pr p ON inv.id_pr = p.id
-                WHERE p.name_pr = %s
-                ORDER BY l.name_lot
-            """
-            lots_raw = execute_query(lots_query, (manufacturer,))
+            def get_lots_by_manufacturer_from_db():
+                lots_query = f"""
+                    SELECT DISTINCT l.name_lot 
+                    FROM lot l
+                    INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
+                    INNER JOIN pr p ON inv.id_pr = p.id
+                    WHERE p.name_pr = %s
+                    ORDER BY l.name_lot
+                """
+                lots_raw = execute_query(lots_query, (manufacturer,))
+                if lots_raw and isinstance(lots_raw, (list, tuple)):
+                    return [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+                return []
+            
+            cache_key = f'lots_manufacturer_{manufacturer}_{warehouse_type}'
+            lots = get_cached_or_execute(cache_key, get_lots_by_manufacturer_from_db, ttl_seconds=600)
         else:
             # Все партии
-            lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
-            lots_raw = execute_query(lots_query)
-            if lots_raw and isinstance(lots_raw, (list, tuple)):
-                lots = [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
-            else:
-                lots = []
+            def get_all_lots_from_db():
+                lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
+                lots_raw = execute_query(lots_query)
+                if lots_raw and isinstance(lots_raw, (list, tuple)):
+                    return [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+                return []
+            
+            cache_key = f'lots_all_{warehouse_type}'
+            lots = get_cached_or_execute(cache_key, get_all_lots_from_db, ttl_seconds=600)
+        
         return jsonify({"lots": lots})
     except Exception as e:
         _flask_app.logger.error(f"Ошибка загрузки партий: {e}", exc_info=True)
@@ -2990,17 +3092,24 @@ def inventory():
 
     manufacturers, lots = [], []
     try:
-        manufacturers_raw = execute_query("SELECT DISTINCT name_pr FROM pr ORDER BY name_pr")
-        if manufacturers_raw and isinstance(manufacturers_raw, list):
-            manufacturers = [row[0] for row in manufacturers_raw if row and isinstance(row, (list, tuple)) and len(row) > 0]
-        else:
-            manufacturers = []
+        # Используем кэш для списка производителей (TTL = 10 минут)
+        def get_manufacturers_from_db():
+            manufacturers_raw = execute_query("SELECT DISTINCT name_pr FROM pr ORDER BY name_pr")
+            if manufacturers_raw and isinstance(manufacturers_raw, list):
+                return [row[0] for row in manufacturers_raw if row and isinstance(row, (list, tuple)) and len(row) > 0]
+            return []
+        
+        manufacturers = get_cached_or_execute('manufacturers_all', get_manufacturers_from_db, ttl_seconds=600)
 
-        lots_raw = execute_query("SELECT DISTINCT name_lot FROM lot ORDER BY name_lot")
-        if lots_raw and isinstance(lots_raw, list):
-            lots = [row[0] for row in lots_raw if row and isinstance(row, (list, tuple)) and len(row) > 0]
-        else:
-            lots = []
+        # Используем кэш для списка партий (TTL = 10 минут)
+        def get_all_lots_from_db():
+            lots_raw = execute_query("SELECT DISTINCT name_lot FROM lot ORDER BY name_lot")
+            if lots_raw and isinstance(lots_raw, list):
+                return [row[0] for row in lots_raw if row and isinstance(row, (list, tuple)) and len(row) > 0]
+            return []
+        
+        cache_key_lots = f'lots_all_{warehouse_type}'
+        lots = get_cached_or_execute(cache_key_lots, get_all_lots_from_db, ttl_seconds=600)
     except Exception as e:
         _flask_app.logger.error(f"Ошибка загрузки фильтров для инвентаризации: {e}", exc_info=True)
         flash("Не удалось загрузить фильтры.", "danger")
