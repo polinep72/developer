@@ -3,6 +3,26 @@
 Все изменения в этом проекте будут задокументированы в этом файле.
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), проект использует [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.16] - 2025-12-17
+
+### Added
+- Создан SQL скрипт `create_indexes.sql` для создания индексов в базе данных
+- Создан Python скрипт `apply_indexes.py` для автоматического применения индексов
+- Добавлены индексы для всех таблиц invoice (invoice, invoice_p, invoice_f) по статусу, дате, item_id и внешним ключам
+- Добавлены индексы для всех таблиц consumption (consumption, consumption_p, consumption_f) по item_id, дате и внешним ключам
+- Добавлены составные индексы для ускорения GROUP BY запросов
+- Добавлены индексы для справочных таблиц (pr, lot, n_chip, tech, wafer, quad, in_lot, start_p, stor, cells, chip, pack)
+- Добавлен индекс для текстового поиска по n_chip (LOWER(n_chip))
+- Добавлены индексы для таблицы cart по user_id, warehouse_type, item_id
+- Добавлены индексы для таблицы users по username, email, is_admin, is_blocked
+
+### Performance
+- Значительно ускорены JOIN операции за счет индексов на внешних ключах
+- Ускорена фильтрация по статусу и дате в таблицах invoice и consumption
+- Ускорены GROUP BY запросы за счет составных индексов
+- Ускорен текстовый поиск по шифрам кристаллов
+- Улучшена производительность работы с корзиной пользователей
+
 ## [1.4.15] - 2025-12-17
 
 ### Added
