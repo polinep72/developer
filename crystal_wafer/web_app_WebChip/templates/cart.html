@@ -368,7 +368,7 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
+		}
     </style>
 </head>
 <body>
@@ -538,30 +538,30 @@
 		
 		// Инициализация обработчиков после загрузки DOM
 		document.addEventListener('DOMContentLoaded', function() {
-			// Сохранение изменений количества
-			document.querySelectorAll('.save-item').forEach(button => {
-				button.addEventListener('click', function () {
+		// Сохранение изменений количества
+		document.querySelectorAll('.save-item').forEach(button => {
+			button.addEventListener('click', function () {
 					const originalButton = this;
-					const row = this.closest('tr');
-					const itemId = row.dataset.id;
-					const consW = row.querySelector('.quantity-input-w').value;
-					const consGP = row.querySelector('.quantity-input-gp').value;
+				const row = this.closest('tr');
+				const itemId = row.dataset.id;
+				const consW = row.querySelector('.quantity-input-w').value;
+				const consGP = row.querySelector('.quantity-input-gp').value;
 
 					setButtonLoading(originalButton, true);
 
 					const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-					fetch('/update_cart_item', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
+				fetch('/update_cart_item', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
 							'X-CSRFToken': csrfToken,
-						},
-						body: JSON.stringify({
-							id: itemId,
-							cons_w: consW,
-							cons_gp: consGP
-						}),
-					})
+					},
+					body: JSON.stringify({
+						id: itemId,
+						cons_w: consW,
+						cons_gp: consGP
+					}),
+				})
 					.then(response => {
 						console.log('Response status:', response.status);
 						console.log('Response headers:', response.headers);
@@ -624,9 +624,9 @@
 						}
 						return response.json();
 					})
-					.then(data => {
+				.then(data => {
 							setButtonLoading(originalButton, false);
-							if (data.success) {
+					if (data.success) {
 								// Удаляем строку из таблицы
 								const row = originalButton.closest('tr');
 								row.remove();
@@ -635,69 +635,69 @@
 								if (remainingRows.length === 0) {
 									location.reload(); // Перезагружаем страницу если корзина пуста
 								}
-							} else {
+					} else {
 								showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
-							}
-						})
-						.catch(error => {
+					}
+				})
+				.catch(error => {
 							setButtonLoading(originalButton, false);
-							console.error('Ошибка:', error);
+					console.error('Ошибка:', error);
 							showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
 						});
-					});
 				});
 			});
+		});
 
-			// Экспорт корзины
-			function exportCart() {
-				// Можно добавить индикатор загрузки, если нужно
-				const exportButton = document.getElementById('export-cart');
+				// Экспорт корзины
+		function exportCart() {
+			// Можно добавить индикатор загрузки, если нужно
+			const exportButton = document.getElementById('export-cart');
 				if (!exportButton) return;
 				setButtonLoading(exportButton, true);
 
-				fetch('/export_cart') // Делаем GET запрос на эндпоинт
-				.then(response => {
-					if (response.ok) {
-						// Получаем имя файла из заголовка Content-Disposition
-						const contentDisposition = response.headers.get('Content-Disposition');
-						let filename = "export.xlsx"; // Имя по умолчанию, если заголовок не найден
-						if (contentDisposition) {
-							// Пробуем извлечь имя файла из заголовка
-							const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]*)/);
-							if (filenameMatch && filenameMatch[1]) {
-								// Декодируем имя файла, если оно в кодировке URL
-								filename = decodeURIComponent(filenameMatch[1].replace(/"/g, ''));
-							}
+			fetch('/export_cart') // Делаем GET запрос на эндпоинт
+			.then(response => {
+				if (response.ok) {
+					// Получаем имя файла из заголовка Content-Disposition
+					const contentDisposition = response.headers.get('Content-Disposition');
+					let filename = "export.xlsx"; // Имя по умолчанию, если заголовок не найден
+					if (contentDisposition) {
+						// Пробуем извлечь имя файла из заголовка
+						const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]*)/);
+						if (filenameMatch && filenameMatch[1]) {
+							// Декодируем имя файла, если оно в кодировке URL
+							filename = decodeURIComponent(filenameMatch[1].replace(/"/g, ''));
 						}
-						// Возвращаем и blob, и имя файла для следующего .then()
-						return response.blob().then(blob => ({ blob, filename }));
-					} else {
-						// Если сервер вернул ошибку, пытаемся прочитать текст ошибки
-						return response.text().then(text => {
-							throw new Error(text || 'Ошибка сервера при экспорте корзины.');
-						});
 					}
-				})
-				.then(({ blob, filename }) => {
-					// Создаем временную ссылку для скачивания
-					const url = window.URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.style.display = 'none';
-					a.href = url;
-					a.download = filename; // <-- ИСПОЛЬЗУЕМ ИМЯ ФАЙЛА С СЕРВЕРА
-					
-					document.body.appendChild(a);
-					a.click(); // Инициируем скачивание
-					
-					window.URL.revokeObjectURL(url); // Очищаем память
-					a.remove(); // Удаляем ссылку из DOM
-				})
-				.catch(error => {
+					// Возвращаем и blob, и имя файла для следующего .then()
+					return response.blob().then(blob => ({ blob, filename }));
+				} else {
+					// Если сервер вернул ошибку, пытаемся прочитать текст ошибки
+					return response.text().then(text => {
+						throw new Error(text || 'Ошибка сервера при экспорте корзины.');
+					});
+				}
+			})
+			.then(({ blob, filename }) => {
+				// Создаем временную ссылку для скачивания
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = filename; // <-- ИСПОЛЬЗУЕМ ИМЯ ФАЙЛА С СЕРВЕРА
+				
+				document.body.appendChild(a);
+				a.click(); // Инициируем скачивание
+				
+				window.URL.revokeObjectURL(url); // Очищаем память
+				a.remove(); // Удаляем ссылку из DOM
+			})
+			.catch(error => {
 					setButtonLoading(exportButton, false);
-					console.error('Ошибка экспорта:', error);
+				console.error('Ошибка экспорта:', error);
 					showToast('Не удалось экспортировать корзину: ' + (error.message || 'Неизвестная ошибка'), 'error');
-				})
-				.finally(() => {
+			})
+			.finally(() => {
 					// Скрываем индикатор загрузки после скачивания файла
 					setTimeout(() => {
 						setButtonLoading(exportButton, false);
@@ -768,7 +768,7 @@
 						form.appendChild(csrfInput);
 						document.body.appendChild(form);
 						form.submit();
-					});
+			});
 				});
 			}
 		});

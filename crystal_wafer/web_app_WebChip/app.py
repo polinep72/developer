@@ -12,6 +12,8 @@ from io import BytesIO
 import time
 import pandas as pd
 import psycopg2  # Убедитесь, что psycopg2 или psycopg2-binary есть в requirements.txt
+from psycopg2 import pool
+import threading
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, send_file, jsonify, session, redirect, url_for, make_response, flash
 from werkzeug.utils import escape
@@ -280,26 +282,57 @@ def get_temp_user_id(session):
 
 
 def get_db_connection():
-    # Используем DB_NAME (основная БД с таблицами users, invoice и т.д.)
-    # с fallback на DB_NAME2 для обратной совместимости
-    db_name = os.getenv('DB_NAME') or os.getenv('DB_NAME2')
-    db_host = os.getenv('DB_HOST')
-    _flask_app.logger.info(f"Подключение к БД: host={db_host}, database={db_name}")
+    """
+    Получение подключения из пула подключений
     
-    conn = psycopg2.connect(
-        host=db_host,
-        database=db_name,
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        port=os.getenv('DB_PORT', '5432')  # Используем порт из env или дефолтный
-    )
-    return conn
+    ВАЖНО: После использования подключение должно быть возвращено в пул через return_db_connection()
+    """
+    try:
+        db_pool = init_db_pool()
+        conn = db_pool.getconn()
+        return conn
+    except pool.PoolError as e:
+        _flask_app.logger.error(f"Ошибка получения подключения из пула: {e}", exc_info=True)
+        raise
+    except Exception as e:
+        _flask_app.logger.error(f"Неожиданная ошибка при получении подключения: {e}", exc_info=True)
+        raise
+
+def return_db_connection(conn):
+    """
+    Возврат подключения в пул
+    
+    Args:
+        conn: Подключение к БД, полученное из get_db_connection()
+    """
+    global _db_pool
+    if _db_pool and conn:
+        try:
+            _db_pool.putconn(conn)
+        except Exception as e:
+            _flask_app.logger.error(f"Ошибка возврата подключения в пул: {e}", exc_info=True)
+            # В случае ошибки закрываем подключение напрямую
+            try:
+                conn.close()
+            except:
+                pass
 
 
 def execute_query(query, params=None, fetch=True):
+    """
+    Выполнение SQL запроса с использованием пула подключений
+    
+    Args:
+        query: SQL запрос
+        params: Параметры запроса (кортеж или список)
+        fetch: Если True, возвращает результаты запроса. Если False, возвращает количество затронутых строк
+        
+    Returns:
+        Результаты запроса (список кортежей) или количество затронутых строк (int)
+    """
     conn = None
     try:
-        conn = get_db_connection()
+        conn = get_db_connection()  # Получаем подключение из пула
         cur = conn.cursor()
 
         stripped_query = query.strip().lower()
@@ -326,11 +359,15 @@ def execute_query(query, params=None, fetch=True):
         _flask_app.logger.error(f"Ошибка при выполнении SQL: {error}. Запрос: {query}, Параметры: {params}",
                                 exc_info=True)
         if conn:
-            conn.rollback()
+            try:
+                conn.rollback()
+            except:
+                pass
         raise  # Пробрасываем ошибку дальше
     finally:
+        # Возвращаем подключение в пул вместо закрытия
         if conn:
-            conn.close()
+            return_db_connection(conn)
 
 
 def get_or_create_id(table_name, column_name, value):
@@ -740,7 +777,7 @@ def inflow():
         else:
             df['Приход GelPack, шт.'] = 0  # Значение по умолчанию, если колонка отсутствует
 
-        # Создаем одно подключение для всех операций
+        # Получаем подключение из пула для всех операций
         conn_loop = get_db_connection()
         cur = conn_loop.cursor()
         
@@ -865,8 +902,9 @@ def inflow():
             _flask_app.logger.error(f"Inflow - General error during DB insert: {e}", exc_info=True)
             return jsonify({"success": False, "message": f"Ошибка при загрузке данных в БД: {e}"}), 500
         finally:
+            # Возвращаем подключение в пул вместо закрытия
             if conn_loop:
-                conn_loop.close()
+                return_db_connection(conn_loop)
 
     except pd.errors.EmptyDataError:
         _flask_app.logger.warning("Inflow POST: Uploaded file is empty (pandas error).")
@@ -1039,20 +1077,20 @@ def outflow():
                 if conn_loop_out:
                     conn_loop_out.rollback()
                     cur.close()
-                    conn_loop_out.close()
+                    return_db_connection(conn_loop_out)
                 return jsonify({"success": False, "message": f"Ошибка в строке {idx + 2}: отсутствует столбец '{missing_column}'. Проверьте формат файла."}), 400
             except (ValueError, Exception) as e_row:
                 _flask_app.logger.error(f"Outflow - Error processing row {idx + 2}: {e_row}", exc_info=True)
                 if conn_loop_out:
                     conn_loop_out.rollback()
                     cur.close()
-                    conn_loop_out.close()
+                    return_db_connection(conn_loop_out)
                 return jsonify({"success": False, "message": f"Ошибка в строке {idx + 2}: {str(e_row)}"}), 400
 
         if not all_data_to_insert:
             if conn_loop_out:
                 cur.close()
-                conn_loop_out.close()
+                return_db_connection(conn_loop_out)
             return jsonify({"success": False, "message": "Нет корректных данных для импорта в файле."}), 400
 
         # SQL запрос согласно требованиям
@@ -1105,8 +1143,9 @@ def outflow():
             _flask_app.logger.error(f"Непредвиденная ошибка обработки файла /outflow: {e}", exc_info=True)
             return jsonify({"success": False, "message": f"Произошла непредвиденная ошибка на сервере: {str(e)}"}), 500
         finally:
+            # Возвращаем подключение в пул вместо закрытия
             if conn_loop_out:
-                conn_loop_out.close()
+                return_db_connection(conn_loop_out)
 
     except Exception as e_outer:
         _flask_app.logger.error(f"Ошибка обработки файла /outflow: {e_outer}", exc_info=True)
@@ -1261,8 +1300,9 @@ def refund():
             _flask_app.logger.error(f"Refund - Unexpected Error: {e}", exc_info=True)
             return jsonify({"success": False, "message": f"Произошла непредвиденная ошибка на сервере: {str(e)}"}), 500
         finally:
+            # Возвращаем подключение в пул вместо закрытия
             if conn_refund_loop:
-                conn_refund_loop.close()
+                return_db_connection(conn_refund_loop)
 
     except Exception as e_outer:
         _flask_app.logger.error(f"Refund - Outer Exception: {e_outer}", exc_info=True)
@@ -1860,12 +1900,12 @@ def cart_view():  # Переименовал, чтобы не конфликто
 
 @_flask_app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():
-    _flask_app.logger.info(f"REMOVE_FROM_CART: Получен запрос от пользователя")
+    _flask_app.logger.info("REMOVE_FROM_CART: Получен запрос от пользователя")
+    # Получаем user_id (реальный или временный для неавторизованных)
+    user_id = get_temp_user_id(session)
+    warehouse_type = session.get('warehouse_type', 'crystals')
+    _flask_app.logger.info(f"REMOVE_FROM_CART: user_id={user_id}, warehouse_type={warehouse_type}")
     try:
-        # Получаем user_id (реальный или временный для неавторизованных)
-        user_id = get_temp_user_id(session)
-        warehouse_type = session.get('warehouse_type', 'crystals')
-        _flask_app.logger.info(f"REMOVE_FROM_CART: user_id={user_id}, warehouse_type={warehouse_type}")
         data = request.get_json()
         _flask_app.logger.info(f"REMOVE_FROM_CART: data={data}")
         item_id = data.get('item_id')  # ID товара (row[0] из search.html)
@@ -1874,7 +1914,15 @@ def remove_from_cart():
             return jsonify({'success': False, 'message': 'Неверный ID товара'}), 400
 
         query_delete_cart = "DELETE FROM cart WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
-        rows_deleted = execute_query(query_delete_cart, (item_id, user_id, warehouse_type), fetch=False)
+        result = execute_query(query_delete_cart, (item_id, user_id, warehouse_type), fetch=False)
+        # execute_query может вернуть количество затронутых строк, либо list/None - приводим к int явно
+        rows_deleted = 0
+        if isinstance(result, int):
+            rows_deleted = result
+        elif isinstance(result, list) and hasattr(result, '__len__'):
+            rows_deleted = len(result)
+        else:
+            rows_deleted = 0
         _flask_app.logger.info(f"REMOVE_FROM_CART: rows_deleted={rows_deleted}")
         if rows_deleted > 0:
             return jsonify({'success': True, 'message': 'Товар удален'})
@@ -2186,12 +2234,13 @@ def login():
 
         try:
             _flask_app.logger.info(f"Попытка входа пользователя: {username}")
-            user_data_list = execute_query(query_login, (username,))  # execute_query возвращает список
-            _flask_app.logger.info(f"Результат запроса: найдено записей = {len(user_data_list) if user_data_list else 0}")
-            
+            user_data_list = execute_query(query_login, (username,))  # execute_query должен возвращать список
+            count_records = len(user_data_list) if isinstance(user_data_list, (list, tuple)) else 0
+            _flask_app.logger.info(f"Результат запроса: найдено записей = {count_records}")
+
             # Защита от перечисления пользователей: всегда выполняем проверку пароля
             # даже если пользователь не найден, чтобы время ответа было одинаковым
-            user_found = user_data_list and isinstance(user_data_list, (list, tuple)) and len(user_data_list) > 0
+            user_found = isinstance(user_data_list, (list, tuple)) and count_records > 0
             password_valid = False
             is_blocked = False
             
@@ -2572,7 +2621,7 @@ def update_profile():
         update_details = {'updated_fields': []}
         if password:
             update_details['updated_fields'].append('password')
-        if secret_question_validated:
+        if secret_question:
             update_details['updated_fields'].append('secret_question')
         if secret_answer_raw:
             update_details['updated_fields'].append('secret_answer')
@@ -2897,10 +2946,16 @@ def inventory():
     manufacturers, lots = [], []
     try:
         manufacturers_raw = execute_query("SELECT DISTINCT name_pr FROM pr ORDER BY name_pr")
-        manufacturers = [row[0] for row in manufacturers_raw] if manufacturers_raw else []
+        if manufacturers_raw and isinstance(manufacturers_raw, list):
+            manufacturers = [row[0] for row in manufacturers_raw if row and isinstance(row, (list, tuple)) and len(row) > 0]
+        else:
+            manufacturers = []
 
         lots_raw = execute_query("SELECT DISTINCT name_lot FROM lot ORDER BY name_lot")
-        lots = [row[0] for row in lots_raw] if lots_raw else []
+        if lots_raw and isinstance(lots_raw, list):
+            lots = [row[0] for row in lots_raw if row and isinstance(row, (list, tuple)) and len(row) > 0]
+        else:
+            lots = []
     except Exception as e:
         _flask_app.logger.error(f"Ошибка загрузки фильтров для инвентаризации: {e}", exc_info=True)
         flash("Не удалось загрузить фильтры.", "danger")
@@ -3229,8 +3284,9 @@ def inventory():
             except Exception as e_debug_mogrify_raw:
                 _flask_app.logger.error(f"Error mogrifying raw data query: {e_debug_mogrify_raw}", exc_info=True)
             finally:
+                # Возвращаем подключение в пул вместо закрытия
                 if conn_debug_mogrify_raw:
-                    conn_debug_mogrify_raw.close()
+                    return_db_connection(conn_debug_mogrify_raw)
 
             raw_data_results = []
             try:
