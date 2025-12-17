@@ -1,26 +1,42 @@
-version: '3.8' # Эту строку можно удалить, если Docker Compose выдает предупреждение
+version: '3.8'
 
 services:
-  web_app_dash:
+  # Объединенный сервис: веб-приложение + телеграм-бот (интегрирован в одном процессе)
+  crystal_wafer_app:
     build:
-      context: ./web_app_dash
+      context: ./web_app_WebChip
       dockerfile: Dockerfile
-    container_name: web_app_dash_container
+    container_name: crystal_wafer_app_container
     env_file:
       - .env
     ports:
-      - "8083:8083"
+      - "8089:8089"
     environment:
-      # Оставляем DB_HOST=host.docker.internal, так как extra_hosts его правильно обработает
-      - DB_HOST=host.docker.internal 
-      - DB_PORT=${DB_PORT}
+      # База данных
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME1=${DB_NAME1}
+      - DB_NAME=${DB_NAME}
+      # Flask приложение
+      - SECRET_KEY=${SECRET_KEY}
+      - MODE=production
+      # Telegram бот
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     restart: unless-stopped
-    extra_hosts: # <--- ДОБАВЛЯЕМ ИЛИ РАСКОММЕНТИРОВЫВАЕМ ЭТУ СЕКЦИЮ
+    extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      # Монтируем логи для доступа извне
+      - ./web_app_WebChip/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
+  # Отдельное веб-приложение (если нужен только веб)
   web_app_webchip:
     build:
       context: ./web_app_WebChip
@@ -31,17 +47,37 @@ services:
     ports:
       - "8087:8087"
     environment:
-      # Оставляем DB_HOST=host.docker.internal
-      - DB_HOST=host.docker.internal
-      - DB_PORT=${DB_PORT}
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME2=${DB_NAME2}
+      - DB_NAME=${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
+      - MODE=production
     restart: unless-stopped
-    extra_hosts: # <--- ДОБАВЛЯЕМ ИЛИ РАСКОММЕНТИРОВЫВАЕМ ЭТУ СЕКЦИЮ
+    extra_hosts:
       - "host.docker.internal:host-gateway"
+    profiles:
+      - web-only
 
-# volumes: (удалите, если не используются)
-#   pgdata1:
-#   pgdata2:
+  # Веб-приложение Dash (если нужно)
+  web_app_dash:
+    build:
+      context: ./web_app_dash
+      dockerfile: Dockerfile
+    container_name: web_app_dash_container
+    env_file:
+      - .env
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME1=${DB_NAME1}
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - dash

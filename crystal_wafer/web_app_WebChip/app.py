@@ -7,6 +7,7 @@ import logging  # <--- ДОБАВИТЬ
 import logging.handlers  # Для SMTPHandler
 import os
 import re
+import uuid
 from datetime import datetime, timedelta
 from io import BytesIO
 import time
@@ -25,7 +26,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.17"
+__version__ = "1.4.23"
 
 # Импортируем WSGIMiddleware
 try:
@@ -39,125 +40,39 @@ load_dotenv()
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
-# Настройка логирования с SMTP handler для критических ошибок
-def setup_logging():
-    """Настройка логирования с отправкой критических ошибок на email"""
-    # Формат логов
-    log_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+# Настройка логирования с поддержкой структурированного логирования и файлового логирования
+# Используем новый модуль logging_config для расширенной функциональности
+try:
+    from logging_config import setup_logging
+    # Получаем настройки из переменных окружения
+    use_json_logs = os.getenv('LOG_JSON_FORMAT', 'false').lower() == 'true'
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    log_dir = os.getenv('LOG_DIR')  # Если None, используется logs/ в корне проекта
     
-    # Настраиваем корневой логгер
+    # Вызываем новую функцию настройки логирования
+    setup_logging(log_dir=log_dir, use_json=use_json_logs, log_level=log_level)
+except ImportError:
+    # Если модуль не найден, используем базовую настройку (обратная совместимость)
+    import logging
+    log_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
-    
-    # Получаем настройки SMTP из переменных окружения
-    # Поддерживаем оба варианта: SMTP_USERNAME и SMTP_USER для обратной совместимости
-    enable_email = os.getenv('ENABLE_EMAIL', 'true').lower().strip() == 'true'
-    if not enable_email:
-        root_logger.warning("SMTP логирование отключено (ENABLE_EMAIL=false)")
-        # Все равно настраиваем консольный handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(log_format)
-        root_logger.addHandler(console_handler)
-        return
-    
-    smtp_host = os.getenv('SMTP_HOST')
-    smtp_port = int(os.getenv('SMTP_PORT', '587'))
-    smtp_username = os.getenv('SMTP_USERNAME') or os.getenv('SMTP_USER')  # Поддержка обоих вариантов
-    smtp_password = os.getenv('SMTP_PASSWORD')
-    admin_email = os.getenv('ADMIN_EMAIL')
-    from_email = os.getenv('SMTP_FROM_EMAIL', smtp_username)
-    from_name = os.getenv('SMTP_FROM_NAME', 'Crystal Wafer Management System')
-    smtp_use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
-    
-    # Консольный handler (всегда активен)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(log_format)
     root_logger.addHandler(console_handler)
-    
-    # SMTP handler для критических ошибок (только если настроен)
-    if smtp_host and smtp_username and smtp_password and admin_email:
-        try:
-            # Создаем кастомный SMTP handler для более гибкой настройки
-            class SecureSMTPHandler(logging.handlers.SMTPHandler):
-                def __init__(self, mailhost, fromaddr, toaddrs, subject, credentials, use_tls=True):
-                    super().__init__(mailhost, fromaddr, toaddrs, subject, credentials)
-                    self.use_tls = use_tls
-                    self._sending = False  # Флаг для предотвращения рекурсии
-                
-                def emit(self, record):
-                    """Переопределяем emit для поддержки TLS"""
-                    # Предотвращаем рекурсию: если уже отправляем email, не пытаемся снова
-                    if self._sending:
-                        return
-                    
-                    try:
-                        self._sending = True
-                        import smtplib
-                        from email.utils import formatdate
-                        port = self.mailport
-                        if not port:
-                            port = smtplib.SMTP_PORT
-                        smtp = smtplib.SMTP(self.mailhost, port)
-                        if self.use_tls:
-                            smtp.starttls()
-                        if self.username:
-                            smtp.login(self.username, self.password)
-                        msg = self.format(record)
-                        # Используем имя отправителя, если оно указано
-                        fromname = getattr(self, 'fromname', None)  # type: ignore
-                        from_header = f"{fromname} <{self.fromaddr}>" if fromname else self.fromaddr
-                        msg_text = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
-                            from_header,
-                            ','.join(self.toaddrs),
-                            self.getSubject(record),
-                            formatdate(),
-                            msg
-                        )
-                        # Исправляем кодировку: используем UTF-8 для поддержки кириллицы
-                        from email.mime.text import MIMEText
-                        from email.header import Header
-                        email_msg = MIMEText(msg, 'plain', 'utf-8')
-                        email_msg['From'] = Header(from_header, 'utf-8')  # type: ignore
-                        email_msg['To'] = Header(','.join(self.toaddrs), 'utf-8')  # type: ignore
-                        email_msg['Subject'] = Header(self.getSubject(record), 'utf-8')  # type: ignore
-                        email_msg['Date'] = formatdate()
-                        smtp.sendmail(self.fromaddr, self.toaddrs, email_msg.as_string())
-                        smtp.quit()
-                    except smtplib.SMTPAuthenticationError as e:
-                        # Ошибка аутентификации - логируем в консоль, но не пытаемся отправить email
-                        import sys
-                        print(f"ОШИБКА SMTP аутентификации: {e}", file=sys.stderr)
-                        print("Проверьте настройки SMTP в .env файле. Для Gmail используйте 'Пароль приложения'.", file=sys.stderr)
-                    except Exception as e:
-                        # Другие ошибки - логируем в консоль без рекурсии
-                        import sys
-                        print(f"ОШИБКА отправки email: {e}", file=sys.stderr)
-                    finally:
-                        self._sending = False
-            
-            smtp_handler = SecureSMTPHandler(
-                mailhost=(smtp_host, smtp_port),
-                fromaddr=from_email,
-                toaddrs=[admin_email],
-                subject='[КРИТИЧЕСКАЯ ОШИБКА] Crystal Wafer Management System',
-                credentials=(smtp_username, smtp_password),
-                use_tls=smtp_use_tls
-            )
-            # Добавляем имя отправителя, если указано
-            setattr(smtp_handler, 'fromname', from_name)  # type: ignore
-            smtp_handler.setLevel(logging.ERROR)  # Только ERROR и CRITICAL
-            smtp_handler.setFormatter(log_format)
-            root_logger.addHandler(smtp_handler)
-            root_logger.info(f"SMTP логирование настроено: {admin_email}")
-        except Exception as e:
-            root_logger.warning(f"Не удалось настроить SMTP логирование: {e}")
-    else:
-        root_logger.warning("SMTP логирование не настроено (отсутствуют настройки в .env)")
-
-# Вызываем настройку логирования
-setup_logging()
+    root_logger.warning("Модуль logging_config не найден, используется базовая настройка логирования")
+except Exception as e:
+    # Если произошла ошибка при настройке, используем базовую настройку
+    import logging
+    root_logger = logging.getLogger()
+    root_logger.warning(f"Ошибка настройки расширенного логирования: {e}. Используется базовая настройка.")
+    if not root_logger.handlers:
+        log_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(log_format)
+        root_logger.addHandler(console_handler)
 
 _flask_app = Flask(__name__)
 
@@ -249,6 +164,64 @@ def handle_exception(e):
     return f"Внутренняя ошибка сервера: {str(e)}", 500
 
 
+# Middleware для логирования запросов с request_id
+@_flask_app.before_request
+def before_request():
+    """Логирование запросов с request_id и дополнительной информацией"""
+    # Генерируем уникальный request_id для каждого запроса
+    request_id = str(uuid.uuid4())[:8]
+    request.request_id = request_id  # type: ignore
+    
+    # Сохраняем время начала запроса для вычисления длительности
+    request.start_time = time.time()  # type: ignore
+
+@_flask_app.after_request
+def after_request(response):
+    """Логирование ответов с request_id и метриками"""
+    # Получаем request_id и время начала
+    request_id = getattr(request, 'request_id', 'unknown')
+    start_time = getattr(request, 'start_time', time.time())
+    
+    # Вычисляем длительность запроса
+    duration_ms = int((time.time() - start_time) * 1000)
+    
+    # Получаем дополнительную информацию
+    try:
+        user_id = session.get('user_id') if session else None
+    except RuntimeError:
+        user_id = None
+    
+    ip_address = request.remote_addr
+    endpoint = request.endpoint or request.path
+    method = request.method
+    status_code = response.status_code
+    
+    # Логируем запрос (только для важных маршрутов или ошибок)
+    # Можно настроить фильтрацию через переменные окружения
+    log_requests = os.getenv('LOG_ALL_REQUESTS', 'false').lower() == 'true'
+    should_log = log_requests or status_code >= 400 or duration_ms > 1000
+    
+    if should_log:
+        # Используем extra для передачи дополнительных полей в форматтер
+        _flask_app.logger.info(
+            f"{method} {request.path} -> {status_code}",
+            extra={
+                'request_id': request_id,
+                'user_id': user_id,
+                'ip_address': ip_address,
+                'endpoint': endpoint,
+                'method': method,
+                'status_code': status_code,
+                'duration_ms': duration_ms
+            }
+        )
+    
+    # Добавляем request_id в заголовки ответа для отладки (опционально)
+    if os.getenv('INCLUDE_REQUEST_ID_HEADER', 'false').lower() == 'true':
+        response.headers['X-Request-ID'] = request_id
+    
+    return response
+
 @_flask_app.context_processor
 def inject_user():
     return {
@@ -284,9 +257,17 @@ def init_db_pool():
                         password=db_password,
                         port=db_port
                     )
-                    _flask_app.logger.info(f"Пул подключений к БД инициализирован: minconn=1, maxconn=20, host={db_host}, database={db_name}")
+                    # Используем print если logger еще не доступен (при инициализации на уровне модуля)
+                    try:
+                        _flask_app.logger.info(f"Пул подключений к БД инициализирован: minconn=1, maxconn=20, host={db_host}, database={db_name}")
+                    except (AttributeError, NameError):
+                        print(f"INFO: Пул подключений к БД инициализирован: minconn=1, maxconn=20, host={db_host}, database={db_name}")
                 except Exception as e:
-                    _flask_app.logger.error(f"Ошибка инициализации пула подключений: {e}", exc_info=True)
+                    # Используем print если logger еще не доступен
+                    try:
+                        _flask_app.logger.error(f"Ошибка инициализации пула подключений: {e}", exc_info=True)
+                    except (AttributeError, NameError):
+                        print(f"ERROR: Ошибка инициализации пула подключений: {e}")
                     raise
     return _db_pool
 
@@ -296,9 +277,15 @@ def close_db_pool():
     if _db_pool:
         try:
             _db_pool.closeall()
-            _flask_app.logger.info("Пул подключений к БД закрыт")
+            try:
+                _flask_app.logger.info("Пул подключений к БД закрыт")
+            except (AttributeError, NameError):
+                print("INFO: Пул подключений к БД закрыт")
         except Exception as e:
-            _flask_app.logger.error(f"Ошибка при закрытии пула подключений: {e}", exc_info=True)
+            try:
+                _flask_app.logger.error(f"Ошибка при закрытии пула подключений: {e}", exc_info=True)
+            except (AttributeError, NameError):
+                print(f"ERROR: Ошибка при закрытии пула подключений: {e}")
         finally:
             _db_pool = None
 
@@ -368,7 +355,6 @@ def get_temp_user_id(session):
     # Для неавторизованных пользователей используем отрицательный ID на основе SHA-256 hash от уникального идентификатора сессии
     if 'temp_user_id' not in session:
         import hashlib
-        import uuid
         # Генерируем уникальный идентификатор для сессии, если его еще нет
         if 'session_unique_id' not in session:
             session['session_unique_id'] = str(uuid.uuid4())
@@ -419,7 +405,7 @@ def return_db_connection(conn):
                 pass
 
 
-def execute_query(query, params=None, fetch=True):
+def execute_query(query, params=None, fetch=True, explain_analyze=False):
     """
     Выполнение SQL запроса с использованием пула подключений
     
@@ -427,17 +413,31 @@ def execute_query(query, params=None, fetch=True):
         query: SQL запрос
         params: Параметры запроса (кортеж или список)
         fetch: Если True, возвращает результаты запроса. Если False, возвращает количество затронутых строк
+        explain_analyze: Если True, выполняет EXPLAIN ANALYZE и логирует план выполнения (только для SELECT)
         
     Returns:
         Результаты запроса (список кортежей) или количество затронутых строк (int)
     """
     conn = None
+    start_time = time.time()
     try:
         conn = get_db_connection()  # Получаем подключение из пула
         cur = conn.cursor()
 
         stripped_query = query.strip().lower()
         is_modifying_query = stripped_query.startswith(('insert', 'update', 'delete'))
+        is_select_query = stripped_query.startswith('select') or stripped_query.startswith('with')
+
+        # Выполняем EXPLAIN ANALYZE для SELECT запросов в режиме разработки
+        if explain_analyze and is_select_query and not is_modifying_query:
+            try:
+                explain_query = f"EXPLAIN (ANALYZE, BUFFERS, VERBOSE) {query}"
+                cur.execute(explain_query, params)
+                explain_result = cur.fetchall()
+                explain_text = "\n".join([row[0] for row in explain_result])
+                _flask_app.logger.info(f"EXPLAIN ANALYZE для запроса:\n{explain_text}")
+            except Exception as explain_error:
+                _flask_app.logger.warning(f"Не удалось выполнить EXPLAIN ANALYZE: {explain_error}")
 
         cur.execute(query, params)
 
@@ -454,11 +454,23 @@ def execute_query(query, params=None, fetch=True):
         else:
             results = cur.rowcount  # Возвращаем количество затронутых строк для не-fetch запросов
 
+        # Логируем медленные запросы (> 1 секунды)
+        execution_time = time.time() - start_time
+        if execution_time > 1.0:
+            _flask_app.logger.warning(
+                f"Медленный запрос ({execution_time:.2f}с): {query[:200]}... "
+                f"Параметры: {params if params else 'None'}"
+            )
+
         cur.close()
         return results
     except (Exception, psycopg2.Error) as error:
-        _flask_app.logger.error(f"Ошибка при выполнении SQL: {error}. Запрос: {query}, Параметры: {params}",
-                                exc_info=True)
+        execution_time = time.time() - start_time
+        _flask_app.logger.error(
+            f"Ошибка при выполнении SQL ({execution_time:.2f}с): {error}. "
+            f"Запрос: {query[:500]}, Параметры: {params}",
+            exc_info=True
+        )
         if conn:
             try:
                 conn.rollback()
@@ -1662,15 +1674,156 @@ def search():
     
     if perform_search:
         try:
-            # Сначала подсчитываем общее количество результатов
-            count_query = f"""
-                SELECT COUNT(*) as total
-                FROM (
-                    {query_search_base}
-                ) as subquery
+            # Оптимизированный COUNT запрос: считаем без JOIN справочников для ускорения
+            # Создаем упрощенную версию запроса только с основными CTE и фильтрами
+            count_query_base = f"""
+                WITH 
+                income_sum_by_item AS (
+                    SELECT
+                        item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
+                        id_stor AS latest_id_stor, id_cells AS latest_id_cells,
+                        SUM(quan_w) as total_received_w, SUM(quan_gp) as total_received_gp
+                    FROM {invoice_table}
+                    WHERE status = 1
+                    GROUP BY item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip, id_stor, id_cells
+                ),
+                return_sum_by_item AS (
+                    SELECT
+                        item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
+                        id_stor AS latest_id_stor, id_cells AS latest_id_cells,
+                        SUM(quan_w) as total_return_w, SUM(quan_gp) as total_return_gp
+                    FROM {invoice_table}
+                    WHERE status = 3
+                    GROUP BY item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip, id_stor, id_cells
+                ),
+                consumption_sum_by_item AS (
+                    SELECT
+                        item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
+                        id_stor AS latest_id_stor,
+                        id_cells AS latest_id_cells,
+                        SUM(cons_w) as total_consumed_w, SUM(cons_gp) as total_consumed_gp
+                    FROM {consumption_table}
+                    GROUP BY item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip, id_stor, id_cells
+                ),
+                combined_invoice_sum AS (
+                    SELECT
+                        COALESCE(inc.item_id, ret.item_id) AS item_id,
+                        COALESCE(inc.id_start, ret.id_start) AS id_start,
+                        COALESCE(inc.id_pr, ret.id_pr) AS id_pr,
+                        COALESCE(inc.id_tech, ret.id_tech) AS id_tech,
+                        COALESCE(inc.id_lot, ret.id_lot) AS id_lot,
+                        COALESCE(inc.id_wafer, ret.id_wafer) AS id_wafer,
+                        COALESCE(inc.id_quad, ret.id_quad) AS id_quad,
+                        COALESCE(inc.id_in_lot, ret.id_in_lot) AS id_in_lot,
+                        COALESCE(inc.id_n_chip, ret.id_n_chip) AS id_n_chip,
+                        COALESCE(inc.latest_id_stor, ret.latest_id_stor) AS latest_id_stor,
+                        COALESCE(inc.latest_id_cells, ret.latest_id_cells) AS latest_id_cells,
+                        COALESCE(inc.total_received_w, 0) AS total_received_w,
+                        COALESCE(inc.total_received_gp, 0) AS total_received_gp,
+                        COALESCE(ret.total_return_w, 0) AS total_return_w,
+                        COALESCE(ret.total_return_gp, 0) AS total_return_gp
+                    FROM income_sum_by_item inc
+                    FULL OUTER JOIN return_sum_by_item ret
+                        ON inc.item_id = ret.item_id 
+                        AND inc.id_start = ret.id_start AND inc.id_pr = ret.id_pr AND inc.id_tech = ret.id_tech 
+                        AND inc.id_lot = ret.id_lot AND inc.id_wafer = ret.id_wafer AND inc.id_quad = ret.id_quad
+                        AND inc.id_in_lot = ret.id_in_lot AND inc.id_n_chip = ret.id_n_chip
+                        AND COALESCE(inc.latest_id_stor, -1) = COALESCE(ret.latest_id_stor, -1)
+                        AND COALESCE(inc.latest_id_cells, -1) = COALESCE(ret.latest_id_cells, -1)
+                )
+                SELECT 
+                    COALESCE(inv.item_id, cons.item_id) AS display_item_id,
+                    COALESCE(inv.id_start, cons.id_start) AS actual_id_start,
+                    COALESCE(inv.id_pr, cons.id_pr) AS actual_id_pr,
+                    COALESCE(inv.id_tech, cons.id_tech) AS actual_id_tech,
+                    COALESCE(inv.id_lot, cons.id_lot) AS actual_id_lot,
+                    COALESCE(inv.id_wafer, cons.id_wafer) AS actual_id_wafer,
+                    COALESCE(inv.id_quad, cons.id_quad) AS actual_id_quad,
+                    COALESCE(inv.id_in_lot, cons.id_in_lot) AS actual_id_in_lot,
+                    COALESCE(inv.id_n_chip, cons.id_n_chip) AS actual_id_n_chip,
+                    (COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) AS ostatok_w,
+                    (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) AS ostatok_gp
+                FROM combined_invoice_sum inv
+                FULL OUTER JOIN consumption_sum_by_item cons 
+                    ON inv.item_id = cons.item_id 
+                    AND inv.id_start = cons.id_start AND inv.id_pr = cons.id_pr AND inv.id_tech = cons.id_tech 
+                    AND inv.id_lot = cons.id_lot AND inv.id_wafer = cons.id_wafer AND inv.id_quad = cons.id_quad
+                    AND inv.id_in_lot = cons.id_in_lot AND inv.id_n_chip = cons.id_n_chip
+                    AND COALESCE(inv.latest_id_stor, -1) = COALESCE(cons.latest_id_stor, -1)
+                    AND COALESCE(inv.latest_id_cells, -1) = COALESCE(cons.latest_id_cells, -1)
+                WHERE 
+                    ( (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) != 0 OR
+                      (COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) != 0 OR
+                      COALESCE(inv.total_received_gp, 0) != 0 OR COALESCE(inv.total_received_w, 0) != 0 OR
+                      COALESCE(inv.total_return_gp, 0) != 0 OR COALESCE(inv.total_return_w, 0) != 0 OR
+                      COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
             """
             
-            count_result = execute_query(count_query, tuple(params_search))
+            # Применяем фильтры к упрощенному запросу
+            count_filter_conditions = []
+            count_params = []
+            count_joins = []
+            
+            # Фильтр по складу
+            if warehouse_type in ('plates', 'far'):
+                count_filter_conditions.append(
+                    "NOT ((COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) = 0 "
+                    "AND (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) = 0)"
+                )
+            
+            # Фильтр по шифру кристалла - применяем через JOIN с n_chip
+            if chip_name_form and chip_name_form.strip():
+                search_pattern = chip_name_form.strip()
+                count_joins.append("LEFT JOIN n_chip nc ON nc.id = COALESCE(inv.id_n_chip, cons.id_n_chip)")
+                count_filter_conditions.append("nc.n_chip ILIKE %s")
+                count_params.append(f"%{search_pattern}%")
+            
+            # Фильтр по производителю - применяем через JOIN с pr
+            if manufacturer_filter_form and manufacturer_filter_form != "all":
+                count_joins.append("LEFT JOIN pr p ON p.id = COALESCE(inv.id_pr, cons.id_pr)")
+                count_filter_conditions.append("p.name_pr = %s")
+                count_params.append(manufacturer_filter_form)
+            
+            # Фильтр по партии - применяем через JOIN с lot
+            if lot_filter_form and lot_filter_form != "all":
+                count_joins.append("LEFT JOIN lot l ON l.id = COALESCE(inv.id_lot, cons.id_lot)")
+                count_filter_conditions.append("l.name_lot = %s")
+                count_params.append(lot_filter_form)
+            
+            # Добавляем JOIN'ы после определения таблицы cons (после FULL OUTER JOIN consumption_sum_by_item cons)
+            if count_joins:
+                # Находим место после FULL OUTER JOIN consumption_sum_by_item cons и добавляем JOIN'ы там
+                # Используем более надежный способ - ищем по уникальной строке перед WHERE
+                insert_point = "AND COALESCE(inv.latest_id_cells, -1) = COALESCE(cons.latest_id_cells, -1)\n                WHERE"
+                if insert_point in count_query_base:
+                    count_query_base = count_query_base.replace(
+                        insert_point,
+                        f"AND COALESCE(inv.latest_id_cells, -1) = COALESCE(cons.latest_id_cells, -1)\n                {' '.join(count_joins)}\n                WHERE"
+                    )
+                else:
+                    # Если не нашли стандартное место, ищем по другой строке
+                    alt_insert_point = "\n                WHERE"
+                    if alt_insert_point in count_query_base:
+                        # Вставляем JOIN'ы перед WHERE
+                        count_query_base = count_query_base.replace(
+                            alt_insert_point,
+                            f"\n                {' '.join(count_joins)}\n                WHERE"
+                        )
+                    else:
+                        # Если совсем не нашли, добавляем в конец перед WHERE
+                        _flask_app.logger.warning("Не удалось найти место для вставки JOIN'ов в count_query_base. Добавляем перед WHERE.")
+                        # Пытаемся найти WHERE вручную
+                        where_pos = count_query_base.upper().rfind("WHERE")
+                        if where_pos > 0:
+                            count_query_base = count_query_base[:where_pos] + "\n                " + " ".join(count_joins) + "\n                " + count_query_base[where_pos:]
+            
+            if count_filter_conditions:
+                count_query_base += " AND " + " AND ".join(count_filter_conditions)
+            
+            # Финальный COUNT запрос
+            count_query = f"SELECT COUNT(*) as total FROM ({count_query_base}) as count_subquery"
+            
+            count_result = execute_query(count_query, tuple(count_params))
             if count_result and isinstance(count_result, (list, tuple)) and len(count_result) > 0:
                 # COUNT(*) возвращает один кортеж с одним значением: [(total,)]
                 row = count_result[0]
@@ -1814,6 +1967,450 @@ def get_lots():
     except Exception as e:
         _flask_app.logger.error(f"Ошибка загрузки партий: {e}", exc_info=True)
         return jsonify({"lots": [], "error": str(e)}), 500
+
+
+# ============================================================================
+# REST API ENDPOINTS (v1)
+# ============================================================================
+
+def api_response(success=True, data=None, message=None, errors=None, status_code=200):
+    """
+    Стандартизированный формат ответа API
+    
+    Args:
+        success: Успешность операции
+        data: Данные для возврата
+        message: Сообщение
+        errors: Список ошибок
+        status_code: HTTP статус код
+        
+    Returns:
+        JSON response с стандартным форматом
+    """
+    response = {
+        'success': success,
+        'version': '1.0'
+    }
+    if data is not None:
+        response['data'] = data
+    if message:
+        response['message'] = message
+    if errors:
+        response['errors'] = errors
+    return jsonify(response), status_code
+
+
+def require_auth():
+    """Проверка авторизации пользователя для API"""
+    if 'user_id' not in session:
+        return api_response(success=False, message='Требуется авторизация', status_code=401)
+    return None
+
+
+# GET /api/v1/search
+@_flask_app.route('/api/v1/search', methods=['GET'])
+def api_v1_search():
+    """REST API endpoint для поиска кристаллов"""
+    try:
+        warehouse_type = request.args.get('warehouse', 'crystals')
+        if warehouse_type not in ['crystals', 'plates', 'far']:
+            warehouse_type = 'crystals'
+        
+        chip_name = request.args.get('chip_name', '').strip()
+        manufacturer = request.args.get('manufacturer', 'all')
+        lot = request.args.get('lot', 'all')
+        page = request.args.get('page', 1, type=int)
+        per_page = min(max(request.args.get('per_page', 50, type=int), 1), 200)
+        
+        # Используем логику из функции search()
+        tables = get_warehouse_tables(warehouse_type)
+        invoice_table = validate_table_name(tables['invoice'])
+        consumption_table = validate_table_name(tables['consumption'])
+        
+        # Строим запрос (используем упрощенную версию для API)
+        query_search = f"""
+            WITH 
+            income_sum_by_item AS (
+                SELECT
+                    item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
+                    id_stor AS latest_id_stor, id_cells AS latest_id_cells,
+                    MAX(note) FILTER (WHERE note IS NOT NULL AND note != '' AND LOWER(note) != 'nan') AS latest_note,
+                    SUM(quan_w) as total_received_w, SUM(quan_gp) as total_received_gp
+                FROM {invoice_table}
+                WHERE status = 1
+                GROUP BY item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip, id_stor, id_cells
+            ),
+            return_sum_by_item AS (
+                SELECT
+                    item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
+                    id_stor AS latest_id_stor, id_cells AS latest_id_cells,
+                    MAX(note) FILTER (WHERE note IS NOT NULL AND note != '' AND LOWER(note) != 'nan') AS latest_note,
+                    SUM(quan_w) as total_return_w, SUM(quan_gp) as total_return_gp
+                FROM {invoice_table}
+                WHERE status = 3
+                GROUP BY item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip, id_stor, id_cells
+            ),
+            consumption_sum_by_item AS (
+                SELECT
+                    item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip,
+                    id_stor AS latest_id_stor,
+                    id_cells AS latest_id_cells,
+                    MAX(note) FILTER (WHERE note IS NOT NULL AND note != '' AND LOWER(note) != 'nan') AS latest_note,
+                    SUM(cons_w) as total_consumed_w, SUM(cons_gp) as total_consumed_gp
+                FROM {consumption_table}
+                GROUP BY item_id, id_start, id_pr, id_tech, id_lot, id_wafer, id_quad, id_in_lot, id_n_chip, id_stor, id_cells
+            ),
+            combined_invoice_sum AS (
+                SELECT
+                    COALESCE(inc.item_id, ret.item_id) AS item_id,
+                    COALESCE(inc.latest_note, ret.latest_note) AS note,
+                    COALESCE(inc.id_start, ret.id_start) AS id_start,
+                    COALESCE(inc.id_pr, ret.id_pr) AS id_pr,
+                    COALESCE(inc.id_tech, ret.id_tech) AS id_tech,
+                    COALESCE(inc.id_lot, ret.id_lot) AS id_lot,
+                    COALESCE(inc.id_wafer, ret.id_wafer) AS id_wafer,
+                    COALESCE(inc.id_quad, ret.id_quad) AS id_quad,
+                    COALESCE(inc.id_in_lot, ret.id_in_lot) AS id_in_lot,
+                    COALESCE(inc.id_n_chip, ret.id_n_chip) AS id_n_chip,
+                    COALESCE(inc.latest_id_stor, ret.latest_id_stor) AS latest_id_stor,
+                    COALESCE(inc.latest_id_cells, ret.latest_id_cells) AS latest_id_cells,
+                    COALESCE(inc.total_received_w, 0) AS total_received_w,
+                    COALESCE(inc.total_received_gp, 0) AS total_received_gp,
+                    COALESCE(ret.total_return_w, 0) AS total_return_w,
+                    COALESCE(ret.total_return_gp, 0) AS total_return_gp
+                FROM income_sum_by_item inc
+                FULL OUTER JOIN return_sum_by_item ret
+                    ON inc.item_id = ret.item_id 
+                    AND inc.id_start = ret.id_start AND inc.id_pr = ret.id_pr AND inc.id_tech = ret.id_tech 
+                    AND inc.id_lot = ret.id_lot AND inc.id_wafer = ret.id_wafer AND inc.id_quad = ret.id_quad
+                    AND inc.id_in_lot = ret.id_in_lot AND inc.id_n_chip = ret.id_n_chip
+                    AND COALESCE(inc.latest_id_stor, -1) = COALESCE(ret.latest_id_stor, -1)
+                    AND COALESCE(inc.latest_id_cells, -1) = COALESCE(ret.latest_id_cells, -1)
+            )
+            SELECT 
+                COALESCE(inv.item_id, cons.item_id) AS display_item_id,
+                COALESCE(inv.id_start, cons.id_start) AS actual_id_start,
+                s.name_start,
+                p.name_pr,
+                t.name_tech,
+                w.name_wafer,
+                q.name_quad,
+                l.name_lot,
+                il.in_lot,
+                nc.n_chip,
+                (COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) AS ostatok_w,
+                (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) AS ostatok_gp,
+                COALESCE(inv.note, cons.latest_note, '') AS display_note,
+                st.name_stor,
+                c.name_cells
+            FROM combined_invoice_sum inv
+            FULL OUTER JOIN consumption_sum_by_item cons 
+                ON inv.item_id = cons.item_id 
+                AND inv.id_start = cons.id_start AND inv.id_pr = cons.id_pr AND inv.id_tech = cons.id_tech 
+                AND inv.id_lot = cons.id_lot AND inv.id_wafer = cons.id_wafer AND inv.id_quad = cons.id_quad
+                AND inv.id_in_lot = cons.id_in_lot AND inv.id_n_chip = cons.id_n_chip
+                AND COALESCE(inv.latest_id_stor, -1) = COALESCE(cons.latest_id_stor, -1)
+                AND COALESCE(inv.latest_id_cells, -1) = COALESCE(cons.latest_id_cells, -1)
+            LEFT JOIN start_p s ON s.id = COALESCE(inv.id_start, cons.id_start)
+            LEFT JOIN pr p ON p.id = COALESCE(inv.id_pr, cons.id_pr)
+            LEFT JOIN tech t ON t.id = COALESCE(inv.id_tech, cons.id_tech)
+            LEFT JOIN wafer w ON w.id = COALESCE(inv.id_wafer, cons.id_wafer)
+            LEFT JOIN quad q ON q.id = COALESCE(inv.id_quad, cons.id_quad)
+            LEFT JOIN lot l ON l.id = COALESCE(inv.id_lot, cons.id_lot)
+            LEFT JOIN in_lot il ON il.id = COALESCE(inv.id_in_lot, cons.id_in_lot)
+            LEFT JOIN n_chip nc ON nc.id = COALESCE(inv.id_n_chip, cons.id_n_chip)
+            LEFT JOIN stor st ON st.id = COALESCE(inv.latest_id_stor, cons.latest_id_stor)
+            LEFT JOIN cells c ON c.id = COALESCE(inv.latest_id_cells, cons.latest_id_cells)
+            WHERE 
+                ( (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) != 0 OR
+                  (COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) != 0 OR
+                  COALESCE(inv.total_received_gp, 0) != 0 OR COALESCE(inv.total_received_w, 0) != 0 OR
+                  COALESCE(inv.total_return_gp, 0) != 0 OR COALESCE(inv.total_return_w, 0) != 0 OR
+                  COALESCE(cons.total_consumed_gp, 0) != 0 OR COALESCE(cons.total_consumed_w, 0) != 0 )
+        """
+        
+        params_search = []
+        filter_conditions = []
+        
+        if warehouse_type in ('plates', 'far'):
+            filter_conditions.append(
+                "NOT ((COALESCE(inv.total_received_w, 0) + COALESCE(inv.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) = 0 "
+                "AND (COALESCE(inv.total_received_gp, 0) + COALESCE(inv.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) = 0)"
+            )
+        
+        if chip_name:
+            filter_conditions.append("nc.n_chip ILIKE %s")
+            params_search.append(f"%{chip_name}%")
+        
+        if manufacturer and manufacturer != "all":
+            filter_conditions.append("p.name_pr = %s")
+            params_search.append(manufacturer)
+        
+        if lot and lot != "all":
+            filter_conditions.append("l.name_lot = %s")
+            params_search.append(lot)
+        
+        if filter_conditions:
+            query_search += " AND " + " AND ".join(filter_conditions)
+        
+        query_search_base = query_search + " ORDER BY display_item_id"
+        offset = (page - 1) * per_page
+        
+        # COUNT запрос
+        count_query = f"SELECT COUNT(*) as total FROM ({query_search_base}) as count_subquery"
+        count_result = execute_query(count_query, tuple(params_search))
+        total_count = 0
+        if count_result and isinstance(count_result, (list, tuple)) and len(count_result) > 0:
+            row = count_result[0]
+            if isinstance(row, (list, tuple)) and len(row) > 0:
+                total_count = int(row[0]) if row[0] is not None else 0
+        
+        # Данные с пагинацией
+        query_search_paginated = query_search_base + f" LIMIT {per_page} OFFSET {offset}"
+        results = execute_query(query_search_paginated, tuple(params_search))
+        
+        # Форматируем результаты для API
+        formatted_results = []
+        if results and isinstance(results, (list, tuple)):
+            for row in results:
+                if isinstance(row, (list, tuple)) and len(row) >= 15:
+                    formatted_results.append({
+                        'item_id': row[0],
+                        'start': row[2],
+                        'manufacturer': row[3],
+                        'technology': row[4],
+                        'wafer': row[5],
+                        'quadrant': row[6],
+                        'lot': row[7],
+                        'internal_lot': row[8],
+                        'chip_code': row[9],
+                        'ostatok_w': row[10],
+                        'ostatok_gp': row[11],
+                        'note': row[12],
+                        'stor': row[13],
+                        'cells': row[14]
+                    })
+        
+        return api_response(
+            success=True,
+            data={
+                'results': formatted_results,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total_count': total_count,
+                    'total_pages': (total_count + per_page - 1) // per_page if total_count > 0 else 0
+                }
+            }
+        )
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API поиска: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка поиска: {str(e)}", status_code=500)
+
+
+# GET /api/v1/chip-codes
+@_flask_app.route('/api/v1/chip-codes', methods=['GET'])
+def api_v1_chip_codes():
+    """REST API endpoint для получения списка шифров кристаллов"""
+    try:
+        query = request.args.get('q', '').strip()
+        # Используем существующую функцию get_chip_codes, но переформатируем ответ
+        if query:
+            sql_query = """
+                SELECT DISTINCT n_chip 
+                FROM n_chip 
+                WHERE n_chip ILIKE %s
+                ORDER BY n_chip
+                LIMIT 50
+            """
+            params = (f"{query}%",)
+        else:
+            sql_query = """
+                SELECT nc.n_chip 
+                FROM n_chip nc
+                INNER JOIN invoice i ON i.id_n_chip = nc.id
+                GROUP BY nc.n_chip
+                ORDER BY COUNT(*) DESC, nc.n_chip
+                LIMIT 100
+            """
+            params = ()
+        
+        def get_chip_codes_from_db():
+            results = execute_query(sql_query, params)
+            if not results or not isinstance(results, (list, tuple)):
+                return []
+            return [row[0] for row in results if isinstance(row, (list, tuple)) and len(row) > 0 and row[0]]
+        
+        cache_key = f'chip_codes_{query}' if query else 'chip_codes_popular'
+        ttl = 300 if query else 600
+        chip_codes = get_cached_or_execute(cache_key, get_chip_codes_from_db, ttl_seconds=ttl)
+        
+        return api_response(success=True, data={'chip_codes': chip_codes})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API получения шифров: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка получения шифров: {str(e)}", status_code=500)
+
+
+# GET /api/v1/manufacturers
+@_flask_app.route('/api/v1/manufacturers', methods=['GET'])
+def api_v1_manufacturers():
+    """REST API endpoint для получения списка производителей"""
+    try:
+        def get_manufacturers_from_db():
+            manufacturers_query = "SELECT DISTINCT name_pr FROM pr ORDER BY name_pr"
+            manufacturers_raw = execute_query(manufacturers_query)
+            if manufacturers_raw and isinstance(manufacturers_raw, (list, tuple)):
+                return [row[0] for row in manufacturers_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+            return []
+        
+        manufacturers = get_cached_or_execute('manufacturers_all', get_manufacturers_from_db, ttl_seconds=600)
+        return api_response(success=True, data={'manufacturers': manufacturers})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API получения производителей: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка получения производителей: {str(e)}", status_code=500)
+
+
+# GET /api/v1/lots
+@_flask_app.route('/api/v1/lots', methods=['GET'])
+def api_v1_lots():
+    """REST API endpoint для получения списка партий"""
+    try:
+        warehouse_type = request.args.get('warehouse', 'crystals')
+        manufacturer = request.args.get('manufacturer', 'all')
+        
+        tables = get_warehouse_tables(warehouse_type)
+        invoice_table = validate_table_name(tables['invoice'])
+        
+        if manufacturer and manufacturer != 'all':
+            def get_lots_by_manufacturer_from_db():
+                lots_query = f"""
+                    SELECT DISTINCT l.name_lot 
+                    FROM lot l
+                    INNER JOIN {invoice_table} inv ON inv.id_lot = l.id
+                    INNER JOIN pr p ON inv.id_pr = p.id
+                    WHERE p.name_pr = %s
+                    ORDER BY l.name_lot
+                """
+                lots_raw = execute_query(lots_query, (manufacturer,))
+                if lots_raw and isinstance(lots_raw, (list, tuple)):
+                    return [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+                return []
+            
+            cache_key = f'lots_manufacturer_{manufacturer}_{warehouse_type}'
+            lots = get_cached_or_execute(cache_key, get_lots_by_manufacturer_from_db, ttl_seconds=600)
+        else:
+            def get_all_lots_from_db():
+                lots_query = "SELECT DISTINCT name_lot FROM lot ORDER BY name_lot"
+                lots_raw = execute_query(lots_query)
+                if lots_raw and isinstance(lots_raw, (list, tuple)):
+                    return [row[0] for row in lots_raw if isinstance(row, (list, tuple)) and len(row) > 0]
+                return []
+            
+            cache_key = f'lots_all_{warehouse_type}'
+            lots = get_cached_or_execute(cache_key, get_all_lots_from_db, ttl_seconds=600)
+        
+        return api_response(success=True, data={'lots': lots})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API получения партий: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка получения партий: {str(e)}", status_code=500)
+
+
+# GET /api/v1/cart
+@_flask_app.route('/api/v1/cart', methods=['GET'])
+def api_v1_cart_get():
+    """REST API endpoint для получения корзины пользователя"""
+    try:
+        user_id = get_temp_user_id(session)
+        warehouse_type = request.args.get('warehouse', session.get('warehouse_type', 'crystals'))
+        
+        query_get_cart = """
+        SELECT 
+            item_id, user_id,
+            start, manufacturer, technology, wafer, quadrant, lot, internal_lot, chip_code,
+            note, stor, cells, date_added, cons_w, cons_gp
+        FROM cart
+        WHERE user_id = %s AND warehouse_type = %s
+        ORDER BY date_added DESC
+        """
+        
+        cart_items = execute_query(query_get_cart, (user_id, warehouse_type))
+        formatted_items = []
+        
+        if cart_items and isinstance(cart_items, (list, tuple)):
+            for row in cart_items:
+                if isinstance(row, (list, tuple)) and len(row) >= 15:
+                    formatted_items.append({
+                        'item_id': row[0],
+                        'user_id': row[1],
+                        'start': row[2],
+                        'manufacturer': row[3],
+                        'technology': row[4],
+                        'wafer': row[5],
+                        'quadrant': row[6],
+                        'lot': row[7],
+                        'internal_lot': row[8],
+                        'chip_code': row[9],
+                        'note': row[10],
+                        'stor': row[11],
+                        'cells': row[12],
+                        'date_added': row[13].isoformat() if row[13] else None,
+                        'cons_w': row[14],
+                        'cons_gp': row[15] if len(row) > 15 else 0
+                    })
+        
+        return api_response(success=True, data={'cart_items': formatted_items, 'warehouse_type': warehouse_type})
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API получения корзины: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка получения корзины: {str(e)}", status_code=500)
+
+
+# POST /api/v1/cart
+@_flask_app.route('/api/v1/cart', methods=['POST'])
+def api_v1_cart_add():
+    """REST API endpoint для добавления товара в корзину"""
+    # Используем существующую логику из add_to_cart, но возвращаем API формат
+    try:
+        user_id = get_temp_user_id(session)
+        data = request.get_json()
+        if not data:
+            return api_response(success=False, message='Нет данных', status_code=400)
+        
+        # Вызываем существующую функцию через внутренний редирект
+        # Или реализуем логику напрямую здесь
+        # Для простоты, вернем успешный ответ и логику добавим позже
+        return api_response(success=False, message='Метод в разработке. Используйте /add_to_cart', status_code=501)
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API добавления в корзину: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка добавления в корзину: {str(e)}", status_code=500)
+
+
+# DELETE /api/v1/cart/<item_id>
+@_flask_app.route('/api/v1/cart/<item_id>', methods=['DELETE'])
+def api_v1_cart_delete(item_id):
+    """REST API endpoint для удаления товара из корзины"""
+    try:
+        user_id = get_temp_user_id(session)
+        warehouse_type = request.args.get('warehouse', session.get('warehouse_type', 'crystals'))
+        
+        if not item_id:
+            return api_response(success=False, message='Неверный ID товара', status_code=400)
+        
+        query_delete_cart = "DELETE FROM cart WHERE item_id = %s AND user_id = %s AND warehouse_type = %s"
+        result = execute_query(query_delete_cart, (item_id, user_id, warehouse_type), fetch=False)
+        
+        rows_deleted = result if isinstance(result, int) else 0
+        if rows_deleted > 0:
+            return api_response(success=True, message='Товар удален из корзины')
+        else:
+            return api_response(success=False, message='Товар не найден в корзине', status_code=404)
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка API удаления из корзины: {e}", exc_info=True)
+        return api_response(success=False, message=f"Ошибка удаления из корзины: {str(e)}", status_code=500)
+
+
+# ============================================================================
+# END REST API ENDPOINTS
+# ============================================================================
 
 
 @_flask_app.route('/add_to_cart', methods=['POST'])
@@ -3576,6 +4173,20 @@ if __name__ == '__main__':
     
     # Регистрируем закрытие пула при завершении приложения
     atexit.register(close_db_pool)
+    
+    # Инициализация телеграм-бота (если токен указан)
+    try:
+        # Используем прямой импорт, т.к. app.py запускается как скрипт
+        from telegram_bot import init_telegram_bot, start_bot_polling
+        telegram_bot = init_telegram_bot(_flask_app, execute_query)
+        if telegram_bot:
+            start_bot_polling(telegram_bot)
+            _flask_app.logger.info("Телеграм-бот интегрирован и запущен")
+    except ImportError as e:
+        # Если модуль telegram_bot не найден или произошла ошибка, продолжаем без бота
+        _flask_app.logger.warning(f"Не удалось загрузить модуль telegram_bot: {e}. Телеграм-бот не будет запущен.")
+    except Exception as e:
+        _flask_app.logger.error(f"Ошибка при инициализации телеграм-бота: {e}", exc_info=True)
     
     # Проверяем режим запуска из переменных окружения
     mode = os.getenv('MODE', 'development').lower()

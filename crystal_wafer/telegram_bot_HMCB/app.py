@@ -48,51 +48,70 @@ def get_crystal_stock(message):
     # Агрегируем по n_chip.n_chip
     query = """
     WITH
-    income_agg AS (
-        SELECT
-            inv.id_n_chip,
-            SUM(inv.quan_w) as total_income_w,
-            SUM(inv.quan_gp) as total_income_gp
-        FROM invoice inv
-        WHERE COALESCE(inv.note, '') != 'возврат'
-        GROUP BY inv.id_n_chip
+    income_union AS (
+        SELECT 'Склад кристаллов' AS wh, id_n_chip, SUM(quan_w) total_income_w, SUM(quan_gp) total_income_gp
+        FROM invoice
+        WHERE COALESCE(note, '') != 'возврат'
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Склад пластин' AS wh, id_n_chip, SUM(quan_w), SUM(quan_gp)
+        FROM invoice_p
+        WHERE COALESCE(note, '') != 'возврат'
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Дальний склад' AS wh, id_n_chip, SUM(quan_w), SUM(quan_gp)
+        FROM invoice_f
+        WHERE COALESCE(note, '') != 'возврат'
+        GROUP BY 1,2
     ),
-    return_agg AS (
-        SELECT
-            inv.id_n_chip,
-            SUM(inv.quan_w) as total_return_w,
-            SUM(inv.quan_gp) as total_return_gp
-        FROM invoice inv
-        WHERE inv.note = 'возврат'
-        GROUP BY inv.id_n_chip
+    return_union AS (
+        SELECT 'Склад кристаллов' AS wh, id_n_chip, SUM(quan_w) total_return_w, SUM(quan_gp) total_return_gp
+        FROM invoice
+        WHERE note = 'возврат'
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Склад пластин' AS wh, id_n_chip, SUM(quan_w), SUM(quan_gp)
+        FROM invoice_p
+        WHERE note = 'возврат'
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Дальний склад' AS wh, id_n_chip, SUM(quan_w), SUM(quan_gp)
+        FROM invoice_f
+        WHERE note = 'возврат'
+        GROUP BY 1,2
     ),
-    consumption_agg AS (
-        SELECT
-            cons.id_n_chip,
-            SUM(cons.cons_w) as total_consumed_w,
-            SUM(cons.cons_gp) as total_consumed_gp
-        FROM consumption cons
-        GROUP BY cons.id_n_chip
+    consumption_union AS (
+        SELECT 'Склад кристаллов' AS wh, id_n_chip, SUM(cons_w) total_consumed_w, SUM(cons_gp) total_consumed_gp
+        FROM consumption
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Склад пластин' AS wh, id_n_chip, SUM(cons_w), SUM(cons_gp)
+        FROM consumption_p
+        GROUP BY 1,2
+        UNION ALL
+        SELECT 'Дальний склад' AS wh, id_n_chip, SUM(cons_w), SUM(cons_gp)
+        FROM consumption_f
+        GROUP BY 1,2
     ),
-    all_chips_with_ops AS ( -- Собираем все id_n_chip, по которым были операции
-        SELECT id_n_chip FROM invoice
+    all_keys AS (
+        SELECT wh, id_n_chip FROM income_union
         UNION
-        SELECT id_n_chip FROM consumption
+        SELECT wh, id_n_chip FROM return_union
+        UNION
+        SELECT wh, id_n_chip FROM consumption_union
     )
     SELECT
-        nc.n_chip AS "Шифр_кристалла",
-        -- Расчет остатков Wafer
-        (COALESCE(ia.total_income_w, 0) + COALESCE(ra.total_return_w, 0) - COALESCE(ca.total_consumed_w, 0)) AS "Остаток_Wafer",
-        -- Расчет остатков GelPak
-        (COALESCE(ia.total_income_gp, 0) + COALESCE(ra.total_return_gp, 0) - COALESCE(ca.total_consumed_gp, 0)) AS "Остаток_GelPak"
-    FROM
-        all_chips_with_ops acwo
-    JOIN n_chip nc ON acwo.id_n_chip = nc.id -- Присоединяем n_chip для получения имени и фильтрации
-    LEFT JOIN income_agg ia ON acwo.id_n_chip = ia.id_n_chip
-    LEFT JOIN return_agg ra ON acwo.id_n_chip = ra.id_n_chip
-    LEFT JOIN consumption_agg ca ON acwo.id_n_chip = ca.id_n_chip
-    WHERE nc.n_chip ILIKE %s -- Фильтр по шифру кристалла
-    ORDER BY nc.n_chip;
+        ak.wh,
+        nc.n_chip AS chip_code,
+        (COALESCE(inc.total_income_w, 0) + COALESCE(ret.total_return_w, 0) - COALESCE(cons.total_consumed_w, 0)) AS stock_w,
+        (COALESCE(inc.total_income_gp, 0) + COALESCE(ret.total_return_gp, 0) - COALESCE(cons.total_consumed_gp, 0)) AS stock_gp
+    FROM all_keys ak
+    JOIN n_chip nc ON ak.id_n_chip = nc.id
+    LEFT JOIN income_union inc ON inc.wh = ak.wh AND inc.id_n_chip = ak.id_n_chip
+    LEFT JOIN return_union ret ON ret.wh = ak.wh AND ret.id_n_chip = ak.id_n_chip
+    LEFT JOIN consumption_union cons ON cons.wh = ak.wh AND cons.id_n_chip = ak.id_n_chip
+    WHERE nc.n_chip ILIKE %s
+    ORDER BY ak.wh, nc.n_chip;
     """
 
     try:
@@ -104,19 +123,31 @@ def get_crystal_stock(message):
                 results = cursor.fetchall()
 
                 if results:
-                    response_text = ""
-                    for row in results:
-                        chip_code = row[0]
-                        stock_wafer = row[1]
-                        stock_gelpak = row[2]
-                        # Показываем только если есть какой-либо остаток
-                        if stock_wafer > 0 or stock_gelpak > 0:
-                            response_text += f"Шифр: {chip_code}\n"
-                            response_text += f"  Остаток Wafer: {stock_wafer if stock_wafer is not None else 0} шт.\n"
-                            response_text += f"  Остаток GelPak: {stock_gelpak if stock_gelpak is not None else 0} шт.\n\n"
-                    
-                    if response_text:
-                        bot.reply_to(message, response_text)
+                    warehouse_order = ["Склад кристаллов", "Склад пластин", "Дальний склад"]
+                    # Структура: {chip_code: {wh: (stock_w, stock_gp)}}
+                    chips = {}
+                    for wh, chip_code, stock_wafer, stock_gelpak in results:
+                        chip_entry = chips.setdefault(chip_code, {})
+                        chip_entry[wh] = (
+                            stock_wafer if stock_wafer is not None else 0,
+                            stock_gelpak if stock_gelpak is not None else 0
+                        )
+
+                    response_parts = []
+                    for chip_code, per_wh in chips.items():
+                        for wh in warehouse_order:
+                            response_parts.append(wh)
+                            if wh in per_wh:
+                                stock_w, stock_gp = per_wh[wh]
+                                response_parts.append(f"Шифр: {chip_code}")
+                                response_parts.append(f"  Остаток Wafer: {stock_w} шт.")
+                                response_parts.append(f"  Остаток GelPak: {stock_gp} шт.")
+                            else:
+                                response_parts.append("Информация по этому кристаллу не найдена.")
+                            response_parts.append("---------------")
+
+                    if response_parts:
+                        bot.reply_to(message, "\n".join(response_parts))
                     else:
                         bot.reply_to(message, "Кристаллы найдены, но остаток по ним равен 0 (Wafer и GelPak).")
                 else:

@@ -2,3 +2,8 @@
 .env
 .venv
 
+# Log files
+logs/
+*.log
+web_app_WebChip/logs/
+
