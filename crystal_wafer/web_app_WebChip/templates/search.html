@@ -327,6 +327,94 @@
             font-size: 12px;
             font-weight: bold;
         }
+        
+        /* Пагинация */
+        .pagination-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .pagination {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .pagination-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            background-color: #fff;
+            min-width: 40px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .pagination-link:hover:not(.disabled) {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+        
+        .pagination-link.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            background-color: #f5f5f5;
+        }
+        
+        .pagination-current {
+            padding: 8px 12px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .pagination-ellipsis {
+            padding: 8px 5px;
+            color: #666;
+        }
+        
+        .pagination-per-page {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .pagination-per-page label {
+            color: #666;
+        }
+        
+        .pagination-per-page select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        
+        .pagination-per-page select:hover {
+            border-color: #007bff;
+        }
     </style>
 </head>
 <body>
@@ -476,6 +564,65 @@
 		{% endfor %}
 </tbody>
 </table>
+		</div>
+		{% endif %}
+		
+		{% if results and total_pages > 1 %}
+		<div class="pagination-container">
+			<div class="pagination-info">
+				Показано {{ ((page - 1) * per_page) + 1 }}-{{ [page * per_page, total_count]|min }} из {{ total_count }} результатов
+			</div>
+			<div class="pagination">
+				{% if page > 1 %}
+					<a href="?page={{ page - 1 }}&chip_name={{ chip_name|urlencode }}&manufacturer={{ manufacturer_filter|default('all')|urlencode }}&lot_filter={{ lot_filter|default('all')|urlencode }}&warehouse={{ warehouse_type|default('crystals')|urlencode }}&per_page={{ per_page }}" class="pagination-link">« Предыдущая</a>
+				{% else %}
+					<span class="pagination-link disabled">« Предыдущая</span>
+				{% endif %}
+				
+				{% set start_page = [1, page - 2]|max %}
+				{% set end_page = [total_pages, page + 2]|min %}
+				
+				{% if start_page > 1 %}
+					<a href="?page=1&chip_name={{ chip_name|urlencode }}&manufacturer={{ manufacturer_filter|default('all')|urlencode }}&lot_filter={{ lot_filter|default('all')|urlencode }}&warehouse={{ warehouse_type|default('crystals')|urlencode }}&per_page={{ per_page }}" class="pagination-link">1</a>
+					{% if start_page > 2 %}
+						<span class="pagination-ellipsis">...</span>
+					{% endif %}
+				{% endif %}
+				
+				{% for p in range(start_page, end_page + 1) %}
+					{% if p == page %}
+						<span class="pagination-current">{{ p }}</span>
+					{% else %}
+						<a href="?page={{ p }}&chip_name={{ chip_name|urlencode }}&manufacturer={{ manufacturer_filter|default('all')|urlencode }}&lot_filter={{ lot_filter|default('all')|urlencode }}&warehouse={{ warehouse_type|default('crystals')|urlencode }}&per_page={{ per_page }}" class="pagination-link">{{ p }}</a>
+					{% endif %}
+				{% endfor %}
+				
+				{% if end_page < total_pages %}
+					{% if end_page < total_pages - 1 %}
+						<span class="pagination-ellipsis">...</span>
+					{% endif %}
+					<a href="?page={{ total_pages }}&chip_name={{ chip_name|urlencode }}&manufacturer={{ manufacturer_filter|default('all')|urlencode }}&lot_filter={{ lot_filter|default('all')|urlencode }}&warehouse={{ warehouse_type|default('crystals')|urlencode }}&per_page={{ per_page }}" class="pagination-link">{{ total_pages }}</a>
+				{% endif %}
+				
+				{% if page < total_pages %}
+					<a href="?page={{ page + 1 }}&chip_name={{ chip_name|urlencode }}&manufacturer={{ manufacturer_filter|default('all')|urlencode }}&lot_filter={{ lot_filter|default('all')|urlencode }}&warehouse={{ warehouse_type|default('crystals')|urlencode }}&per_page={{ per_page }}" class="pagination-link">Следующая »</a>
+				{% else %}
+					<span class="pagination-link disabled">Следующая »</span>
+				{% endif %}
+			</div>
+			<div class="pagination-per-page">
+				<label for="per_page_select">На странице:</label>
+				<select id="per_page_select" onchange="changePerPage(this.value)">
+					<option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+					<option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+					<option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+					<option value="200" {% if per_page == 200 %}selected{% endif %}>200</option>
+				</select>
+			</div>
+		</div>
+		{% elif results and total_count > 0 %}
+		<div class="pagination-info">
+			Показано {{ total_count }} результатов
 		</div>
 		{% endif %}
     </div>
@@ -731,6 +878,14 @@
 			});
 		}
 	});
+	
+	// Функция для изменения количества результатов на странице
+	function changePerPage(perPage) {
+		const url = new URL(window.location);
+		url.searchParams.set('per_page', perPage);
+		url.searchParams.set('page', '1'); // Сбрасываем на первую страницу при изменении количества
+		window.location.href = url.toString();
+	}
 </script>
 </body>
 </html>

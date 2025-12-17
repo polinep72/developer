@@ -1641,23 +1641,66 @@ def search():
     if filter_conditions:
             query_search += " AND " + " AND ".join(filter_conditions)
 
-    query_search += " ORDER BY display_item_id;"
+    query_search_base = query_search + " ORDER BY display_item_id"
 
-    # Выполняем поиск только если это POST запрос (при нажатии кнопки "Найти")
+    # Пагинация
+    page = request.args.get('page', 1, type=int) if request.method == 'GET' else 1
+    per_page = request.args.get('per_page', 50, type=int)
+    per_page = min(max(per_page, 1), 200)  # От 1 до 200 на странице
+    
+    # Переопределяем page при POST запросе (сбрасываем на страницу 1)
     if request.method == 'POST':
+        page = 1
+    
+    offset = (page - 1) * per_page
+    total_count = 0
+    total_pages = 0
+    results = []
+
+    # Выполняем поиск только если это POST запрос (при нажатии кнопки "Найти") или GET с параметрами поиска
+    perform_search = request.method == 'POST' or (request.method == 'GET' and (chip_name_form or manufacturer_filter_form != 'all' or lot_filter_form != 'all'))
+    
+    if perform_search:
         try:
-            # Логируем для диагностики
-            _flask_app.logger.info(f"Поиск: chip_name_form='{chip_name_form}', применено фильтров: {len(filter_conditions)}")
-            _flask_app.logger.info(f"SQL запрос (последние 200 символов): {query_search[-200:]}")
-            _flask_app.logger.info(f"Параметры поиска: {params_search}")
+            # Сначала подсчитываем общее количество результатов
+            count_query = f"""
+                SELECT COUNT(*) as total
+                FROM (
+                    {query_search_base}
+                ) as subquery
+            """
             
-            results = execute_query(query_search, tuple(params_search))
+            count_result = execute_query(count_query, tuple(params_search))
+            if count_result and isinstance(count_result, (list, tuple)) and len(count_result) > 0:
+                # COUNT(*) возвращает один кортеж с одним значением: [(total,)]
+                row = count_result[0]
+                if isinstance(row, (list, tuple)) and len(row) > 0:
+                    total_count = int(row[0]) if row[0] is not None else 0
+                else:
+                    total_count = 0
+            else:
+                total_count = 0
+            
+            total_pages = (total_count + per_page - 1) // per_page if total_count > 0 else 0
+            
+            # Логируем для диагностики
+            _flask_app.logger.info(f"Поиск: chip_name_form='{chip_name_form}', применено фильтров: {len(filter_conditions)}, страница: {page}, на странице: {per_page}, всего: {total_count}")
+            
+            # Затем получаем данные с пагинацией
+            query_search_paginated = query_search_base + f" LIMIT {per_page} OFFSET {offset}"
+            
+            results = execute_query(query_search_paginated, tuple(params_search))
             if not results:
-                flash("По вашему запросу ничего не найдено.", "info")
+                if total_count == 0:
+                    flash("По вашему запросу ничего не найдено.", "info")
+                else:
+                    # Если есть результаты, но не на этой странице - это странно, но обработаем
+                    flash(f"Найдено {total_count} результатов, но нет данных для страницы {page}.", "warning")
+                    results = []
         except Exception as e:
             flash(f"Ошибка при выполнении поиска: {e}", "danger")
             _flask_app.logger.error(f"Ошибка поиска: {e}", exc_info=True)
-            _flask_app.logger.error(f"SQL запрос: {query_search}")
+            _flask_app.logger.error(f"SQL запрос: {query_search_base[:500]}")
             _flask_app.logger.error(f"Параметры: {params_search}")
             results = []
 
@@ -1668,7 +1711,11 @@ def search():
                            chip_name=chip_name_form,
                            manufacturer_filter=manufacturer_filter_form,
                            lot_filter=lot_filter_form,
-                           warehouse_type=warehouse_type
+                           warehouse_type=warehouse_type,
+                           page=page,
+                           per_page=per_page,
+                           total_pages=total_pages,
+                           total_count=total_count
                            )
 
 
