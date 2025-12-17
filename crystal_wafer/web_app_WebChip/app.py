@@ -258,6 +258,51 @@ def inject_user():
     }
 
 
+# --- ПУЛ ПОДКЛЮЧЕНИЙ К БД ---
+_db_pool = None
+_pool_lock = threading.Lock()
+
+def init_db_pool():
+    """Инициализация пула подключений при старте приложения"""
+    global _db_pool
+    if _db_pool is None:
+        with _pool_lock:
+            if _db_pool is None:
+                db_name = os.getenv('DB_NAME') or os.getenv('DB_NAME2')
+                db_host = os.getenv('DB_HOST')
+                db_user = os.getenv('DB_USER')
+                db_password = os.getenv('DB_PASSWORD')
+                db_port = os.getenv('DB_PORT', '5432')
+                
+                try:
+                    _db_pool = pool.ThreadedConnectionPool(
+                        minconn=1,  # Минимальное количество подключений в пуле
+                        maxconn=20,  # Максимальное количество подключений в пуле
+                        host=db_host,
+                        database=db_name,
+                        user=db_user,
+                        password=db_password,
+                        port=db_port
+                    )
+                    _flask_app.logger.info(f"Пул подключений к БД инициализирован: minconn=1, maxconn=20, host={db_host}, database={db_name}")
+                except Exception as e:
+                    _flask_app.logger.error(f"Ошибка инициализации пула подключений: {e}", exc_info=True)
+                    raise
+    return _db_pool
+
+def close_db_pool():
+    """Закрытие пула подключений при завершении приложения"""
+    global _db_pool
+    if _db_pool:
+        try:
+            _db_pool.closeall()
+            _flask_app.logger.info("Пул подключений к БД закрыт")
+        except Exception as e:
+            _flask_app.logger.error(f"Ошибка при закрытии пула подключений: {e}", exc_info=True)
+        finally:
+            _db_pool = None
+
+
 # --- НАЧАЛО ОПРЕДЕЛЕНИЙ ВСПОМОГАТЕЛЬНЫХ ФУНКЦИЙ ---
 def get_temp_user_id(session):
     """Генерирует временный ID пользователя для неавторизованных пользователей на основе session ID"""
