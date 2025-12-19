@@ -6,7 +6,7 @@ services:
     build:
       context: ../WSB/wsb_bot
       dockerfile: Dockerfile
-    container_name: wsb-core-bot
+    container_name: wsb-bot_6.0.2
     env_file:
       - .env
     restart: unless-stopped
@@ -18,9 +18,9 @@ services:
   # Веб-портал WSB (WSB_portal)
   wsb-portal:
     build:
-      context: ../WSB_portal
-      dockerfile: Dockerfile
-    container_name: wsb-core-portal
+      context: .
+      dockerfile: wsb_portal/Dockerfile
+    container_name: wsb-portal_2.0.2
     ports:
       - "8090:8090"
     env_file:
@@ -35,7 +35,7 @@ services:
     networks:
       - wsb-core-net
     volumes:
-      - ../WSB_portal/.env:/app/.env:ro
+      - ./wsb_core:/app/wsb_core:ro
 
   # Redis для кеширования портала (имя изменено, чтобы не конфликтовать с существующим wsb-redis)
   wsb-core-redis:

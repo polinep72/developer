@@ -7,10 +7,14 @@ import os
 from typing import Any, Optional, Dict
 from datetime import timedelta
 from dotenv import load_dotenv
+import os
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
+# Загружаем .env только если переменные окружения не заданы
+# Это позволяет использовать env_file из docker-compose с приоритетом
+if not os.getenv("REDIS_HOST") and not os.getenv("REDIS_ENABLED"):
+    load_dotenv(override=False)
 
 # Настройки Redis из переменных окружения
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")

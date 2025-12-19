@@ -19,15 +19,22 @@ possible_paths = [
     base_dir / ".env",         # WSB_core/WSB_portal/.env
 ]
 
+# Загружаем .env только если переменные окружения не заданы
+# Это позволяет использовать env_file из docker-compose с приоритетом
 env_loaded = False
-for env_path in possible_paths:
-    if env_path.exists():
-        load_dotenv(env_path, override=env_loaded is False)
-        logger.info("Загружен .env из: %s", env_path)
-        env_loaded = True
+# Проверяем, заданы ли переменные окружения из env_file
+if not os.getenv("EQUIPMENT_DB_HOST") and not os.getenv("DB_HOST") and not os.getenv("POSTGRE_HOST"):
+    for env_path in possible_paths:
+        if env_path.exists():
+            load_dotenv(env_path, override=False)  # override=False - не перезаписывать существующие переменные
+            logger.info("Загружен .env из: %s", env_path)
+            env_loaded = True
+            break
 
-if not env_loaded:
-    logger.info("Файлы .env рядом с WSB_portal не найдены, используются только переменные окружения.")
+if env_loaded:
+    logger.info("Используются переменные из .env файла.")
+else:
+    logger.info("Используются переменные окружения из env_file (docker-compose) или системные.")
 
 
 def _get_env(primary_key: str, fallback_key: Optional[str] = None, default: Optional[str] = None) -> Optional[str]:

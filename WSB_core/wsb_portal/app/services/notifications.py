@@ -8,8 +8,12 @@ from email.mime.multipart import MIMEMultipart
 from typing import Dict, Any, Optional, List
 from datetime import datetime, date, time
 from dotenv import load_dotenv
+import os
 
-load_dotenv()
+# Загружаем .env только если переменные окружения не заданы
+# Это позволяет использовать env_file из docker-compose с приоритетом
+if not os.getenv("SMTP_HOST") and not os.getenv("EMAIL_HOST"):
+    load_dotenv(override=False)
 
 # Настройки SMTP из переменных окружения
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")

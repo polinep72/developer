@@ -20,10 +20,16 @@ except ImportError:  # pragma: no cover
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+# В Docker контейнере .env монтируется в /app/.env
+# Сначала проверяем переменные окружения (из env_file в docker-compose),
+# затем загружаем .env файл только если переменные не заданы
 ENV_PATH = BASE_DIR.parent / ".env"
 
 if load_dotenv:
-    load_dotenv(ENV_PATH)
+    # Загружаем .env только если переменные окружения не заданы
+    # Это позволяет использовать env_file из docker-compose с приоритетом
+    if not os.getenv("POSTGRE_HOST") and not os.getenv("DB_HOST"):
+        load_dotenv(ENV_PATH, override=False)  # override=False - не перезаписывать существующие переменные
 
 DB_HOST = os.getenv("POSTGRE_HOST") or os.getenv("DB_HOST")
 DB_PORT = int(os.getenv("POSTGRE_PORT") or os.getenv("DB_PORT") or 5432)

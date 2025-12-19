@@ -8,11 +8,15 @@ from datetime import datetime
 import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
+import os
 from typing import cast
 
 from .auth import _connect, hash_password, verify_password
 
-load_dotenv()
+# Загружаем .env только если переменные окружения не заданы
+# Это позволяет использовать env_file из docker-compose с приоритетом
+if not os.getenv("POSTGRE_HOST") and not os.getenv("DB_HOST"):
+    load_dotenv(override=False)
 
 
 def get_all_users() -> Dict[str, Any]:

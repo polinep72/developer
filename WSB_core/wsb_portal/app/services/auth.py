@@ -9,7 +9,10 @@ from psycopg.rows import dict_row
 from dotenv import load_dotenv
 from typing import cast
 
-load_dotenv()
+# Загружаем .env только если переменные окружения не заданы
+# Это позволяет использовать env_file из docker-compose с приоритетом
+if not os.getenv("POSTGRE_USER") and not os.getenv("DB_USER"):
+    load_dotenv(override=False)  # override=False - не перезаписывать существующие переменные
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

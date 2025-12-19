@@ -7,10 +7,14 @@ import numpy as np
 import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
+import os
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
+# Загружаем .env только если переменные окружения не заданы
+# Это позволяет использовать env_file из docker-compose с приоритетом
+if not os.getenv("POSTGRE_HOST") and not os.getenv("DB_HOST"):
+    load_dotenv(override=False)
 
 def _get_env(primary: str, fallback: str | None = None, default: str | None = None) -> str | None:
     value = os.getenv(primary)

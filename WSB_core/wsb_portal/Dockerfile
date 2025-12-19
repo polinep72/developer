@@ -10,14 +10,17 @@ RUN apt-get update && apt-get install -y \
 # Рабочая директория
 WORKDIR /app
 
+# Копируем wsb_core, чтобы он был доступен как пакет
+COPY wsb_core/ /app/wsb_core/
+
 # Копирование файлов зависимостей
-COPY requirements.txt .
+COPY wsb_portal/requirements.txt .
 
 # Установка Python зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование кода приложения
-COPY . .
+COPY wsb_portal/ .
 
 # Переменные окружения по умолчанию
 ENV PYTHONUNBUFFERED=1
