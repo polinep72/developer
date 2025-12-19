@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <script>
+        function addToCart(itemId, quantity) {
+            fetch('/add_to_cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ item_id: itemId, quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Добавлено в корзину!');
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Результаты поиска</h1>
+    <table border="1">
+        <tr>
+            <th>Запуск</th>
+            <th>Производитель</th>
+            <th>Технология</th>
+            <th>Партия</th>
+            <th>Пластина</th>
+            <th>Квадрант</th>
+            <th>Внутренняя партия</th>
+            <th>Шифр кристалла</th>
+            <th>Количество на пластине</th>
+            <th>Количество в GelPack</th>
+            <th>Добавить на пластине</th>
+            <th>Добавить в GelPack</th>
+        </tr>
+        {% for row in results %}
+        <tr>
+            <td>{{ row.name_start }}</td>
+            <td>{{ row.name_pr }}</td>
+            <td>{{ row.name_tech }}</td>
+            <td>{{ row.name_lot }}</td>
+            <td>{{ row.name_wafer }}</td>
+            <td>{{ row.name_quad }}</td>
+            <td>{{ row.in_lot }}</td>
+            <td>{{ row.n_chip }}</td>
+            <td>{{ row.ostatok_w }}</td>
+            <td>{{ row.ostatok_gp }}</td>
+            <td>
+                <input type="number" min="1" max="{{ row.ostatok_w }}" id="plate_{{ loop.index }}" placeholder="Макс: {{ row.ostatok_w }}">
+                <button onclick="addToCart({{ row.item_id }}, document.getElementById('plate_{{ loop.index }}').value)">Добавить</button>
+            </td>
+            <td>
+                <input type="number" min="1" max="{{ row.ostatok_gp }}" id="gelpack_{{ loop.index }}" placeholder="Макс: {{ row.ostatok_gp }}">
+                <button onclick="addToCart({{ row.item_id }}, document.getElementById('gelpack_{{ loop.index }}').value)">Добавить</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/cart">Перейти в корзину</a>
+</body>
+</html>

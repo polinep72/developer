@@ -1,0 +1,41 @@
+# Объединенный docker-compose для web_app_WebChip + telegram_bot_HMCB
+version: '3.8'
+
+services:
+  crystal_wafer_app:
+    build:
+      context: .
+      dockerfile: web_app_WebChip/Dockerfile.combined
+    container_name: crystal_wafer_combined_container
+    env_file:
+      - .env
+    ports:
+      - "8089:8089"
+    environment:
+      # База данных
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      # Flask приложение
+      - SECRET_KEY=${SECRET_KEY}
+      - MODE=production
+      # Telegram бот
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Монтируем логи для доступа извне
+      - ./logs:/app/logs
+      - ./web_app_WebChip/logs:/app/web_app_WebChip/logs
+      - ./telegram_bot_HMCB/logs:/app/telegram_bot_HMCB/logs
+      - /var/log/supervisor:/var/log/supervisor
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+

@@ -1,0 +1,45 @@
+# Объединенный Dockerfile для web_app_WebChip + telegram_bot_HMCB
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Установка системных зависимостей
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    iputils-ping \
+    curl \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Установка Python зависимостей для веб-приложения
+COPY web_app_WebChip/requirements.txt /app/web_app_WebChip/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r web_app_WebChip/requirements.txt
+
+# Установка Python зависимостей для телеграм-бота
+COPY telegram_bot_HMCB/requirements.txt /app/telegram_bot_HMCB/requirements.txt
+RUN pip install --no-cache-dir -r telegram_bot_HMCB/requirements.txt
+
+# Копирование файлов веб-приложения
+COPY web_app_WebChip/ /app/web_app_WebChip/
+COPY telegram_bot_HMCB/ /app/telegram_bot_HMCB/
+
+# Создание директорий для логов
+RUN mkdir -p /app/web_app_WebChip/logs && \
+    mkdir -p /app/telegram_bot_HMCB/logs && \
+    mkdir -p /var/log/supervisor
+
+# Конфигурация Supervisor для управления процессами
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Переменные окружения
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV MODE=production
+
+# Expose порт для веб-приложения
+EXPOSE 8089
+
+# Запуск Supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+

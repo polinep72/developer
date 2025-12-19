@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8089:8089"
+      - "${PORT:-8087}:${PORT:-8087}"
     environment:
       # База данных
       - DB_HOST=${DB_HOST:-host.docker.internal}
@@ -21,6 +21,8 @@ services:
       # Flask приложение
       - SECRET_KEY=${SECRET_KEY}
       - MODE=production
+      - PORT=${PORT:-8087}
+      - HOST=${HOST:-0.0.0.0}
       # Telegram бот
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     restart: unless-stopped
@@ -30,54 +32,9 @@ services:
       # Монтируем логи для доступа извне
       - ./web_app_WebChip/logs:/app/logs
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8089/"]
+      test: ["CMD-SHELL", "curl -f http://localhost:$$PORT/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # Отдельное веб-приложение (если нужен только веб)
-  web_app_webchip:
-    build:
-      context: ./web_app_WebChip
-      dockerfile: Dockerfile
-    container_name: web_app_webchip_container
-    env_file:
-      - .env
-    ports:
-      - "8087:8087"
-    environment:
-      - DB_HOST=${DB_HOST:-host.docker.internal}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - SECRET_KEY=${SECRET_KEY}
-      - MODE=production
-    restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    profiles:
-      - web-only
-
-  # Веб-приложение Dash (если нужно)
-  web_app_dash:
-    build:
-      context: ./web_app_dash
-      dockerfile: Dockerfile
-    container_name: web_app_dash_container
-    env_file:
-      - .env
-    ports:
-      - "8083:8083"
-    environment:
-      - DB_HOST=${DB_HOST:-host.docker.internal}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME1=${DB_NAME1}
-    restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    profiles:
-      - dash

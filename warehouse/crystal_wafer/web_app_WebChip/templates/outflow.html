@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0 20px;
+            height: 100vh;
+        }
+
+        .header {
+            width: calc(100% + 40px);
+            margin: 0 -20px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .logo img {
+            height: 50px;
+            max-width: 300px;
+            object-fit: contain;
+        }
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            text-decoration: underline;
+            color: #007CBB;
+        }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+
+        .main-menu-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .main-menu-button:hover {
+            background-color: #006AA3;
+        }
+        .container {
+            text-align: center;
+        }
+        .button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #006AA3;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007CBB;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            font-weight: bold;
+        }
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+		<a href="/" class="main-menu-button">Главное меню</a>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <a href="/profile" class="user-info">{{ session['username'] }}</a>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+	<div class="container">
+        <h1>Расход</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required />
+            <button type="button" class="button" id="uploadButton" onclick="uploadData()">Загрузить данные в БД</button>
+        </form>
+        <div class="loader" id="loader"></div>
+        <div class="status-message" id="statusMessage"></div>
+        <a href="/" class="button">Назад</a>
+    </div>
+
+    <script>
+        function uploadData() {
+            const uploadButton = document.getElementById('uploadButton');
+            const loader = document.getElementById('loader');
+            const statusMessage = document.getElementById('statusMessage');
+            const fileInput = document.getElementById('fileInput');
+            
+            // Проверяем, выбран ли файл
+            if (!fileInput.files || !fileInput.files[0]) {
+                statusMessage.textContent = 'Пожалуйста, выберите файл для загрузки';
+                statusMessage.className = 'status-message error';
+                statusMessage.style.display = 'block';
+                return;
+            }
+            
+            // Показываем индикатор загрузки и отключаем кнопку
+            uploadButton.disabled = true;
+            loader.style.display = 'block';
+            statusMessage.style.display = 'none';
+            
+            const formData = new FormData(document.getElementById('uploadForm'));
+            const warehouseType = '{{ warehouse_type }}';
+            fetch(`/outflow?warehouse=${warehouseType}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || "Неизвестная ошибка сервера"); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                loader.style.display = 'none';
+                uploadButton.disabled = false;
+                
+                if (data.success) {
+                    statusMessage.textContent = data.message;
+                    statusMessage.className = 'status-message success';
+                    statusMessage.style.display = 'block';
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    statusMessage.textContent = "Ошибка: " + (data.message || "Неизвестная ошибка");
+                    statusMessage.className = 'status-message error';
+                    statusMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loader.style.display = 'none';
+                uploadButton.disabled = false;
+                statusMessage.textContent = "Произошла ошибка при загрузке: " + error.message;
+                statusMessage.className = 'status-message error';
+                statusMessage.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>

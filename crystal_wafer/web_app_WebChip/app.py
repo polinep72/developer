@@ -26,7 +26,7 @@ from psycopg2.extras import execute_values
 from openpyxl.styles import NamedStyle
 from urllib.parse import quote
 
-__version__ = "1.4.23"
+__version__ = "1.4.24"
 
 # Импортируем WSGIMiddleware
 try:
@@ -127,6 +127,7 @@ if not _flask_app.debug:  # Обычно в debug режиме Flask более 
 
 # Обработчик ошибок rate limiting
 @_flask_app.errorhandler(429)
+@limiter.exempt  # Исключаем обработчик 429 из дополнительных лимитов
 def ratelimit_handler(e):
     """Обработка ошибки превышения лимита запросов"""
     flash("Слишком много попыток входа. Пожалуйста, подождите минуту перед следующей попыткой.", "warning")
@@ -229,6 +230,16 @@ def inject_user():
         'username': session.get('username'),
         'is_admin': session.get('is_admin', False)
     }
+
+
+@_flask_app.route('/health', methods=['GET'])
+@limiter.exempt  # healthcheck не должен попадать под rate limiting
+def health():
+    """
+    Простой healthcheck-эндпоинт для Docker и мониторинга.
+    Не требует авторизации и всегда возвращает 200 OK, если приложение живо.
+    """
+    return jsonify({"status": "ok", "version": __version__}), 200
 
 
 # --- ПУЛ ПОДКЛЮЧЕНИЙ К БД ---
@@ -3759,6 +3770,8 @@ def inventory():
         flash("Не удалось загрузить фильтры.", "danger")
 
     results = []
+    results_for_export = []
+    inventory_status = 'no_results'  # 'no_results', 'zero_stock', 'has_stock'
     action = None
 
     if request.method == 'POST':
@@ -3896,8 +3909,7 @@ def inventory():
             LEFT JOIN pack pk ON la.id_pack = pk.id
             LEFT JOIN stor st ON la.id_stor = st.id
             LEFT JOIN cells ce ON la.id_cells = ce.id
-            WHERE (COALESCE(ia.total_income_all, 0) + COALESCE(ra.total_return_all, 0) - COALESCE(ca.total_consumed_all, 0)) <> 0
-            {where_clause_summary}
+            WHERE 1=1 {where_clause_summary}
             ORDER BY COALESCE(sp.name_start, 'N/A'), COALESCE(pr.name_pr, 'N/A'), COALESCE(l.name_lot, 'N/A'), COALESCE(nc.n_chip, 'N/A');
             """
             _flask_app.logger.info(f"Inventory Action (Summary): {action}")
@@ -3918,18 +3930,44 @@ def inventory():
                                         exc_info=True)
             finally:
                 if conn_debug_mogrify_inv_s:
-                    conn_debug_mogrify_inv_s.close()
+                    return_db_connection(conn_debug_mogrify_inv_s)
 
             try:
-                results = execute_query(sql_query_inventory, tuple(params_sql_filter))
-                if not results and action == 'search':
-                    flash("По вашему запросу для инвентаризации ничего не найдено.", "info")
+                results_all = execute_query(sql_query_inventory, tuple(params_sql_filter))
+                # Определяем статус инвентаризации
+                inventory_status = 'no_results'  # 'no_results', 'zero_stock', 'has_stock'
+                results = []  # Для отображения в таблице (только ненулевые остатки)
+                results_for_export = []  # Для экспорта (все записи)
+                
+                if results_all and isinstance(results_all, (list, tuple)) and len(results_all) > 0:
+                    # Проверяем остатки (колонка 17 - "Остаток_шт")
+                    has_non_zero_stock = False
+                    for row in results_all:
+                        if isinstance(row, (list, tuple)) and len(row) > 17:
+                            ostatok = row[17]  # Остаток_шт
+                            ostatok_int = int(ostatok) if ostatok is not None else 0
+                            if ostatok_int != 0:
+                                has_non_zero_stock = True
+                                results.append(row)  # Добавляем только ненулевые остатки для таблицы
+                    
+                    if has_non_zero_stock:
+                        inventory_status = 'has_stock'
+                    else:
+                        inventory_status = 'zero_stock'
+                    
+                    # Для экспорта используем все записи (включая нулевые)
+                    results_for_export = results_all
+                else:
+                    inventory_status = 'no_results'
+                    
             except Exception as e:
                 _flask_app.logger.error(f"Ошибка выполнения запроса инвентаризации (сводка): {e}", exc_info=True)
                 flash(f"Ошибка при выполнении запроса инвентаризации (сводка): {e}", "danger")
                 results = []
+                results_for_export = []
+                inventory_status = 'no_results'
 
-            if action == 'export' and results:
+            if action == 'export' and results_for_export:
                 _flask_app.logger.info("Preparing 'Инвентаризация' Excel export...")
                 excel_friendly_columns_summary = [
                     "Номер запуска", "Производитель", "Технологический процесс", "Партия (Lot ID)",
@@ -3942,7 +3980,7 @@ def inventory():
                     "Упаковка", "Место хранения", "Ячейка хранения"
                 ]
 
-                df = pd.DataFrame(results, columns=excel_friendly_columns_summary)
+                df = pd.DataFrame(results_for_export, columns=excel_friendly_columns_summary)
 
                 output = BytesIO()
                 try:
@@ -4149,6 +4187,8 @@ def inventory():
                            manufacturers=manufacturers,
                            lots=lots,
                            results=results,
+                           results_for_export=results_for_export,
+                           inventory_status=inventory_status,
                            selected_manufacturer=selected_manufacturer_form,
                            selected_lot_id=selected_lot_id_form,
                            selected_chip_code_filter=selected_chip_code_filter_form,
@@ -4192,22 +4232,28 @@ if __name__ == '__main__':
     mode = os.getenv('MODE', 'development').lower()
     is_production = mode == 'production'
     
+    # Получаем порт из переменной окружения (по умолчанию 8089)
+    port = int(os.getenv('PORT', '8089'))
+    host = os.getenv('HOST', '0.0.0.0')
+    
     if is_production:
         # Production режим: используем Waitress (кроссплатформенный WSGI сервер)
         try:
             from waitress import serve
             print("=" * 60)
-            print("Запуск в PRODUCTION режиме через Waitress WSGI сервер")
+            print(f"Запуск в PRODUCTION режиме через Waitress WSGI сервер")
+            print(f"Порт: {port}, Хост: {host}")
             print("=" * 60)
-            serve(_flask_app, host="0.0.0.0", port=8089, threads=4)
+            serve(_flask_app, host=host, port=port, threads=4)
         except ImportError:
             print("ОШИБКА: Waitress не установлен. Установите: pip install waitress")
             print("Запуск в режиме разработки...")
-            _flask_app.run(debug=False, host="0.0.0.0", port=8089)
+            _flask_app.run(debug=False, host=host, port=port)
     else:
         # Development режим: используем встроенный сервер Flask (только для разработки)
         print("=" * 60)
         print("ВНИМАНИЕ: Запуск в режиме РАЗРАБОТКИ")
+        print(f"Порт: {port}, Хост: {host}")
         print("Для production установите MODE=production в .env")
         print("=" * 60)
-        _flask_app.run(debug=True, host="0.0.0.0", port=8089)
+        _flask_app.run(debug=True, host=host, port=port)

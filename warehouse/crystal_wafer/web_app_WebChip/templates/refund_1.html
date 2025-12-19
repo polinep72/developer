@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        .button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #006AA3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Возврат</h1>
+        <input type="file" id="fileInput" />
+        <button class="button" onclick="uploadData('inflow')">Загрузить данные в БД</button>
+        <a href="/" class="button">Назад</a>
+    </div>
+
+    <script>
+        function uploadData(type) {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Пожалуйста, выберите файл для загрузки');
+                return;
+            }
+            
+            // Здесь можно написать код для загрузки файла на сервер
+            // Например, с помощью fetch API или XMLHttpRequest
+            alert(`Файл ${file.name} будет загружен для ${type}`);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Объединенный сервис: веб-приложение + телеграм-бот (интегрирован в одном процессе)
+  crystal_wafer_app:
+    build:
+      context: ./web_app_WebChip
+      dockerfile: Dockerfile
+    container_name: crystal_wafer_app_container
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-8087}:${PORT:-8087}"
+    environment:
+      # База данных
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      # Flask приложение
+      - SECRET_KEY=${SECRET_KEY}
+      - MODE=production
+      - PORT=${PORT:-8087}
+      - HOST=${HOST:-0.0.0.0}
+      # Telegram бот
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Монтируем логи для доступа извне
+      - ./web_app_WebChip/logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:$$PORT || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+

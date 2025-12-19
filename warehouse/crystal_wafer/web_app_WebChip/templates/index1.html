@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кристаллы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Добавьте свои стили здесь */
+    </style>
+</head>
+<body>
+    <h1>Поиск кристаллов</h1>
+    <input type="text" id="chip_name" placeholder="Введите первые символы..." />
+    <div id="results"></div>
+
+    <script>
+        $(document).ready(function() {
+            $("#chip_name").on("input", function() {
+                var chip_name = $(this).val();
+                
+                $.ajax({
+                    url: "/search",
+                    method: "POST",
+                    data: { chip_name: chip_name },
+                    success: function(response) {
+                        $("#results").html(response);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

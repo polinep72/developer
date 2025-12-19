@@ -488,6 +488,7 @@ def check_docker_container_status(container_name):
             DOCKER_CLIENT.ping()
             logger.info("Docker клиент успешно переинициализирован.")
         except Exception as e:
+            logger.error(f"Не удалось переинициализировать Docker клиент: {e}")
             return False, "Docker клиент не инициализирован, проверка невозможна."
 
     logger.debug(f"Docker Check: Проверка контейнера '{container_name}'")

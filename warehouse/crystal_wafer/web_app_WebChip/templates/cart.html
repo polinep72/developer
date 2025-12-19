@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>ИПК ЭЛЕКТРОН-МАШ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0 20px;
+            height: 100vh;
+        }
+
+        .header {
+            width: calc(100% + 40px);
+            margin: 0 -20px;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .logo img {
+            height: 50px;
+            max-width: 300px;
+            object-fit: contain;
+        }
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            text-decoration: underline;
+            color: #007CBB;
+        }
+
+        .user-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .logout-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+
+        .main-menu-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .main-menu-button:hover {
+            background-color: #006AA3;
+        }
+		.container {
+            margin: 10px;
+            width: 100%;
+            max-width: 1850px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+		table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0; /* Убираем отступ, так как он теперь у wrapper */
+            margin-left: 0; /* Выравнивание по левому краю */
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Обертка для таблицы с прокруткой */
+        .table-wrapper {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table th {
+            background-color: #007CBB;
+            color: white;
+            position: sticky;
+            top: 0; /* Закрепляем относительно table-wrapper */
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+        }
+        
+        .table-wrapper table {
+            margin-top: 0; /* Убираем отступ сверху для таблицы внутри wrapper */
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            margin: 0; /* Убираем отступы, контролируем через .cart-actions */
+        }
+
+        .button:hover {
+            background-color: #006AA3;
+        }
+        
+        /* Контейнер для кнопок действий корзины - вертикальное расположение */
+        .cart-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px; /* Вертикальный отступ между кнопками */
+            margin-top: 20px;
+        }
+        
+        /* Стиль для кнопок "Экспортировать", "Очистить корзину" - такой же как у "Назад к поиску" */
+        #export-cart, .btn.btn-danger, button[type="submit"].btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            margin-left: 0; /* Убираем горизонтальный отступ */
+        }
+        
+        /* Стиль для кнопки "Сохранить" - такой же размер как "Удалить" */
+        .save-item {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+            display: inline-block;
+            width: 90px; /* Фиксированная ширина для одинакового размера */
+            text-align: center;
+        }
+        
+        .save-item:hover {
+            background-color: #006AA3;
+        }
+        
+        #export-cart:hover, .btn.btn-danger:hover, button[type="submit"].btn:hover {
+            background-color: #006AA3;
+        }
+        
+        /* Контейнер для кнопок в ячейке таблицы - вертикальное расположение */
+        td:last-child {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px; /* Вертикальный сдвиг между кнопками */
+        }
+        
+        /* Стиль для кнопки "Удалить" - размер как у "Сохранить" */
+        .remove-item {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-sizing: border-box;
+            display: inline-block;
+            width: 90px; /* Фиксированная ширина для одинакового размера */
+            text-align: center;
+            margin-left: 0 !important;
+        }
+
+        .remove-item:hover {
+            background-color: #c82333 !important;
+        }
+		/* Уменьшение ширины столбцов */
+        .limited-width-column {
+            width: 90px; /* Ограничение ширины */
+            word-wrap: break-word; /* Перенос текста */
+            text-align: center;
+        }
+		.quantity-column {
+        width: 60px; /* Уменьшенная ширина столбцов */
+		}
+
+		.quantity-input-w,
+		.quantity-input-gp {
+			width: 60px; /* Уменьшенная ширина полей ввода */
+		}
+        /* Toast уведомления */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            font-size: 14px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .toast-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .toast-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .toast-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        /* Модальное окно подтверждения */
+        .modal-confirm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        .modal-confirm .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-confirm h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .modal-confirm p {
+            margin-bottom: 25px;
+            color: #555;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .modal-confirm .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .modal-confirm .btn-confirm {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .modal-confirm .btn-confirm:hover {
+            background-color: #c82333;
+        }
+        .modal-confirm .btn-cancel {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-confirm .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        /* Индикаторы загрузки */
+        .button-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .button-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+		}
+    </style>
+</head>
+<body>
+	<div class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+		<a href="/" class="main-menu-button">Главное меню</a>
+        <div class="user-menu">
+            {% if session.get('username') %}
+                <a href="/profile" class="user-info">{{ session['username'] }}</a>
+                <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+            {% else %}
+                <i class="user-icon" onclick="location.href='/login'">&#128100;</i>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container">
+        <h1>Корзина</h1>
+        {% if results %}
+        <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>item_id</th>
+					<th>Запуск</th>
+                    <th>Производитель</th>
+                    <th>Технология</th>
+                    <th>Пластина</th>
+                    <th>Квадрант</th>
+                    <th>Партия</th>
+					<th>Внутренняя партия</th>
+                    <th>Шифр кристалла</th>
+                    <th>Примечание</th>
+					<th>Место хранения</th>
+					<th>Ячейка хранения</th>
+					<th>Дата добавления</th> 
+                    <th>Взять на пластине</th>
+                    <th>Взять в GelPack</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr data-id="{{ row[0] }}">
+				    <td>{{ row[0] }}</td>
+					<td>{{ row[2] }}</td>
+					<td>{{ row[3] }}</td>
+					<td>{{ row[4] }}</td>
+					<td>{{ row[5] }}</td>
+					<td>{{ row[6] }}</td>
+					<td>{{ row[7] }}</td>
+					<td>{{ row[8] }}</td>
+					<td>{{ row[9] }}</td>
+					<td>{{ row[10] }}</td>
+					<td>{{ row[11] }}</td>
+					<td>{{ row[12] }}</td>
+					<td>{{ row[13] }}</td>
+					<td>
+						<input type="number" class="quantity-input-w" value="{{ row[14] }}" min="0">
+					</td>
+					<td>
+						<input type="number" class="quantity-input-gp" value="{{ row[15] }}" min="0">
+					</td>
+					<td>
+						<button class="save-item">Сохранить</button>
+                        <button class="remove-item" data-id="{{ row[0] }}">Удалить</button>
+					</td>
+				</tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div class="cart-actions">
+            <a href="/search?warehouse={{ warehouse_type|default('crystals') }}" class="button">Назад к поиску</a>
+        <button id="export-cart" type="button">Экспортировать корзину в Excel</button>
+            <button type="button" class="btn btn-danger" id="clear-cart-btn">Очистить корзину</button>
+        </div>
+        {% else %}
+        <p>Ваша корзина пуста.</p>
+        <a href="/search?warehouse={{ warehouse_type|default('crystals') }}" class="button">Добавить позиции</a>
+        {% endif %}
+    </div>
+    <script>
+		// Универсальная функция для модального подтверждения действий
+		function confirmAction(message, callback) {
+			const modal = document.createElement('div');
+			modal.className = 'modal-confirm';
+			modal.innerHTML = `
+				<div class="modal-content">
+					<h3>Подтверждение</h3>
+					<p>${message}</p>
+					<div class="modal-actions">
+						<button class="btn-cancel">Отмена</button>
+						<button class="btn-confirm">Да, подтверждаю</button>
+					</div>
+				</div>
+			`;
+			
+			// Закрытие по клику на фон
+			modal.addEventListener('click', function(e) {
+				if (e.target === modal) {
+					modal.remove();
+				}
+			});
+			
+			// Кнопка отмены
+			const cancelBtn = modal.querySelector('.btn-cancel');
+			cancelBtn.addEventListener('click', function() {
+				modal.remove();
+			});
+			
+			// Кнопка подтверждения
+			const confirmBtn = modal.querySelector('.btn-confirm');
+			confirmBtn.addEventListener('click', function() {
+				modal.remove();
+				if (callback) callback();
+			});
+			
+			// Закрытие по Esc
+			const escHandler = function(e) {
+				if (e.key === 'Escape') {
+					modal.remove();
+					document.removeEventListener('keydown', escHandler);
+				}
+			};
+			document.addEventListener('keydown', escHandler);
+			
+			document.body.appendChild(modal);
+			
+			// Фокус на кнопке отмены для доступности
+			cancelBtn.focus();
+		}
+		
+		// Функция для показа toast-уведомлений
+		function showToast(message, type = 'error', duration = 4000) {
+			const toast = document.createElement('div');
+			toast.className = `toast toast-${type}`;
+			toast.textContent = message;
+			document.body.appendChild(toast);
+			
+			setTimeout(() => {
+				toast.classList.add('show');
+			}, 10);
+			
+			setTimeout(() => {
+				toast.classList.remove('show');
+				setTimeout(() => toast.remove(), 300);
+			}, duration);
+		}
+		
+		// Универсальная функция для показа индикатора загрузки на кнопке
+		function setButtonLoading(button, loading) {
+			if (loading) {
+				button.classList.add('button-loading');
+				button.disabled = true;
+				button.dataset.originalText = button.textContent;
+				button.textContent = 'Загрузка...';
+			} else {
+				button.classList.remove('button-loading');
+				button.disabled = false;
+				if (button.dataset.originalText) {
+					button.textContent = button.dataset.originalText;
+				}
+			}
+		}
+		
+		// Инициализация обработчиков после загрузки DOM
+		document.addEventListener('DOMContentLoaded', function() {
+		// Сохранение изменений количества
+		document.querySelectorAll('.save-item').forEach(button => {
+			button.addEventListener('click', function () {
+					const originalButton = this;
+				const row = this.closest('tr');
+				const itemId = row.dataset.id;
+				const consW = row.querySelector('.quantity-input-w').value;
+				const consGP = row.querySelector('.quantity-input-gp').value;
+
+					setButtonLoading(originalButton, true);
+
+					const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+				fetch('/update_cart_item', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+							'X-CSRFToken': csrfToken,
+					},
+					body: JSON.stringify({
+						id: itemId,
+						cons_w: consW,
+						cons_gp: consGP
+					}),
+				})
+					.then(response => {
+						console.log('Response status:', response.status);
+						console.log('Response headers:', response.headers);
+						if (!response.ok) {
+							throw new Error(`HTTP error! status: ${response.status}`);
+						}
+						const contentType = response.headers.get('content-type');
+						if (!contentType || !contentType.includes('application/json')) {
+							return response.text().then(text => {
+								console.error('Expected JSON but got:', contentType, text);
+								throw new Error('Сервер вернул не JSON ответ');
+							});
+						}
+						return response.json();
+					})
+					.then(data => {
+						setButtonLoading(originalButton, false);
+						console.log('Response data:', data);
+						if (data.success) {
+							showToast('Количество обновлено', 'success');
+						} else {
+							showToast('Ошибка обновления: ' + (data.message || 'Неизвестная ошибка'), 'error');
+						}
+					})
+					.catch(error => {
+						setButtonLoading(originalButton, false);
+						console.error('Ошибка:', error);
+						showToast('Ошибка сохранения данных: ' + error.message, 'error');
+					});
+				});
+			});
+
+			// Удаление элемента из корзины
+			document.querySelectorAll('.remove-item').forEach(button => {
+				button.addEventListener('click', function () {
+					const originalButton = this;
+					const itemId = this.dataset.id;
+					
+					confirmAction('Вы уверены, что хотите удалить этот элемент из корзины?', function() {
+						setButtonLoading(originalButton, true);
+
+						const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+						fetch('/remove_from_cart', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-CSRFToken': csrfToken,
+							},
+							body: JSON.stringify({
+								item_id: itemId
+							}),
+						})
+					.then(response => {
+						console.log('Remove response status:', response.status);
+						if (!response.ok) {
+							return response.text().then(text => {
+								console.error('Remove error response:', text);
+								throw new Error(`HTTP error! status: ${response.status}`);
+							});
+						}
+						return response.json();
+					})
+				.then(data => {
+							setButtonLoading(originalButton, false);
+					if (data.success) {
+								// Удаляем строку из таблицы
+								const row = originalButton.closest('tr');
+								row.remove();
+								// Проверяем, остались ли еще элементы в корзине
+								const remainingRows = document.querySelectorAll('tbody tr');
+								if (remainingRows.length === 0) {
+									location.reload(); // Перезагружаем страницу если корзина пуста
+								}
+					} else {
+								showToast('Ошибка удаления: ' + (data.message || 'Неизвестная ошибка'), 'error');
+					}
+				})
+				.catch(error => {
+							setButtonLoading(originalButton, false);
+					console.error('Ошибка:', error);
+							showToast('Ошибка удаления элемента. Проверьте подключение к интернету.', 'error');
+						});
+				});
+			});
+		});
+
+				// Экспорт корзины
+		function exportCart() {
+			// Можно добавить индикатор загрузки, если нужно
+			const exportButton = document.getElementById('export-cart');
+				if (!exportButton) return;
+				setButtonLoading(exportButton, true);
+
+			fetch('/export_cart') // Делаем GET запрос на эндпоинт
+			.then(response => {
+				if (response.ok) {
+					// Получаем имя файла из заголовка Content-Disposition
+					const contentDisposition = response.headers.get('Content-Disposition');
+					let filename = "export.xlsx"; // Имя по умолчанию, если заголовок не найден
+					if (contentDisposition) {
+						// Пробуем извлечь имя файла из заголовка
+						const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]*)/);
+						if (filenameMatch && filenameMatch[1]) {
+							// Декодируем имя файла, если оно в кодировке URL
+							filename = decodeURIComponent(filenameMatch[1].replace(/"/g, ''));
+						}
+					}
+					// Возвращаем и blob, и имя файла для следующего .then()
+					return response.blob().then(blob => ({ blob, filename }));
+				} else {
+					// Если сервер вернул ошибку, пытаемся прочитать текст ошибки
+					return response.text().then(text => {
+						throw new Error(text || 'Ошибка сервера при экспорте корзины.');
+					});
+				}
+			})
+			.then(({ blob, filename }) => {
+				// Создаем временную ссылку для скачивания
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = filename; // <-- ИСПОЛЬЗУЕМ ИМЯ ФАЙЛА С СЕРВЕРА
+				
+				document.body.appendChild(a);
+				a.click(); // Инициируем скачивание
+				
+				window.URL.revokeObjectURL(url); // Очищаем память
+				a.remove(); // Удаляем ссылку из DOM
+			})
+			.catch(error => {
+					setButtonLoading(exportButton, false);
+				console.error('Ошибка экспорта:', error);
+					showToast('Не удалось экспортировать корзину: ' + (error.message || 'Неизвестная ошибка'), 'error');
+			})
+			.finally(() => {
+					// Скрываем индикатор загрузки после скачивания файла
+					setTimeout(() => {
+						setButtonLoading(exportButton, false);
+					}, 500);
+				});
+			}
+
+			// Экспорт корзины - обработчик события
+			const exportCartBtn = document.getElementById('export-cart');
+			if (exportCartBtn) {
+				exportCartBtn.addEventListener('click', function() {
+					exportCart();
+				});
+			}
+
+			// Клавиатурные сокращения
+			document.addEventListener('keydown', function(e) {
+				// Ctrl+S или Cmd+S - сохранить изменения в корзине (если есть несохраненные)
+				if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+					e.preventDefault();
+					// Не сохраняем, если пользователь вводит текст в поле
+					if (document.activeElement.tagName !== 'INPUT' && 
+						document.activeElement.tagName !== 'TEXTAREA') {
+						// Находим первую кнопку "Сохранить" и нажимаем на неё
+						const firstSaveButton = document.querySelector('.save-item');
+						if (firstSaveButton && !firstSaveButton.disabled) {
+							firstSaveButton.click();
+						}
+					}
+				}
+				
+				// Esc - закрыть flash-сообщения и toast-уведомления
+				if (e.key === 'Escape') {
+					const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+					flashMessages.forEach(msg => msg.remove());
+					
+					const toasts = document.querySelectorAll('.toast');
+					toasts.forEach(toast => {
+						toast.style.opacity = '0';
+						setTimeout(() => toast.remove(), 300);
+					});
+				}
+				
+				// Enter в полях количества - сохранить
+				if (e.key === 'Enter' && (e.target.classList.contains('quantity-input-w') || e.target.classList.contains('quantity-input-gp'))) {
+					e.preventDefault();
+					const saveButton = e.target.closest('tr').querySelector('.save-item');
+					if (saveButton && !saveButton.disabled) {
+						saveButton.click();
+					}
+				}
+			});
+			
+			// Очистка корзины с подтверждением
+			const clearCartBtn = document.getElementById('clear-cart-btn');
+			if (clearCartBtn) {
+				clearCartBtn.addEventListener('click', function() {
+					confirmAction('Вы уверены, что хотите очистить всю корзину?<br><br>Все добавленные товары будут удалены. Это действие нельзя отменить.', function() {
+						const form = document.createElement('form');
+						form.method = 'POST';
+						form.action = '/clear_cart';
+						
+						const csrfInput = document.createElement('input');
+						csrfInput.type = 'hidden';
+						csrfInput.name = 'csrf_token';
+						csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+						
+						form.appendChild(csrfInput);
+						document.body.appendChild(form);
+						form.submit();
+			});
+				});
+			}
+		});
+	</script>
+</body>
+</html>

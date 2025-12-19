@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <title>Личный кабинет</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: white;
+            color: #333;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #007CBB;
+        }
+        .logo {
+            cursor: pointer;
+        }
+        .logo img {
+            height: 40px;
+        }
+        .logo:hover {
+            opacity: 0.8;
+        }
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            text-decoration: underline;
+            color: #007CBB;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .main-menu-button {
+            padding: 5px 15px;
+            background-color: #007CBB;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .main-menu-button:hover {
+            background-color: #006AA3;
+        }
+
+        .logout-button {
+            background-color: #007CBB;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #006AA3;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007CBB;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #007CBB;
+            box-shadow: 0 0 5px rgba(0,124,187,0.3);
+        }
+        .help-text {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        /* Toast уведомления */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            font-size: 14px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .toast-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .toast-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .toast-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .btn-primary {
+            background-color: #007CBB;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            background-color: #006AA3;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flash-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .flash-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <img src="{{ url_for('static', filename='logo-electron-mash.webp') }}" alt="ИПК ЭЛЕКТРОН-МАШ">
+        </div>
+        <a href="/" class="main-menu-button">Главное меню</a>
+        <div class="user-menu">
+            <span class="user-info">{{ session.get('username') }}</span>
+            <button onclick="location.href='/logout'" class="logout-button">Выйти</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Личный кабинет</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form id="profileForm" onsubmit="updateProfile(event)">
+            <div class="form-group">
+                <label for="username">Имя пользователя *</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       value="{{ user.username }}" 
+                       required 
+                       minlength="3"
+                       maxlength="50"
+                       pattern="[a-zA-Z0-9_-]+"
+                       title="Только буквы, цифры, дефис и подчеркивание">
+                <div class="help-text">Минимум 3 символа. Только буквы, цифры, дефис и подчеркивание.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Электронная почта</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       value="{{ user.email or '' }}" 
+                       placeholder="email@example.com"
+                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                       title="Введите корректный email адрес">
+                <div class="help-text">Введите корректный email адрес (необязательно)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Новый пароль</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Оставьте пустым, чтобы не менять"
+                       minlength="4"
+                       autocomplete="new-password">
+                <div class="help-text">Минимум 4 символа. Если не хотите менять пароль, оставьте поле пустым.</div>
+                <div class="error-message" id="password-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Подтвердите новый пароль</label>
+                <input type="password" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       placeholder="Подтвердите новый пароль"
+                       minlength="4"
+                       autocomplete="new-password">
+                <div class="help-text">Необходимо, если вы меняете пароль</div>
+                <div class="error-message" id="confirm-password-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="secret_question">Секретный вопрос</label>
+                <input type="text" 
+                       id="secret_question" 
+                       name="secret_question" 
+                       value="{{ user.secret_question or '' }}" 
+                       placeholder="Введите секретный вопрос"
+                       minlength="5"
+                       maxlength="255">
+                <div class="help-text">Минимум 5 символов. Используется для восстановления пароля.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="secret_answer">Ответ на секретный вопрос</label>
+                <input type="text" 
+                       id="secret_answer" 
+                       name="secret_answer" 
+                       placeholder="Введите ответ на секретный вопрос"
+                       minlength="2"
+                       maxlength="100">
+                <div class="help-text">Минимум 2 символа. Если меняете вопрос, обязательно укажите ответ.</div>
+            </div>
+
+            <button type="submit" class="btn-primary">Сохранить изменения</button>
+        </form>
+    </div>
+
+    <script>
+        // Функция для показа toast-уведомлений
+        function showToast(message, type = 'error', duration = 4000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        // Функция для показа ошибки под полем
+        function showFieldError(fieldId, message) {
+            const errorDiv = document.getElementById(fieldId + '-error');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        // Функция для скрытия ошибки под полем
+        function hideFieldError(fieldId) {
+            const errorDiv = document.getElementById(fieldId + '-error');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }
+        
+        function updateProfile(event) {
+            event.preventDefault();
+            
+            // Очищаем предыдущие ошибки
+            hideFieldError('password');
+            hideFieldError('confirm-password');
+            
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const confirm_password = document.getElementById('confirm_password').value.trim();
+            const secret_question = document.getElementById('secret_question').value.trim();
+            const secret_answer = document.getElementById('secret_answer').value.trim();
+            
+            // Валидация пароля
+            if (password) {
+                if (password.length < 4) {
+                    showFieldError('password', 'Пароль должен содержать минимум 4 символа');
+                    return;
+                }
+                
+                if (password !== confirm_password) {
+                    showFieldError('confirm-password', 'Пароли не совпадают');
+                    return;
+                }
+            } else if (confirm_password) {
+                // Если есть подтверждение, но нет пароля
+                showFieldError('password', 'Введите новый пароль');
+                return;
+            }
+            
+            // Валидация секретного вопроса и ответа
+            if (secret_question && secret_question.length < 5) {
+                showToast('Секретный вопрос должен содержать минимум 5 символов', 'error');
+                return;
+            }
+            
+            if (secret_answer && secret_answer.length < 2) {
+                showToast('Ответ на секретный вопрос должен содержать минимум 2 символа', 'error');
+                return;
+            }
+            
+            // Если меняется секретный вопрос, должен быть указан ответ
+            const oldSecretQuestion = '{{ user.secret_question or "" }}';
+            if (secret_question !== oldSecretQuestion && !secret_answer) {
+                showToast('При изменении секретного вопроса необходимо указать ответ', 'error');
+                return;
+            }
+
+            const data = {
+                username: username,
+                email: email || null,
+                password: password || null,
+                confirm_password: confirm_password || null,
+                secret_question: secret_question || null,
+                secret_answer: secret_answer || null
+            };
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message || 'Профиль успешно обновлен', 'success');
+                    // Обновляем имя пользователя в интерфейсе, если оно изменилось
+                    if (data.new_username) {
+                        document.querySelector('.user-info').textContent = data.new_username;
+                    }
+                    // Очищаем поля паролей после успешного сохранения
+                    document.getElementById('password').value = '';
+                    document.getElementById('confirm_password').value = '';
+                    // Перезагружаем страницу для обновления данных через 1 секунду
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Не удалось обновить профиль. Проверьте подключение к интернету.', 'error');
+            });
+        }
+        
+        // Валидация в реальном времени для подтверждения пароля
+        document.getElementById('confirm_password').addEventListener('blur', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            if (confirmPassword && password && password !== confirmPassword) {
+                showFieldError('confirm-password', 'Пароли не совпадают');
+            } else {
+                hideFieldError('confirm-password');
+            }
+        });
+        
+        document.getElementById('password').addEventListener('blur', function() {
+            const password = this.value;
+            if (password && password.length < 4) {
+                showFieldError('password', 'Пароль должен содержать минимум 4 символа');
+            } else {
+                hideFieldError('password');
+            }
+        });
+        
+        // Клавиатурные сокращения
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S или Cmd+S - сохранить профиль
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                // Не сохраняем, если пользователь вводит текст в поле
+                if (document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    const profileForm = document.getElementById('profileForm');
+                    if (profileForm) {
+                        profileForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+            
+            // Esc - закрыть flash-сообщения и toast-уведомления
+            if (e.key === 'Escape') {
+                const flashMessages = document.querySelectorAll('.flash-message, .flash-message-container');
+                flashMessages.forEach(msg => msg.remove());
+                
+                const toasts = document.querySelectorAll('.toast');
+                toasts.forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

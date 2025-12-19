@@ -62,8 +62,9 @@ CREATE TABLE IF NOT EXISTS monitoring_services (
 INSERT INTO monitoring_services (name, type, check_params, priority)
 VALUES
  ('Docker: WSB Bot', 'docker_container_status', '{"container_name": "wsb_bot_container"}', 1),
- ('Docker: HMCB Bot', 'docker_container_status', '{"container_name": "telegram_bot_hmcb-app-1"}', 2),
- ('Docker: CRB Bot',  'docker_container_status', '{"container_name": "crb_bot_container"}', 3);
+ ('Docker: HMCB Bot', 'docker_container_status', '{"container_name": "telegram_bot_hmcb_app-1"}', 2),
+ ('Docker: CRB Bot',  'docker_container_status', '{"container_name": "crb_bot_container"}', 3),
+ ('Docker: PDF Converter', 'docker_container_status', '{"container_name": "pdf2md-test"}', 4);
 
 -- WEB сервисы
 INSERT INTO monitoring_services (name, type, check_params, priority)
@@ -327,7 +328,7 @@ python main.py
 
 ```bash
 # Docker Compose
-docker-compose logs -f monitor
+docker compose logs -f monitor
 
 # Локальный запуск
 python main.py 2>&1 | tee monitor.log
