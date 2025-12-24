@@ -9,6 +9,13 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    # Базовые зависимости для Python пакетов
+    libffi-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    # Зависимости для xhtml2pdf (pycairo)
+    pkg-config \
+    libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Копируем файлы зависимостей
