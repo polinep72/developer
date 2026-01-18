@@ -136,14 +136,21 @@ def get_crystal_stock(message):
                     response_parts = []
                     for chip_code, per_wh in chips.items():
                         for wh in warehouse_order:
-                            response_parts.append(wh)
+                            # Формируем название склада с правильной формулировкой
+                            if wh == "Склад пластин":
+                                wh_name = "Склад пластин (не разделенные на кристаллы):"
+                            else:
+                                wh_name = wh + ":"
+                            response_parts.append(wh_name)
                             if wh in per_wh:
                                 stock_w, stock_gp = per_wh[wh]
                                 response_parts.append(f"Шифр: {chip_code}")
                                 response_parts.append(f"  Остаток Wafer: {stock_w} шт.")
-                                response_parts.append(f"  Остаток GelPak: {stock_gp} шт.")
+                                # GelPak показываем только для "Склад кристаллов"
+                                if wh == "Склад кристаллов":
+                                    response_parts.append(f"  Остаток GelPak: {stock_gp} шт.")
                             else:
-                                response_parts.append("Информация по этому кристаллу не найдена.")
+                                response_parts.append("Информация отсутствует")
                             response_parts.append("---------------")
 
                     if response_parts:
