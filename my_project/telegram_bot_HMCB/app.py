@@ -5,6 +5,9 @@ from os import getenv
 from dotenv import load_dotenv, find_dotenv
 import os # Уже импортирован
 
+# Версия программы
+__version__ = "1.0.0"
+
 # Загрузка переменных окружения
 load_dotenv(find_dotenv())
 
