@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  warehouse-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warehouse-ipk-bot
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME:-warehouse}
+      - DB_HOST=${DB_HOST}
+    env_file:
+      - .env
+    networks:
+      - warehouse-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  warehouse-network:
+    driver: bridge
