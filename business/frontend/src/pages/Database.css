@@ -1,0 +1,431 @@
+.database-page {
+  width: 100%;
+}
+
+.db-sticky-header {
+  position: sticky;
+  top: 120px; /* ниже шапки и вкладок Layout */
+  z-index: 5;
+  background: #fff;
+  padding-bottom: 12px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.db-section-title {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #007CBB;
+}
+
+.db-tabs-and-search {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.db-tabs {
+  display: inline-flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.db-tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.db-tab + .db-tab {
+  border-left: 1px solid #dee2e6;
+}
+
+.db-tab:hover {
+  background-color: #e9ecef;
+}
+
+.db-tab.active {
+  background-color: #007CBB;
+  color: #fff;
+}
+
+.db-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.db-search-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  flex-shrink: 0;
+}
+
+.db-search-input {
+  min-width: 280px;
+  width: 450px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.db-search-input::placeholder {
+  color: #6c757d;
+}
+
+.db-search-input:focus {
+  outline: none;
+  border-color: #007CBB;
+  box-shadow: 0 0 0 2px rgba(0, 124, 187, 0.2);
+}
+
+.db-tab-content {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.db-section h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 20px;
+  color: #007CBB;
+}
+
+.db-placeholder {
+  margin: 0;
+  color: #6c757d;
+}
+
+.db-error {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.db-loading {
+  margin: 0;
+  color: #6c757d;
+}
+
+.db-table-wrapper {
+  overflow-x: auto;
+}
+
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.db-table thead {
+  background-color: #34495e;
+  color: white;
+}
+
+.db-table thead th:first-child {
+  border-radius: 6px 0 0 0;
+}
+
+.db-table thead th:last-child {
+  border-radius: 0 6px 0 0;
+}
+
+.db-table th,
+.db-table td {
+  padding: 8px 10px;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.db-table th {
+  background-color: #34495e;
+  font-weight: 600;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.db-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.db-input {
+  width: 100%;
+  min-width: 80px;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.db-input-sm {
+  min-width: 60px;
+  max-width: 120px;
+}
+
+/* поле наименования — шире, чтобы входили длинные обозначения */
+.db-input-name {
+  min-width: 300px;
+  max-width: none;
+}
+
+.db-input-num {
+  min-width: 70px;
+  max-width: 100px;
+}
+
+.db-save-btn {
+  padding: 4px 12px;
+  font-size: 13px;
+  background-color: #007CBB;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.db-save-btn:hover:not(:disabled) {
+  background-color: #0069a0;
+}
+
+.db-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.db-empty {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+}
+
+.db-add-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.db-add-btn:hover {
+  background-color: #218838;
+}
+
+.db-cancel-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.db-cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.db-create-form {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.db-form-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.db-form-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.db-form-row .db-save-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 8px;
+}
+
+/* Таблица «Вид работ» */
+.db-works-section .db-table th {
+  text-align: center;
+}
+
+.db-works-section .db-table th.col-works-multiline {
+  line-height: 1.25;
+  white-space: normal;
+  min-width: 4.5rem;
+}
+
+.db-works-section .db-table .col-works-name {
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.db-works-section .db-table .col-works-basewage {
+  width: 1%;
+  white-space: nowrap;
+  max-width: 7rem;
+}
+
+/* Ячейка «Действия» — обычная ячейка, контент центрируется вертикально через vertical-align */
+.db-works-section .db-table .db-actions-cell {
+  padding: 8px 10px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Кнопки в одном inline-блоке, чтобы участвовать в выравнивании строки по вертикали */
+.db-works-section .db-table .db-actions-inner {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Правая граница таблицы «Вид работ» и последнего столбца */
+.db-works-section .db-table-wrapper {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.db-works-section .db-table th:last-child,
+.db-works-section .db-table td:last-child {
+  border-right: 1px solid #dee2e6;
+}
+
+/* Кнопки без собственной рамки — точно как «Сохранить» на других подвкладках */
+.db-work-btn {
+  padding: 4px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s;
+}
+
+.db-work-btn:focus-visible {
+  outline: 2px solid #007CBB;
+  outline-offset: 1px;
+}
+
+.db-work-btn-edit {
+  background-color: #007CBB;
+  color: #fff;
+}
+
+.db-work-btn-edit:hover {
+  background-color: #0069a0;
+  color: #fff;
+}
+
+.db-work-btn-delete {
+  background: #ef4444;
+  color: #fff;
+}
+
+.db-work-btn-delete:hover:not(:disabled) {
+  background: #dc2626;
+  color: #fff;
+}
+
+.db-work-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.db-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.db-modal {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.db-modal-title {
+  margin: 0;
+  padding: 16px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #007CBB;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.db-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.db-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.db-form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.db-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}
+
+.db-work-form .db-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
